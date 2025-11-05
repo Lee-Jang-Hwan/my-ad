@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp add supabase -s local -e SUPABASE_ACCESS_TOKEN=sbp_5725e6e1450a83c6439f9b59b3d6177d41777fe6 -- npx -y @supabase/mcp-server-supabase@latest)",
+      "Bash(claude mcp add context7 -s local -- npx -y @upnext/context7)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp list:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
