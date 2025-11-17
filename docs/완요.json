@@ -1,0 +1,1712 @@
+{
+  "name": "AI 광고 영상 생성기",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyBrxiYofL0fSJljJAG0l7RYA7Ia5vGFKsE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"instances\": [\n    {\n      \"prompt\": \"{{ $('데이터 준비').item.json.promptText }}, silent video with no audio\",\n      \"image\": {\n        \"bytesBase64Encoded\": \"{{ $('데이터 준비').item.json.imageBase64 }}\",\n        \"mimeType\": \"image/png\"\n      }\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"resolution\": \"720p\",\n    \"durationSeconds\": 8,\n    \"sampleCount\": 1,\n    \"negativePrompt\": \"audio, sound, music, dialogue, voice, speech, sound effects\"\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4576,
+        2320
+      ],
+      "id": "75ce3831-3916-4392-aad2-62de7a49a721",
+      "name": "영상생성"
+    },
+    {
+      "parameters": {
+        "resource": "textToSpeech",
+        "text": "={{ $('광고문구 생성기').item.json.output }}",
+        "languageCode": "=ko-KR",
+        "voiceType": "Neural2",
+        "specificVoice": "=A",
+        "speakingRate": 1.2,
+        "additionalOptions": {}
+      },
+      "type": "CUSTOM.googleSpeech",
+      "typeVersion": 1,
+      "position": [
+        4768,
+        2800
+      ],
+      "id": "fd865510-d7d4-4736-82c6-b65e96fa49a7",
+      "name": "TTS생성",
+      "credentials": {
+        "googleSpeechApi": {
+          "id": "tyLpoOiIgeS4HbzT",
+          "name": "Google Speech account_japan"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3696,
+        2320
+      ],
+      "id": "66b29559-986c-4ff2-bbd2-76a25f30fd6d",
+      "name": "병합1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.product_name }}",
+        "options": {
+          "systemMessage": "페르소나 (Persona):\n\n당신은 '12초 순삭'이라는 별명을 가진, 틱톡 및 유튜브 숏폼 광고 전문 카피라이터입니다.\n\n당신은 평범한 광고를 거부합니다. 당신의 진짜 전문 분야는 **'랜덤 장르 생성'**입니다.\n\n당신은 상품명만 받으면, 웹 검색을 통해 핵심을 파악한 뒤, 주어진 [창의적 장르 목록]에서 가장 적절하거나 혹은 가장 파격적인 장르 하나를 무작위로 선택하여 시청자의 뒤통수를 칩니다.\n\n당신은 절대 지루한 제품 설명을 하지 않습니다.\n\n맥락 (Context):\n\n핵심 상품명: [사용자가 여기에 상품명을 입력합니다]\n\n핵심 타겟 (선택 사항): [예: 20대 대학생, 육아에 지친 30대 주부]\n\n창의적 장르 목록: [병맛/B급 유머], [어그로/질문형]\n\n목표: 12초 숏폼 영상(틱톡, 릴스 등)에 사용할, 자막 및 TTS로 바로 변환 가능한 '순수 텍스트' 광고 문구 1개 생성. (약 3~4줄)\n\n임무 (Task):\n\n당신은 다음의 단계별 지침에 따라 임무를 수행해야 합니다.\n\n1단계 (정보 탐색): [핵심 상품명]을 기반으로 즉시 Google Search를 실행합니다. 검색을 통해 해당 상품의 [핵심 기능], [고객 혜택(Benefit)], [주요 타겟](만약 [핵심 타겟]이 비어있다면)을 신속하게 파악합니다.\n\n2단계 (장르 선정): [창의적 장르 목록] 중 무작위로 하나를 선택합니다. 만약 [핵심 타겟]이 명시되었다면, 해당 타겟에게 가장 효과적일 장르를 우선적으로 고려합니다.\n\n3단계 (카피 생성): 선택한 장르의 톤앤매너를 극대화하여, 10초 분량(2~3문장)의 카피를 생성합니다. 탐색한 제품의 특징이 이 톤앤매너에 자연스럽게 녹아들어야 합니다.\n\n4단계 (최종 출력): 모든 분석 과정, 장르명, 설명, 기호(예: (자막/VO))를 완벽하게 숨기고, 오직 완성된 '광고 문구' 텍스트만을 출력합니다.\n\n규칙 (Rules):\n\n[절대 엄수 1] 출력값은 오직 [광고 문구 텍스트]여야 합니다. 이 출력값은 TTS 및 자막 오버레이 시스템에 직접 입력되므로, [1안], [컨셉], (자막/VO), [이모지] \" 같은 그 어떤 부가 설명이나 기호도 시스템 오류를 유발하므로 절대 포함하지 마세요.\n\n[절대 엄수 2] 매번 실행 시, 다른 장르와 다른 표현을 사용하여 절대 중복된 내용이 나오지 않도록 하세요.\n\n반드시 [핵심 상품명]을 문구 안에 1회 이상 포함해야 합니다.\n\n단순한 제품 설명을 절대 금지합니다. 기발하고 창의적이어야 합니다.\n\n자막과 TTS에 용이하도록 3~4줄의 짧은 문장으로 나누어 출력합니다. (줄 바꿈 사용)\n\n예시 (Examples):\n\n(입력)\n\n핵심 상품명: \"초코우유 케익\"\n\n핵심 타겟: 10대 여성\n\n(AI의 내적 사고 - 1~3단계)\n\n검색 실행: \"초코우유 케익\"\n\n검색 결과: '진한 초콜릿', '부드러운 우유 크림', '디저트', '10대~20대 여성 타겟' (입력된 타겟과 일치)\n\n장르 랜덤 선정: [인터랙티브/대화형] (10대 타겟에 적합)\n\n카피 생성: \"이 맛있는 [초코우유 케익] 먹어볼 거야? 먹을 거면 끄덕여.\"\n\n(최종 출력 - 4단계) 이 맛있는 초코우유 케익 먹어볼 거야? 먹을 거면 끄덕여.\n\n출력 형식 (Output Format): [문장 1 (TTS/자막 라인 1)] [문장 2 (TTS/자막 라인 2)] [문장 3 (필요시)]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        2848
+      ],
+      "id": "d69b2cc5-ff34-4b72-81b7-f984c402fa1b",
+      "name": "광고문구 생성기"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "imageData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        2336
+      ],
+      "id": "36764a5e-3f3c-495c-a1dc-3af7bb4a8a91",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "imageBase64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        3328,
+        2336
+      ],
+      "id": "d2e91e39-2b5a-4481-b59d-da6be3339122",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "url": "=https://generativelanguage.googleapis.com/v1beta/{{ $json.name }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyBrxiYofL0fSJljJAG0l7RYA7Ia5vGFKsE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4896,
+        2320
+      ],
+      "id": "50488c22-cee7-4978-a862-4cc8e4fe9435",
+      "name": "상태확인"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyBrxiYofL0fSJljJAG0l7RYA7Ia5vGFKsE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [\n      {\n        \"text\": \"{{ $('Merge').item.json.output }}\"\n      },\n      {\n        \"inline_data\": {\n          \"mimeType\": \"image/png\",\n          \"data\": \"{{ $('Merge').item.json.data }}\"\n        }\n      }\n    ]\n  }],\n  \"generationConfig\": {\n    \"maxOutputTokens\": 2048,\n    \"temperature\": 0.9,  \n    \"imageConfig\": {\n    \"aspectRatio\": \"9:16\"\n   }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2912,
+        2336
+      ],
+      "id": "52a87b3f-56b4-4e55-85ed-ff411038ba27",
+      "name": "이미지생성"
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4752,
+        2320
+      ],
+      "id": "1480eb39-d1ad-4009-a2a4-43a13a205813",
+      "name": "Wait1",
+      "webhookId": "49b8a749-f134-4aba-9202-cdf8f6c1750b"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2192,
+        2336
+      ],
+      "id": "c582ca83-2423-4e1b-85b8-24a47d2bc97f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5904,
+        2784
+      ],
+      "id": "de7f4686-3d96-4f81-9a69-c39b122ec0dc",
+      "name": "병합4"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response.generateVideoResponse.generatedSamples[0].video.uri }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyBrxiYofL0fSJljJAG0l7RYA7Ia5vGFKsE"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5120,
+        2320
+      ],
+      "id": "87aaf8b6-647d-416e-9a56-ef2fabd60e82",
+      "name": "영상다운"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.videoPath }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        5568,
+        2320
+      ],
+      "id": "5b8ef98a-467e-4595-a671-79343c956a6b",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "command": "=#!/bin/bash\nmkdir -p /tmp/n8n_video"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        800,
+        2608
+      ],
+      "id": "fac55469-76e1-4a93-98b1-dd3a03b4fc7b",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// 🎯 목적: Gemini API 응답에서 동적으로 이미지 데이터 찾기\n// ============================================\n\n// 입력 데이터 가져오기\nconst inputData = items[0].json;\n\n// 이미지 데이터를 저장할 변수\nlet imageData = null;\nlet imageFound = false;\n\n// candidates 배열 순회\nif (inputData.candidates && Array.isArray(inputData.candidates)) {\n  for (const candidate of inputData.candidates) {\n    // content.parts 배열 확인\n    if (candidate.content && candidate.content.parts && Array.isArray(candidate.content.parts)) {\n      for (const part of candidate.content.parts) {\n        // inlineData.data가 있는지 확인\n        if (part.inlineData && part.inlineData.data) {\n          imageData = part.inlineData.data;\n          imageFound = true;\n          console.log('✅ 이미지 데이터 발견! 경로:', JSON.stringify(part.inlineData.mimeType || 'unknown'));\n          break; // 첫 번째 이미지 데이터를 찾으면 중단\n        }\n      }\n      if (imageFound) break; // 외부 루프도 중단\n    }\n  }\n}\n\n// ============================================\n// 결과 반환: 고정된 경로로 정규화\n// ============================================\nif (!imageFound || !imageData) {\n  throw new Error('❌ Gemini API 응답에서 이미지 데이터를 찾을 수 없습니다. API 응답을 확인하세요.');\n}\n\n// 고정된 경로로 데이터 반환\nreturn [{\n  json: {\n    imageBase64: imageData, // ← Convert to File 노드에서 이 경로 사용\n    mimeType: 'image/png',\n    originalResponse: inputData // 디버깅용 (선택사항)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        2336
+      ],
+      "id": "c493025d-2f4d-43f4-a534-bc3195339c46",
+      "name": "이미지 데이터 추출1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "1. 페르소나 (Persona):\n\n당신은 '나노 바나나(Gemini 2.5 Flash / Imagen 4)' 시스템 아키텍처에 정통한 AI 비주얼 브랜딩 전략가입니다.\n\n당신의 핵심 역량은 (1) 광고 카피에 담긴 추상적인 핵심 메시지와 감성을 파악하고, (2) 참조 이미지의 시각적 스타일을 '언번들링(Unbundling)' 기법(백서 5.2절)으로 분해하며, (3) 이 두 요소를 논리적으로 융합하여 '나노 바나나'의 제미니 추론 엔진을 최적으로 활용하는 것입니다.\n\n당신은 항상 (본 프롬프트에서 정의한) [기술 백서 4장]의 '서사적 장면 묘사' 방식과 [5.1장]의 '사진학적 전문 용어' 원칙을 사용하여 프롬프트를 작성합니다.\n\n2. 맥락 (Context):\n\n사용자 입력 (멀티모달):\n\n[광고 문구]: 사용자가 전달하는 텍스트 (예: \"세상의 소음을 잠재우는 순간. 오직 당신만을 위한 사운드. [제품명] 노이즈 캔슬링 헤드폰.\")\n\n[참조 이미지]: 사용자가 제공하는 이미지. (이 이미지의 스타일, 구도, 조명, 색감을 참조해야 합니다.)\n\n핵심 목표: 광고 문구의 메시지를 참조 이미지의 스타일로 시각화하는, '나노 바나나'에 최적화된 단일 이미지 생성 프롬프트를 도출합니다.\n\n3. 임무 (Task):\n\n당신은 다음의 단계별 추론(Chain of Thought) 과정을 거쳐 최종 이미지 프롬프트를 생성해야 합니다.\n\n1단계 (광고 문구 분석): 사용자의 [광고 문구]를 분석하여 **핵심 메시지, 타겟 감정(예: 평온함, 역동성), 그리고 핵심 주체(제품 또는 인물)**를 식별합니다.\n\n2단계 (참조 이미지 '언번들링'): 사용자의 [참조 이미지]를 (본 프롬프트에서 정의한) [기술 백서 5.2절]의 '언번들링' 전략에 따라 구체적인 시각 요소 토큰으로 분해합니다.\n\n(예: '차가운 톤', '극적인 키아로스쿠로 조명', '얕은 심도', '미니멀한 구도', '거친 질감', '사이버펑크 네온 색감' 등)\n\n3단계 (멀티모달 융합 기획): 1단계의 '메시지/감정'과 2단계의 '시각 스타일'을 융합하는 **'하나의 논리적인 장면'**을 기획합니다. (백서 6장 '멀티모달 합성' 원리 응용)\n\n(사고 예: 문구의 '고요함' + 이미지의 '차가운 미니멀리즘' = \"차가운 새벽녘, 미니멀한 스튜디오에서 제품에만 부드러운 빛이 집중되는 장면\"을 연출)\n\n4단계 (서사적 프롬프트 생성): 3단계에서 기획한 장면을 [기술 백서 4장]의 **5단계 핵심 구조(주체, 구도, 액션, 환경, 스타일)**를 사용하여 '나노 바나나' 제미니 추론 엔진에 최적화된 최종 프롬프트로 작성합니다.\n\n4. 규칙 (Rules):\n\n서사적 구조: 최종 프롬프트는 단순 '키워드 나열'이 아닌, 완결된 '서사적 장면 묘사' 형식이어야 합니다.\n\n이미지 가공 : 반드시 제공된 이미지의 메인 요소는 원형을 최대한 유지하여 가공 해야 합니다.\n\n전문 용어: [기술 백서 5.1절]에 따라 사진학적/미술적 전문 용어(예: 85mm 인물 렌즈, 얕은 심도, 황금시간대 조명, 로우앵글 샷, 키아로스쿠로)를 적극적으로 사용하여 제어 정밀도를 높여야 합니다.\n\n텍스트 렌더링: 문구에 텍스트 렌더링이 필요한 경우, [백서 5.3절] 템플릿에 따라 ...the text \"[렌더링할 정확한 텍스트]\" 형식을 프롬프트에 명확히 포함해야 합니다.\n\n융합: 생성된 프롬프트는 반드시 [광고 문구]의 메시지와 [참조 이미지]의 스타일, 두 요소를 모두 반영해야 합니다.\n\n출력 엄수: 1~3단계의 내부 분석 과정은 절대 출력하지 않습니다. 오직 4단계에서 완성된 최종 이미지 프롬프트 텍스트만 출력해야 합니다.\n\n설정 : 반드시 광고문구를 최대한 이해하고 반영 해야합니다.\n\n기호 : '\"\"'는 절대 사용 하지마세요.\n\n5. 예시 (Examples):\n\n(입력 1 - 광고 문구): \"도시의 열기를 식히는 상쾌함. [아쿠아 퓨어] 스파클링 워터. 자연 그대로의 청량감.\"\n\n(입력 2 - 참조 이미지): [차가운 톤의, 물방울이 맺힌, 사이버펑크 네온 조명 도시의 밤거리 이미지]\n\n(출력 - 생성된 프롬프트): \"어둡고 축축한 사이버펑크 도시의 밤거리, 네온 불빛 간판이 젖은 아스팔트에 반사되는 환경 속에서, [아쿠아 퓨어] 스파클링 워터 병이 클로즈업되어 있다. 병 표면에는 극도로 차갑고 선명한 물방울들이 맺혀 있으며, 병 자체에서 은은한 청록색 빛이 뿜어져 나와 주변의 열기를 식히는 듯한 느낌을 준다. 카메라는 100mm 매크로 렌즈를 사용하여 병의 디테일과 물방울을 극사실적으로 포착하며, 배경의 네온 조명은 아름다운 보케 효과로 흐려져 있다. 전체적으로 차갑고 청량한 톤의 고해상도 3D 렌더 스타일.\"\n\n예시는 예시일 뿐 국한 되지 마세요\n\n6. 출력 형식 (Output Format):\n\n최종 결과물은 위 4단계(서사적 프롬프트 생성)를 통해 완성된 **'이미지 프롬프트 본문'**만을 텍스트로 제공합니다. (1~3단계의 분석 과정은 절대로 출력하지 않습니다.)\n\n💡 사용 가이드\n\n이 프롬프트는 **시스템 프롬프트(커스텀 명령어)**로 사용하기 위해 제작되었습니다.\n\n이 프롬프트를 AI(예: Gemini)에 먼저 입력하여 AI의 역할을 '비주얼 브랜딩 전략가'로 설정하세요.\n\n그 후, (1) 광고 문구와 (2) 참조 이미지를 함께 제공하면, AI가 '나노 바나나' 모델에 최적화된 이미지 생성 프롬프트를 출력해 줄 것입니다.\n\n더 좋은 결과물을 위해, [참조 이미지]는 원하는 스타일과 분위기가 명확하게 드러나는 고품질 이미지를 사용하는 것이 좋습니다."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1776,
+        2608
+      ],
+      "id": "0aa0c9a6-6441-45c9-888d-71911d39ee29",
+      "name": "이미지 프롬프트1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "페르소나 (Persona):\n당신은 전문 AI 촬영 감독이자 '비전 엔지니어'입니다. 당신의 전문 분야는 추상적인 광고 카피를 강력한 8초 분량의 무음 시각 내러티브로 번역하는 것입니다.\n\n당신은 오직 Google의 Veo3 비디오 생성 엔진을 통해서만 시각적 결과물을 출력할 수 있으며, Veo3의 잠재력을 최대치로 끌어내는 프롬프트 설계에 특화되어 있습니다. 당신은 '시네마틱 언어'로만 생각하고 소통합니다.\n\n2. 맥락 (Context):\n입력: 사용자가 광고 문구(모든 언어)를 제공합니다.\n\n목표: 제공된 광고 문구를 분석하여, Veo3 모델에서 최고의 시네마틱 품질을 구현할 수 있는 단 하나의, 매우 상세하고 기술적으로 정밀한 영문(English) 비디오 프롬프트를 생성합니다.\n\n3. Veo3 최적화 핵심 원칙:\n당신은 Veo3의 렌더링 엔진을 완벽하게 이해하고 있으며, 다음 핵심 원칙을 준수해야 합니다.\n\n원칙 1: 물리적 구체성 (감정의 배제) Veo3는 추상적인 '감정'을 렌더링하지 못하지만, '물리적 행동'은 완벽하게 렌더링합니다. (예: '행복' 대신 '입꼬리가 천천히 올라가며 눈이 가늘어지는 모습', '슬픔' 대신 '미간을 찡그리며 뺨을 타고 흐르는 눈물 한 방울')\n\n원칙 2: 기술적 정밀성 (Jargon 활용) Veo3는 모호한 표현보다 구체적인 기술 용어에 훨씬 민감하게 반응합니다. (예: 샷, 앵글, 렌즈 종류 Anamorphic lens flare, Jib shot, 필름 스타일 Kodak Vision3 500T grain, 조명 Chiaroscuro lighting, Kino Flo light)\n\n원칙 3: 8초의 안무 (Movement Focus) Veo3는 정지된 이미지가 아닌, 8초 동안 일어나는 '카메라의 움직임'과 '피사체의 미묘한 변화'를 구현하는 데 탁월합니다. (예: a slow 8-second dolly-in, a continuous 8s pedestal shot rising, petals slowly unfurling over 8 seconds)\n\n4. 임무 (Task - 생각의 사슬):\n1단계: 분석 및 해체: 입력된 광고문구를 읽습니다. 핵심 메시지, 핵심 피사체(제품 또는 인물), 의도된 감정, 전반적인 브랜드 톤을 식별합니다. 반드시 광고문구를 확실하게 인지하고 최대한 반영 해야 합니다.\n\n2단계: 시각화 (핵심 행동): 핵심 메시지를 (원칙 1, 3에 따라) 단 하나의, 간결하고 강력한 '물리적 행동' 또는 '시각적 은유'로 번역합니다.\n\n3단계: 시각화 (장면 구축): '출력 형식'의 구조화 공식을 사용하여 이 행동을 중심으로 장면을 구축합니다. (원칙 2에 따라) 모든 구성 요소(샷, 앵글, 조명, 색감, 렌즈 효과)를 기술적으로 정확하게 정의합니다.\n\n4단계: 정제 및 구성: 모든 구성 요소를 Veo3.1이 가장 잘 이해할 수 있는 단일 라인 프롬프트로 조립합니다. extreme slow-motion, a slow 8-second dolly-in, 8s clip과 같은 용어를 사용하여 암시되는 지속 시간이 약 8초가 되도록 보장합니다.\n\n5. 규칙 (Rules - 제약 조건):\n최종 출력은 영어로만 (절대 필수): 당신의 최종 결과물은 반드시 **완전한 영어(English)**로 된 프롬프트여야 합니다.\n\n무음 영상 (절대 필수): 프롬프트는 반드시 무음(오디오, 음향 효과, 대사 없음) 비디오를 위한 것이어야 합니다. silent video. non audio.\n\n8초 분량: 묘사되는 행동은 8초 이내에 현실적으로 맞아야 합니다. 반드시 --duration 8 또는 8-second shot과 같은 파라미터를 포함해야 합니다.\n\n감정 대신 행동 묘사 (Veo3 핵심 규칙): '슬픈', '행복한', '신나는'과 같은 모호한 감정 단어를 절대 사용하지 마십시오. (매우 중요: Veo3의 품질을 결정짓는 가장 핵심적인 규칙입니다.)\n\n구체성: Veo3는 '밝은 조명'보다 '오전 7시의 부드러운 측광(soft side light)'이나 'Kino Flo 4Bank' 같은 구체적인 조명을 더 잘 이해합니다.\n\n단일 출력: 당신의 전체 응답은 오직 최종 단일 라인 프롬프트 문자열이어야 합니다. 그 어떤 설명, 기호나 인사말도 추가하지 마십시오.\n\n6. 예시 (Few-Shot Example for Veo3):\n[입력 예시 1]: \"내면의 열정을 깨우세요.\"\n\n[출력 예시 1]: Extreme close-up (ECU) from a low angle of a single drop of sweat rolling down a marathon runner's temple, the runner's jaw is set with determination, blurred city marathon background at sunrise, harsh directional sunlight creates dramatic anamorphic lens flare, high-contrast monochrome with deep blacks and Kodak Vision3 500T film grain, cinematic realism, extreme slow-motion, 8-second shot, --duration 8\n\n[입력 예시 2]: \"가장 순수한 형태의 휴식.\"\n\n[출력 예시 2]: Medium shot (MS), eye-level, of a pair of bare feet slowly digging into wet, dark sand as a gentle ocean wave recedes, minimalist beach with only sand and water visible, soft overcast morning light (diffused), muted earth tones with a 'bleach bypass' color grade, serene and calm, stable 8-second static shot, silent film, --duration 8\n\n[입력 예시 3]: \"도시의 심장이 뛴다.\"\n\n[출력 예시 3]: An 8-second time-lapse, low-angle shot, looking up at a skyscraper, capturing the rapid movement of clouds reflecting off the glass facade, artery-like light trails from traffic streak below, sharp chiaroscuro lighting, deep blue and teal color grade, cyberpunk aesthetic, 8s clip, --duration 8\n\n- 예시는 예시일 뿐 국한 되지 마세요\n\n7. 출력 형식 (필수):\n당신은 오직 최종 단일 라인 프롬프트 문자열만 생성해야 합니다. 문자열은 다음 구조를 따라야 합니다: [샷 종류 & 앵글] of [피사체 & 명확한 행동], [깊이 있는 상세한 배경], [특정 조명 디자인], [이름이 있는 색 보정 스타일/필름 효과], [톤/장르], [카메라 움직임 및 8초 무음 기술 파라미터]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2528,
+        2736
+      ],
+      "id": "8a3daf7b-81aa-4e7d-b87a-5257f617ca73",
+      "name": "영상 생성 프롬프트1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ⭐ Gemini 출력에서 텍스트 추출\nconst inputData = $('광고문구 생성기').item.json;\nconst scriptText = inputData.output;\n\nconsole.log('=== 자막 생성 (텍스트 → SRT) ===');\nconsole.log('입력 텍스트:', scriptText);\n\nif (!scriptText) {\n  throw new Error('❌ output 필드가 없습니다!');\n}\n\n// ⭐ 텍스트를 줄 단위로 분리\nconst lines = scriptText.trim().split('\\n').filter(line => line.trim());\n\n// ⭐ SRT 형식으로 변환\nlet srtContent = '';\nconst durationPerLine = 4; // 각 줄당 4초\nlet currentTime = 0;\n\nlines.forEach((line, index) => {\n  const startTime = currentTime;\n  const endTime = currentTime + durationPerLine;\n  \n  // SRT 시간 형식 (00:00:01,500)\n  const formatTime = (seconds) => {\n    const h = Math.floor(seconds / 3600);\n    const m = Math.floor((seconds % 3600) / 60);\n    const s = Math.floor(seconds % 60);\n    const ms = Math.floor((seconds % 1) * 1000);\n    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`;\n  };\n  \n  srtContent += `${index + 1}\\n`;\n  srtContent += `${formatTime(startTime)} --> ${formatTime(endTime)}\\n`;\n  srtContent += `${line}\\n\\n`;\n  \n  currentTime = endTime;\n});\n\nconsole.log('✅ SRT 변환 완료');\nconsole.log('라인 수:', lines.length);\nconsole.log('SRT 길이:', srtContent.length);\n\n// ⭐ 다음 노드로 전달\nconst timestamp = Date.now();\nconst baseDir = '/tmp/n8n_video';\n\nreturn {\n  json: {\n    timestamp: timestamp,\n    tmpDir: baseDir,\n    subtitlePath: `${baseDir}/subtitle_${timestamp}.srt`,\n    subtitleContent: srtContent,\n    outputPath: `${baseDir}/output_${timestamp}.mp4`,\n    scriptText: scriptText,\n    hasAudio: false\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5200,
+        3008
+      ],
+      "id": "faed2737-87ed-45ca-9ecf-dbc630cd9664",
+      "name": "자막 생성1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a073daae-037e-4d8f-bc0b-2761d1de41bc",
+              "name": "imageUrl",
+              "value": "=https://dcbvrbljeanjzsbrqays.supabase.co/storage/v1/object/public/uploads/{{ $json.storage_path }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        2336
+      ],
+      "id": "5a546ee3-27fb-49dc-b2f9-49321cbb03b3",
+      "name": "이미지 URL 생성"
+    },
+    {
+      "parameters": {
+        "url": "https://dcbvrbljeanjzsbrqays.supabase.co/rest/v1/product_info?select=*&order=created_at.desc&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYnZyYmxqZWFuanpzYnJxYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzg1ODksImV4cCI6MjA3NzkxNDU4OX0.e3PF_b779dOTrqeNDmiirwFURapnkPdU3Xic7ltnw2M"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYnZyYmxqZWFuanpzYnJxYXlzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MjMzODU4OSwiZXhwIjoyMDc3OTE0NTg5fQ.5aZ8bInmxJ0I94zn1GLwmtGP1S6BxDUKhyK6_HVkOOg"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1136,
+        2848
+      ],
+      "id": "91d9a345-0059-45a5-8d4e-63906edadc82",
+      "name": "슈파베이스 상품명"
+    },
+    {
+      "parameters": {
+        "url": "https://dcbvrbljeanjzsbrqays.supabase.co/rest/v1/product_images?select=*&order=updated_at.desc&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYnZyYmxqZWFuanpzYnJxYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzg1ODksImV4cCI6MjA3NzkxNDU4OX0.e3PF_b779dOTrqeNDmiirwFURapnkPdU3Xic7ltnw2M"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYnZyYmxqZWFuanpzYnJxYXlzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MjMzODU4OSwiZXhwIjoyMDc3OTE0NTg5fQ.5aZ8bInmxJ0I94zn1GLwmtGP1S6BxDUKhyK6_HVkOOg"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1104,
+        2336
+      ],
+      "id": "db127ad3-8074-434c-ad9d-61c3d557cfd5",
+      "name": "슈파베이스 이미지"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.imageUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "imageData"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        2336
+      ],
+      "id": "14c878b6-c84a-4197-8f11-c65718b3c5a9",
+      "name": "이미지 다운로드"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "51560738-1db2-4110-bdbb-cc24bbaa973b",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -160,
+        2592
+      ],
+      "id": "2c849dff-b06b-430d-bb35-c021f840085f",
+      "name": "Webhook",
+      "webhookId": "51560738-1db2-4110-bdbb-cc24bbaa973b"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        3056
+      ],
+      "id": "1b4221cf-10c0-481d-8cf4-ed7acc02abb8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ED6NPRyKLx3renMf",
+          "name": "Google Gemini(PaLM) Api account japan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Response Body: {\"success\": true, \"message\": \"Workflow started\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        96,
+        2592
+      ],
+      "id": "5805d730-3efb-4c63-b7d4-5d1894586b30",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2608,
+        2336
+      ],
+      "id": "1684d353-e929-4e72-806a-915b66491d7d",
+      "name": "Wait2",
+      "webhookId": "d40c6a75-4889-404b-8516-13545f5f97e7"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4336,
+        2320
+      ],
+      "id": "21ccb0fd-2419-4ea8-8a45-7c4350fae78b",
+      "name": "Wait3",
+      "webhookId": "d40c6a75-4889-404b-8516-13545f5f97e7"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3696,
+        2800
+      ],
+      "id": "d0c92c87-e5b9-4c1e-b127-066afea9e250",
+      "name": "Wait4",
+      "webhookId": "d40c6a75-4889-404b-8516-13545f5f97e7"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3536,
+        3024
+      ],
+      "id": "8ee92598-dc60-4e4b-9cb2-3b38529ee52b",
+      "name": "Wait5",
+      "webhookId": "d40c6a75-4889-404b-8516-13545f5f97e7"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        6752,
+        2784
+      ],
+      "id": "21b08127-ca2a-41d8-8d60-65bb6dbb2dd3",
+      "name": "Wait6",
+      "webhookId": "d40c6a75-4889-404b-8516-13545f5f97e7"
+    },
+    {
+      "parameters": {
+        "command": "=VIDEO_PATH=\"{{ $('경로 수집 Code1').item.json.videoPath }}\"\nAUDIO_PATH=\"{{ $('경로 수집 Code1').item.json.audioPath }}\"\nSUBTITLE_PATH=\"{{ $('경로 수집 Code1').item.json.subtitlePath }}\"\nOUTPUT=\"{{ $('경로 수집 Code1').item.json.outputPath }}\"\n\necho \"=== 자막 파일 생성 ===\"\nprintf '%s\\n' '{{ $('경로 수집 Code1').item.json.subtitleContent }}' > \"$SUBTITLE_PATH\"\n\necho \"\"\necho \"=== 파일 확인 ===\"\nls -lh \"$VIDEO_PATH\" || { echo \"❌ 영상 없음: $VIDEO_PATH\"; exit 1; }\nls -lh \"$AUDIO_PATH\" || { echo \"❌ 오디오 없음: $AUDIO_PATH\"; exit 1; }\nls -lh \"$SUBTITLE_PATH\" || { echo \"✅ 자막 생성: $SUBTITLE_PATH\"; }\n\necho \"\"\necho \"=== FFmpeg 처리 (TTS 오디오로 교체) ===\"\n\nffmpeg -y -i \"$VIDEO_PATH\" -i \"$AUDIO_PATH\" \\\n  -vf \"subtitles=$SUBTITLE_PATH:force_style='FontName=Malgun Gothic,FontSize=24,PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,Outline=2,Shadow=1,MarginV=20'\" \\\n  -map 0:v -map 1:a \\\n  -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p \\\n  -c:a aac -b:a 192k \\\n  -movflags +faststart \\\n  \"$OUTPUT\" 2>&1\n\necho \"\"\nif [ -f \"$OUTPUT\" ]; then\n    echo \"✅ 완료: $OUTPUT\"\n    echo \"$OUTPUT\"\nelse\n    echo \"❌ FFmpeg 실패\"\n    exit 1\nfi"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        7024,
+        2784
+      ],
+      "id": "63699ad8-b2de-4827-bbc9-1196a3201fee",
+      "name": "최종 영상생성1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconsole.log('=== 데이터 추출 시작 ===');\nconsole.log('전체 아이템 수:', items.length);\n\nlet videoUri = '';\nlet videoFileName = '';  // ✅ 빈 문자열로 초기화\nlet subtitleContent = '';\nlet audioPath = '';\n\n// 데이터 추출\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  console.log(`\\n--- 아이템 ${i} 분석 ---`);  // ✅ 백틱 사용 (템플릿 리터럴)\n  console.log('JSON 키:', Object.keys(item.json || {}));\n  \n  // ===== 영상 파일명 =====\n  if (item.json?.fileName && item.json.fileName.includes('input_video')) {  // ✅ 'input_video' 문자열 검색\n    videoFileName = item.json.fileName;\n    console.log('✅ 영상 파일:', videoFileName);\n  }\n  \n  // ===== videoPath도 확인 (우선순위) =====\n  if (item.json?.videoPath && item.json.videoPath.includes('input_video')) {\n    videoFileName = item.json.videoPath;\n    console.log('✅ 영상 파일 (videoPath):', videoFileName);\n  }\n  \n  // ===== 영상 URI =====\n  if (item.json?.response?.generateVideoResponse) {\n    const samples = item.json.response.generateVideoResponse.generatedSamples;\n    if (samples?.[0]?.video?.uri) {\n      videoUri = samples[0].video.uri;\n      console.log('✅ 영상 URI 발견');\n    }\n  }\n  \n  // ===== 자막 =====\n  if (item.json?.subtitleContent) {\n    subtitleContent = item.json.subtitleContent;\n    console.log('✅ 자막 발견:', subtitleContent.substring(0, 50));\n  }\n  \n  // ===== 오디오 경로 =====\n  if (item.json?.audioPath) {\n    audioPath = item.json.audioPath;\n    console.log('✅ TTS 오디오 경로 발견:', audioPath);\n  }\n}\n\n// 검증 (오디오는 선택사항)\nif (!videoFileName) {\n  console.error('❌ 영상 파일명을 찾을 수 없습니다!');\n  console.error('입력 데이터:', JSON.stringify(items.map(i => i.json), null, 2));\n  throw new Error('영상 파일명 없음');\n}\n\nif (!subtitleContent) {\n  console.error('❌ 자막을 찾을 수 없습니다!');\n  throw new Error('자막 없음');\n}\n\nif (!audioPath) {\n  console.warn('⚠️ TTS 오디오 경로가 없습니다. 원본 오디오를 유지합니다.');\n}\n\n// 타임스탬프\nconst timestamp = Date.now();\nconst baseDir = '/tmp/n8n_video';\n\nconsole.log('\\n=== 최종 확인 ===');\nconsole.log('타임스탬프:', timestamp);\nconsole.log('영상:', videoFileName);\nconsole.log('자막 길이:', subtitleContent.length);\nconsole.log('오디오 경로:', audioPath || '(없음)');\n\nreturn {\n  json: {\n    timestamp: timestamp,\n    tmpDir: baseDir,\n    videoUri: videoUri,\n    videoPath: videoFileName,  // ✅ 실제 파일명 전달\n    subtitlePath: `${baseDir}/subtitle_${timestamp}.srt`,\n    audioPath: audioPath,\n    outputPath: `${baseDir}/output_${timestamp}.mp4`,\n    subtitleContent: subtitleContent,\n    hasAudio: !!audioPath\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6128,
+        2800
+      ],
+      "id": "263d5a67-039c-4382-9ac2-712646a8ac21",
+      "name": "데이터 추출 Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.first().json;\n\nconsole.log('=== 경로 수집 ===');\nconsole.log('videoPath:', inputData.videoPath);\nconsole.log('subtitlePath:', inputData.subtitlePath);\nconsole.log('subtitleContent 길이:', inputData.subtitleContent ? inputData.subtitleContent.length : 0);\n\nreturn {\n  json: {\n    videoUri: inputData.videoUri || '',\n    videoPath: inputData.videoPath,\n    subtitlePath: inputData.subtitlePath,\n    subtitleContent: inputData.subtitleContent,\n    audioPath: inputData.audioPath || \"\",\n    outputPath: inputData.outputPath,\n    hasAudio: inputData.hasAudio || false,\n    tmpDir: '/tmp/n8n_video'\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6320,
+        2800
+      ],
+      "id": "1bb71dd6-88a7-4ee3-9844-966b8c5a9833",
+      "name": "경로 수집 Code1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.filePath }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        7456,
+        2784
+      ],
+      "id": "84d99af4-831a-4252-883a-66e430719efd",
+      "name": "Read/Write Files from Disk5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// stdout에서 마지막 줄(파일 경로) 추출\nconst stdout = $input.item.json.stdout;\n\nif (!stdout) {\n  throw new Error('stdout이 비어있습니다');\n}\n\n// 마지막 줄 추출 (개행문자로 분리)\nconst lines = stdout.trim().split('\\n');\nconst filePath = lines[lines.length - 1].trim();\n\n// 파일 경로 검증\nif (!filePath.startsWith('/') || !filePath.includes('.mp4')) {\n  throw new Error(`유효하지 않은 파일 경로: ${filePath}`);\n}\n\nreturn {\n  json: {\n    filePath: filePath,\n    originalStdout: stdout\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7232,
+        2784
+      ],
+      "id": "82c48fbb-b9cf-48bd-8ff3-8e71af1ef1b4",
+      "name": "파일경로추출"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.audioPath }}",
+        "options": {}
+      },
+      "id": "fabfd031-f82a-4938-aff7-4191cbb2257c",
+      "name": "오디오 파일 저장1",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        5376,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const tmpDir = '/tmp/n8n_video';\nconst timestamp = Date.now();\nconst videoFileName = `input_video_${timestamp}.mp4`;\nconst videoPath = `${tmpDir}/${videoFileName}`;\n\nconsole.log('=== 영상 저장 준비 ===');\nconsole.log('저장 경로:', videoPath);\nconsole.log('파일명:', videoFileName);\nconsole.log('tmpDir:', tmpDir);\n\n// Binary 데이터 확인\nconst inputItem = $input.first();\nconst binaryData = inputItem.binary;\n\nif (!binaryData) {\n  throw new Error('❌ 영상 생성 실패: Binary 데이터가 없습니다.');\n}\n\n// Binary 필드 이름 확인 (첫 번째 필드 사용)\nconst binaryKeys = Object.keys(binaryData);\nconsole.log('✅ 사용 가능한 Binary 필드:', binaryKeys);\n\nif (binaryKeys.length === 0) {\n  throw new Error('❌ 영상 Binary 데이터에 필드가 없습니다.');\n}\n\n// 첫 번째 Binary 필드를 'data'로 표준화\nconst firstKey = binaryKeys[0];\nconsole.log('✅ 사용할 Binary 필드:', firstKey);\n\nreturn {\n  json: {\n    videoPath: videoPath,\n    fileName: videoFileName,\n    tmpDir: tmpDir,\n    timestamp: timestamp,\n    originalBinaryKey: firstKey\n  },\n  binary: {\n    data: binaryData[firstKey]\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5328,
+        2320
+      ],
+      "id": "9b2234df-c540-4e58-890c-c68281c10175",
+      "name": "비디오 경로 준비"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tmpDir = '/tmp/n8n_video';\nconst timestamp = Date.now();\nconst audioPath = `${tmpDir}/audio_${timestamp}.mp3`;\n\nconsole.log('=== 오디오 저장 준비 ===');\nconsole.log('저장 경로:', audioPath);\nconsole.log('tmpDir:', tmpDir);\n\n// Binary 데이터 확인\nconst inputItem = $input.first();\nconst binaryData = inputItem.binary;\n\nif (!binaryData) {\n  throw new Error('❌ TTS 생성 실패: Binary 데이터가 없습니다.');\n}\n\n// Binary 필드 이름 확인 (첫 번째 필드 사용)\nconst binaryKeys = Object.keys(binaryData);\nconsole.log('✅ 사용 가능한 Binary 필드:', binaryKeys);\n\nif (binaryKeys.length === 0) {\n  throw new Error('❌ TTS Binary 데이터에 필드가 없습니다.');\n}\n\n// 첫 번째 Binary 필드를 'data'로 표준화\nconst firstKey = binaryKeys[0];\nconsole.log('✅ 사용할 Binary 필드:', firstKey);\n\nreturn {\n  json: {\n    audioPath: audioPath,\n    tmpDir: tmpDir,\n    timestamp: timestamp,\n    originalBinaryKey: firstKey,\n    output: $json.output\n  },\n  binary: {\n    data: binaryData[firstKey]\n  }\n};"
+      },
+      "id": "a259e703-ea8a-4224-8cef-af7a34679d6f",
+      "name": "오디오 경로 준비",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5168,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// 🎯 병합 노드에서 프롬프트와 이미지 추출 (개선 버전)\n// ============================================\n\nconst items = $input.all();\n\nconsole.log('=== 디버깅 시작 ===');\nconsole.log('받은 아이템 개수:', items.length);\n\n// 초기화\nlet promptText = '';\nlet imageBase64 = '';\n\n// 각 아이템 검사\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  console.log(`\\n--- 아이템 ${i} 분석 ---`);\n  \n  // ============================================\n  // 프롬프트 찾기 (개선된 로직)\n  // ============================================\n  if (item.json) {\n    console.log('JSON 키들:', Object.keys(item.json));\n    \n    // AI Agent 노드는 여러 가능한 출력 형식을 가질 수 있음\n    const possibleTextFields = [\n      'output',      // 일반적인 출력\n      'text',        // 텍스트 응답\n      'response',    // 응답\n      'result',      // 결과\n      'content',     // 컨텐츠\n      'message'      // 메시지\n    ];\n    \n    // 가능한 모든 필드를 순회하며 프롬프트 찾기\n    for (const fieldName of possibleTextFields) {\n      if (item.json[fieldName] && typeof item.json[fieldName] === 'string') {\n        const textValue = item.json[fieldName];\n        \n        // Veo 프롬프트 특징으로 식별\n        if (textValue.includes('Close-Up') || \n            textValue.includes('close-up') ||\n            textValue.includes('ECU') ||\n            textValue.includes('shot') ||\n            textValue.includes('duration') ||\n            textValue.includes('8-second') ||\n            textValue.includes('8s') ||\n            textValue.length > 100) {\n          promptText = textValue;\n          console.log(`✅ 프롬프트 발견! 필드: \"${fieldName}\", 길이:`, promptText.length);\n          break;\n        }\n      }\n    }\n    \n    // 여전히 못 찾았다면, 모든 문자열 값을 출력하여 디버깅\n    if (!promptText) {\n      console.log('⚠️ 프롬프트를 찾지 못했습니다. 사용 가능한 문자열 값들:');\n      for (const key in item.json) {\n        if (typeof item.json[key] === 'string' && item.json[key].length > 20) {\n          console.log(`  - ${key}: \"${item.json[key].substring(0, 50)}...\"`);\n        }\n      }\n    }\n  }\n  \n  // ============================================\n  // 이미지 찾기 (기존 로직 유지)\n  // ============================================\n  \n  // Binary 데이터 확인\n  if (item.binary) {\n    console.log('Binary 키들:', Object.keys(item.binary));\n    \n    if (item.binary.data && item.binary.data.data) {\n      imageBase64 = item.binary.data.data;\n      console.log('✅ 이미지 발견 (binary.data.data)! 길이:', imageBase64.length);\n    }\n  }\n  \n  // JSON에 Gemini 응답이 있는 경우 (누끼 노드)\n  if (!imageBase64 && item.json && item.json.candidates) {\n    console.log('Gemini 응답 구조 확인 중...');\n    try {\n      const candidate = item.json.candidates[0];\n      if (candidate && candidate.content && candidate.content.parts) {\n        for (const part of candidate.content.parts) {\n          if (part.inlineData && part.inlineData.data) {\n            imageBase64 = part.inlineData.data;\n            console.log('✅ 이미지 발견 (Gemini)! 길이:', imageBase64.length);\n            break;\n          }\n        }\n      }\n    } catch (e) {\n      console.log('⚠️ Gemini 응답 파싱 실패:', e.message);\n    }\n  }\n  \n  // JSON에 imageBase64 필드가 직접 있는 경우\n  if (!imageBase64 && item.json && item.json.imageBase64) {\n    imageBase64 = item.json.imageBase64;\n    console.log('✅ 이미지 발견 (json.imageBase64)! 길이:', imageBase64.length);\n  }\n}\n\nconsole.log('\\n=== 최종 결과 ===');\nconsole.log('프롬프트 있음:', !!promptText);\nconsole.log('이미지 있음:', !!imageBase64);\n\n// ============================================\n// 검증 및 상세한 에러 메시지\n// ============================================\nif (!promptText) {\n  console.error('\\n❌ 프롬프트를 찾을 수 없습니다!');\n  console.error('디버깅 정보:');\n  console.error('- 받은 아이템 수:', items.length);\n  items.forEach((item, idx) => {\n    console.error(`\\n아이템 ${idx} 구조:`);\n    console.error('  JSON 키:', Object.keys(item.json || {}));\n    if (item.json) {\n      Object.keys(item.json).forEach(key => {\n        const val = item.json[key];\n        if (typeof val === 'string') {\n          console.error(`  - ${key}: \"${val.substring(0, 100)}${val.length > 100 ? '...' : ''}\"`);\n        }\n      });\n    }\n  });\n  \n  throw new Error(\n    '❌ 영상 프롬프트를 찾을 수 없습니다!\\n\\n' +\n    '확인 사항:\\n' +\n    '1. \"영상 생성 프롬프트\" 노드가 실행되었나요?\\n' +\n    '2. \"영상 생성 프롬프트\" 노드가 \"병합\" 노드의 첫 번째 입력에 연결되어 있나요?\\n' +\n    '3. 위의 콘솔 로그에서 실제 출력 필드명을 확인하세요.\\n\\n' +\n    'F12 → Console 탭에서 디버깅 정보를 확인하세요!'\n  );\n}\n\nif (!imageBase64) {\n  throw new Error(\n    '❌ 이미지를 찾을 수 없습니다!\\n\\n' +\n    '확인 사항:\\n' +\n    '1. \"이미지생성1\" 노드가 실행되었나요?\\n' +\n    '2. \"Convert to File1\" 노드가 \"병합\" 노드의 두 번째 입력에 연결되어 있나요?'\n  );\n}\n\n// data: 프리픽스 제거 (있다면)\nif (imageBase64.includes('data:image')) {\n  console.log('⚠️ data: 프리픽스 발견, 제거 중...');\n  imageBase64 = imageBase64.split(',')[1];\n}\n\nconsole.log('✅ 모든 데이터 준비 완료!');\nconsole.log('프롬프트 미리보기:', promptText.substring(0, 100) + '...');\nconsole.log('이미지 Base64 길이:', imageBase64.length);\n\n// Veo 3.1 형식으로 반환\nreturn {\n  json: {\n    promptText: promptText,\n    imageBase64: imageBase64,\n    // 디버깅 정보\n    debug: {\n      promptLength: promptText.length,\n      imageLength: imageBase64.length,\n      timestamp: new Date().toISOString()\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3936,
+        2320
+      ],
+      "id": "a9044aec-087a-4eb5-80a6-ff177d9b0dcd",
+      "name": "데이터 준비"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ad_videos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Extract Workflow Data').item.json.ad_video_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            },
+            {
+              "fieldId": "progress_stage",
+              "fieldValue": "ad_copy_generation"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        528,
+        2592
+      ],
+      "id": "aeb157f6-bdd4-4ae3-b9a2-e94814f2815c",
+      "name": "Update: Ad Copy Generation",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seclYjSbdcXGgk0U",
+          "name": "my-ad"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ad_videos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.body.ad_video_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            },
+            {
+              "fieldId": "progress_stage",
+              "fieldValue": "image_refinement"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        2336
+      ],
+      "id": "61bc7f50-4f91-41f2-90ba-3fc0e4b22ca4",
+      "name": "Update: Image Refinement",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seclYjSbdcXGgk0U",
+          "name": "my-ad"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ad_videos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.body.ad_video_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            },
+            {
+              "fieldId": "progress_stage",
+              "fieldValue": "video_generation"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4144,
+        2320
+      ],
+      "id": "9ccc72f3-dcfe-4265-b9ce-291b5e3e29e2",
+      "name": "Update: Video Generation",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seclYjSbdcXGgk0U",
+          "name": "my-ad"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ad_videos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.body.ad_video_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            },
+            {
+              "fieldId": "progress_stage",
+              "fieldValue": "tts_generation"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3488,
+        2800
+      ],
+      "id": "06d2ac81-9e59-4986-882d-db635710adae",
+      "name": "Update: TTS Generation",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seclYjSbdcXGgk0U",
+          "name": "my-ad"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ad_videos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.body.ad_video_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            },
+            {
+              "fieldId": "progress_stage",
+              "fieldValue": "subtitle_generation"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3328,
+        3024
+      ],
+      "id": "803b5954-3d65-41eb-8e0a-8779a4acbec0",
+      "name": "Update: Subtitle Generation",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seclYjSbdcXGgk0U",
+          "name": "my-ad"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ad_videos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.body.ad_video_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            },
+            {
+              "fieldId": "progress_stage",
+              "fieldValue": "merging"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        6576,
+        2784
+      ],
+      "id": "a43f29f3-39e1-480f-b6d0-698f23832d6c",
+      "name": "Update: Merging",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seclYjSbdcXGgk0U",
+          "name": "my-ad"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e5abfd5a-018d-4202-a9d6-f0de32e69ac2",
+              "name": "ad_video_id",
+              "value": "={{ $json.body.ad_video_id }}",
+              "type": "string"
+            },
+            {
+              "id": "624ee5fd-47fe-4634-8082-f2915fe231ca",
+              "name": "product_image_id",
+              "value": "={{ $json.body.product_image_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a3a348a0-bb9f-4e4f-8da3-ee8d8ac8f4cf",
+              "name": "product_info_id",
+              "value": "={{ $json.body.product_info_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        2592
+      ],
+      "id": "0c48dbc2-2c13-4e70-8352-05a7cd64aeab",
+      "name": "Extract Workflow Data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        7504,
+        3088
+      ],
+      "id": "a5326243-3376-4d3b-b4cf-77fd14190630",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ad_videos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.body.ad_video_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "failed"
+            },
+            {
+              "fieldId": "progress_stage",
+              "fieldValue": "error"
+            },
+            {
+              "fieldId": "error_message",
+              "fieldValue": "={{ $json.error.message || \"워크플로우 실행 중 오류 발생\" }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        7712,
+        3088
+      ],
+      "id": "5b1bc200-e065-4dcd-b0f1-d53541aec479",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seclYjSbdcXGgk0U",
+          "name": "my-ad"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://dcbvrbljeanjzsbrqays.supabase.co/storage/v1/object/videos/{{ $('Webhook').first().json.body.ad_video_id }}.mp4",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYnZyYmxqZWFuanpzYnJxYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzg1ODksImV4cCI6MjA3NzkxNDU4OX0.e3PF_b779dOTrqeNDmiirwFURapnkPdU3Xic7ltnw2M"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYnZyYmxqZWFuanpzYnJxYXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzg1ODksImV4cCI6MjA3NzkxNDU4OX0.e3PF_b779dOTrqeNDmiirwFURapnkPdU3Xic7ltnw2M"
+            },
+            {
+              "name": "Content-Type",
+              "value": "video/mp4"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7696,
+        2784
+      ],
+      "id": "cc93340a-b539-4bff-8e12-b003614824a8",
+      "name": "supabase upload"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\n\nconsole.log('=== Supabase Upload 응답 ===');\nconsole.log('응답:', JSON.stringify(response, null, 2));\n\n// 에러 확인\nif (response.error) {\n  throw new Error(`❌ Supabase Upload 실패: ${response.error.message}`);\n}\n\n// Public URL 생성\nconst bucketName = 'videos';\nconst fileName = $('Webhook').first().json.body.ad_video_id + '.mp4';\nconst publicUrl = `https://dcbvrbljeanjzsbrqays.supabase.co/storage/v1/object/public/${bucketName}/${fileName}`;\n\nconsole.log('✅ 업로드 성공!');\nconsole.log('Public URL:', publicUrl);\n\nreturn {\n  json: {\n    success: true,\n    uploadedFile: response.Key || fileName,\n    publicUrl: publicUrl,\n    ad_video_id: $('Webhook').first().json.body.ad_video_id\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7936,
+        2784
+      ],
+      "id": "0722c613-991b-4c5a-b830-66cb86b54be7",
+      "name": "응답 처리 Code"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ad_videos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.body.ad_video_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "=completed"
+            },
+            {
+              "fieldId": "video_url",
+              "fieldValue": "={{ $('응답 처리').item.json.publicUrl }}"
+            },
+            {
+              "fieldId": "progress_stage",
+              "fieldValue": "=completed"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        8256,
+        2784
+      ],
+      "id": "f679625f-fdbf-48d5-a9da-4cb9567aa210",
+      "name": "Update: finish",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seclYjSbdcXGgk0U",
+          "name": "my-ad"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "영상생성": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TTS생성": {
+      "main": [
+        [
+          {
+            "node": "오디오 경로 준비",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "병합1": {
+      "main": [
+        [
+          {
+            "node": "데이터 준비",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "광고문구 생성기": {
+      "main": [
+        [
+          {
+            "node": "이미지 프롬프트1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "영상 생성 프롬프트1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update: Subtitle Generation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update: TTS Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "병합1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "상태확인": {
+      "main": [
+        [
+          {
+            "node": "영상다운",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "이미지생성": {
+      "main": [
+        [
+          {
+            "node": "이미지 데이터 추출1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "상태확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Update: Image Refinement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "병합4": {
+      "main": [
+        [
+          {
+            "node": "데이터 추출 Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "영상다운": {
+      "main": [
+        [
+          {
+            "node": "비디오 경로 준비",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "병합4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "슈파베이스 상품명",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "슈파베이스 이미지",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "이미지 데이터 추출1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "이미지 프롬프트1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "영상 생성 프롬프트1": {
+      "main": [
+        [
+          {
+            "node": "병합1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "자막 생성1": {
+      "main": [
+        [
+          {
+            "node": "병합4",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "이미지 URL 생성": {
+      "main": [
+        [
+          {
+            "node": "이미지 다운로드",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "슈파베이스 상품명": {
+      "main": [
+        [
+          {
+            "node": "광고문구 생성기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "슈파베이스 이미지": {
+      "main": [
+        [
+          {
+            "node": "이미지 URL 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "이미지 다운로드": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "광고문구 생성기",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "이미지 프롬프트1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "영상 생성 프롬프트1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Extract Workflow Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "이미지생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "영상생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait5": {
+      "main": [
+        [
+          {
+            "node": "자막 생성1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "TTS생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait6": {
+      "main": [
+        [
+          {
+            "node": "최종 영상생성1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "최종 영상생성1": {
+      "main": [
+        [
+          {
+            "node": "파일경로추출",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "데이터 추출 Code1": {
+      "main": [
+        [
+          {
+            "node": "경로 수집 Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "경로 수집 Code1": {
+      "main": [
+        [
+          {
+            "node": "Update: Merging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "파일경로추출": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "오디오 파일 저장1": {
+      "main": [
+        [
+          {
+            "node": "병합4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "비디오 경로 준비": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "오디오 경로 준비": {
+      "main": [
+        [
+          {
+            "node": "오디오 파일 저장1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk5": {
+      "main": [
+        [
+          {
+            "node": "supabase upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "데이터 준비": {
+      "main": [
+        [
+          {
+            "node": "Update: Video Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Ad Copy Generation": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Image Refinement": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Video Generation": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: TTS Generation": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Subtitle Generation": {
+      "main": [
+        [
+          {
+            "node": "Wait5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Merging": {
+      "main": [
+        [
+          {
+            "node": "Wait6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Workflow Data": {
+      "main": [
+        [
+          {
+            "node": "Update: Ad Copy Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "Update: finish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "supabase upload": {
+      "main": [
+        [
+          {
+            "node": "응답 처리 Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "응답 처리 Code": {
+      "main": [
+        [
+          {
+            "node": "Update: finish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: finish": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "829c9383-b4e9-4244-840e-cec19b3f9734",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a05a912e74c6bf20aa829ba78caf29fc894eab26fbc26e23c3268749e205fe23"
+  },
+  "id": "4xjzCd8v7guhFcyY",
+  "tags": []
+}

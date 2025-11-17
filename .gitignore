@@ -62,3 +62,14 @@ repomix-output.xml
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+.vercel
+
+# Windows reserved filenames (cannot be tracked in Git)
+nul
+NUL
+CON
+PRN
+AUX
+COM[1-9]
+LPT[1-9]
