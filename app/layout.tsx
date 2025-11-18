@@ -3,7 +3,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { koKR } from "@clerk/localizations";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import Navbar from "@/components/Navbar";
+import { Sidebar } from "@/components/sidebar";
+import { MobileSidebar } from "@/components/mobile-sidebar";
 import { SyncUserProvider } from "@/components/providers/sync-user-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Footer } from "@/components/footer";
@@ -44,7 +45,7 @@ export default function RootLayout({
     <ClerkProvider localization={koKR}>
       <html lang="ko" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
         >
           <ThemeProvider
             attribute="class"
@@ -53,14 +54,27 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <SyncUserProvider>
-              {/* Header Navigation */}
-              <Navbar />
+              <div className="flex min-h-screen">
+                {/* Desktop Sidebar */}
+                <div className="hidden lg:block">
+                  <Sidebar />
+                </div>
 
-              {/* Main Content Area */}
-              <main className="flex-1">{children}</main>
+                {/* Main Content Wrapper */}
+                <div className="flex-1 flex flex-col lg:ml-64">
+                  {/* Mobile Header */}
+                  <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 lg:hidden supports-[backdrop-filter]:bg-background/60">
+                    <MobileSidebar />
+                    <h1 className="text-lg font-bold">삽가능 스튜디오</h1>
+                  </header>
 
-              {/* Footer */}
-              <Footer />
+                  {/* Main Content Area */}
+                  <main className="flex-1">{children}</main>
+
+                  {/* Footer */}
+                  <Footer />
+                </div>
+              </div>
             </SyncUserProvider>
           </ThemeProvider>
           <Toaster />
