@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import dynamic from "next/dynamic";
 import { HeroSection } from "@/components/home/hero-section";
 
@@ -27,17 +28,33 @@ const SampleVideosSection = dynamic(
 
 export default function Home() {
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useAuth();
+
+  // Show loading while checking auth status
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const handleCTAClick = () => {
     // Redirect to upload page
-    // If not signed in, Clerk will automatically show sign-in modal via middleware
     router.push("/upload");
   };
 
   return (
     <div className="flex flex-col">
-      <HeroSection onCTAClick={handleCTAClick} />
-      <HowItWorksSection />
+      {/* Hero Section and How It Works - only show for non-authenticated users */}
+      {!isSignedIn && (
+        <>
+          <HeroSection onCTAClick={handleCTAClick} />
+          <HowItWorksSection />
+        </>
+      )}
+
+      {/* Sample Videos Section - always show */}
       <SampleVideosSection />
     </div>
   );

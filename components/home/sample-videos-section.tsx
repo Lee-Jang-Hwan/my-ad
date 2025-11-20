@@ -1,3 +1,6 @@
+"use client";
+
+import { useAuth } from "@clerk/nextjs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,18 +54,22 @@ const sampleVideos: SampleVideo[] = [
 ];
 
 export function SampleVideosSection() {
+  const { isSignedIn } = useAuth();
+
   return (
     <section className="py-16 md:py-24 px-4 md:px-8">
       <div className="max-w-6xl mx-auto">
-        {/* Section Header */}
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            이렇게 완성됩니다
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            실제 사용자들이 생성한 홍보영상을 확인해보세요
-          </p>
-        </div>
+        {/* Section Header - only show for non-authenticated users */}
+        {!isSignedIn && (
+          <div className="mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              이렇게 완성됩니다
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              실제 사용자들이 생성한 홍보영상을 확인해보세요
+            </p>
+          </div>
+        )}
 
         {/* Videos Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
