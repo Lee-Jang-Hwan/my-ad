@@ -128,7 +128,7 @@ export function Sidebar() {
           </SignedOut>
 
           <SignedIn>
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center justify-center">
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
@@ -137,7 +137,6 @@ export function Sidebar() {
                   },
                 }}
               />
-              <p className="text-xs text-muted-foreground text-center">계정</p>
             </div>
           </SignedIn>
         </div>

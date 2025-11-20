@@ -7,6 +7,13 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ onCTAClick }: HeroSectionProps) {
+  const handleDemoClick = () => {
+    const sampleSection = document.getElementById('sample-videos-section');
+    if (sampleSection) {
+      sampleSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <section className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
       {/* Background gradient */}
@@ -24,8 +31,6 @@ export function HeroSection({ onCTAClick }: HeroSectionProps) {
         {/* Subheadline */}
         <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-2xl mx-auto">
           이미지 + 상품명만 있으면 OK
-          <br />
-          AI가 광고 문구, 영상 편집, TTS, 자막까지 모두 생성해드립니다.
         </p>
 
         {/* CTA Button Group */}
@@ -34,28 +39,10 @@ export function HeroSection({ onCTAClick }: HeroSectionProps) {
             <span>지금 시작하기</span>
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
-          <Button size="lg" variant="outline" className="text-base">
+          <Button size="lg" variant="outline" className="text-base" onClick={handleDemoClick}>
             <Play className="mr-2 w-4 h-4" />
             <span>데모 영상 보기</span>
           </Button>
-        </div>
-
-        {/* Trust indicators */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span className="text-primary">✓</span>
-            <span>가입 5분, 영상 생성 3분</span>
-          </div>
-          <Separator orientation="vertical" className="h-4 hidden sm:block" />
-          <div className="flex items-center gap-2">
-            <span className="text-primary">✓</span>
-            <span>추가 비용 없음</span>
-          </div>
-          <Separator orientation="vertical" className="h-4 hidden sm:block" />
-          <div className="flex items-center gap-2">
-            <span className="text-primary">✓</span>
-            <span>100% 자동 생성</span>
-          </div>
         </div>
       </div>
     </section>

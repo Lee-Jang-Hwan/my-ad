@@ -142,7 +142,7 @@ export function MobileSidebar() {
               </SignedOut>
 
               <SignedIn>
-                <div className="flex items-center gap-3 px-2">
+                <div className="flex items-center justify-center">
                   <UserButton
                     afterSignOutUrl="/"
                     appearance={{
@@ -151,9 +151,6 @@ export function MobileSidebar() {
                       },
                     }}
                   />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">계정관리</p>
-                  </div>
                 </div>
               </SignedIn>
             </div>
