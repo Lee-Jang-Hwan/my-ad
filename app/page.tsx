@@ -40,8 +40,13 @@ export default function Home() {
   }
 
   const handleCTAClick = () => {
-    // Redirect to upload page
-    router.push("/upload");
+    if (isSignedIn) {
+      // Redirect to upload page if logged in
+      router.push("/upload");
+    } else {
+      // Redirect to sign-up page if not logged in
+      router.push("/sign-up");
+    }
   };
 
   return (
@@ -49,13 +54,16 @@ export default function Home() {
       {/* Hero Section and How It Works - only show for non-authenticated users */}
       {!isSignedIn && (
         <>
-          <HeroSection onCTAClick={handleCTAClick} />
+          <HeroSection
+            onCTAClick={handleCTAClick}
+            sampleVideos={<SampleVideosSection />}
+          />
           <HowItWorksSection />
         </>
       )}
 
-      {/* Sample Videos Section - always show */}
-      <SampleVideosSection />
+      {/* Sample Videos Section - show standalone for authenticated users */}
+      {isSignedIn && <SampleVideosSection />}
     </div>
   );
 }
