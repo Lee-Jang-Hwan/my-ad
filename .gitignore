@@ -73,3 +73,6 @@ PRN
 AUX
 COM[1-9]
 LPT[1-9]
+
+# Temporary sample files
+public/sample.png
