@@ -79,7 +79,7 @@ export function MobileSidebar() {
 
             {/* Navigation Menu */}
             <nav className="flex-1 overflow-y-auto px-3 py-4">
-              <div className="space-y-1">
+              <div className="flex flex-col items-center space-y-4">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
@@ -91,14 +91,14 @@ export function MobileSidebar() {
                           href={item.href}
                           onClick={() => setOpen(false)}
                           className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                            "group flex flex-col items-center gap-2 px-4 py-3 text-xs font-medium transition-all duration-300 ease-in-out rounded-lg",
                             isActive
-                              ? "bg-primary text-primary-foreground"
-                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                              ? "text-black dark:text-white scale-110 font-semibold"
+                              : "text-gray-500 dark:text-gray-400"
                           )}
                         >
-                          <Icon className="h-5 w-5" />
-                          <span>{item.title}</span>
+                          <Icon className="h-6 w-6 transition-all duration-300 group-hover:scale-110" />
+                          <span className="transition-all duration-300 group-hover:text-black dark:group-hover:text-white group-hover:font-semibold">{item.title}</span>
                         </Link>
                       </SignedIn>
                     );
@@ -110,14 +110,14 @@ export function MobileSidebar() {
                       href={item.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        "group flex flex-col items-center gap-2 px-4 py-3 text-xs font-medium transition-all duration-300 ease-in-out rounded-lg",
                         isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          ? "text-black dark:text-white scale-110 font-semibold"
+                          : "text-gray-500 dark:text-gray-400"
                       )}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <Icon className="h-6 w-6 transition-all duration-300 group-hover:scale-110" />
+                      <span className="transition-all duration-300 group-hover:text-black dark:group-hover:text-white group-hover:font-semibold">{item.title}</span>
                     </Link>
                   );
                 })}
@@ -127,17 +127,14 @@ export function MobileSidebar() {
             {/* Bottom Section */}
             <div className="border-t p-4 space-y-3">
               {/* Theme Toggle */}
-              <div className="flex items-center justify-between px-2">
-                <span className="text-sm font-medium text-muted-foreground">
-                  테마
-                </span>
+              <div className="flex items-center justify-center">
                 <ThemeToggle />
               </div>
 
               {/* Auth Section */}
               <SignedOut>
                 <SignInButton mode="modal">
-                  <Button variant="default" className="w-full" size="sm">
+                  <Button variant="default" className="w-full bg-gray-700 hover:bg-gray-800 text-white" size="sm">
                     <LogIn className="w-4 h-4 mr-2" />
                     로그인
                   </Button>

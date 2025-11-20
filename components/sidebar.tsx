@@ -53,21 +53,21 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-32 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center justify-center border-b px-6">
+        <div className="flex h-16 items-center justify-center border-b px-2">
           <Link
             href="/"
-            className={`text-xl font-bold hover:opacity-80 transition-opacity ${blackAndWhitePicture.className}`}
+            className={`text-sm font-bold hover:opacity-80 transition-opacity text-center ${blackAndWhitePicture.className}`}
           >
-            삽가능 스튜디오
+            삽가능<br/>스튜디오
           </Link>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <div className="space-y-1">
+        <nav className="flex-1 overflow-y-auto px-2 py-4">
+          <div className="flex flex-col items-center space-y-4">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -78,14 +78,14 @@ export function Sidebar() {
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        "group flex flex-col items-center gap-2 px-4 py-3 text-xs font-medium transition-all duration-300 ease-in-out rounded-lg",
                         isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          ? "text-black dark:text-white scale-110 font-semibold"
+                          : "text-gray-500 dark:text-gray-400"
                       )}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <Icon className="h-6 w-6 transition-all duration-300 group-hover:scale-110" />
+                      <span className="transition-all duration-300 group-hover:text-black dark:group-hover:text-white group-hover:font-semibold">{item.title}</span>
                     </Link>
                   </SignedIn>
                 );
@@ -96,14 +96,14 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "group flex flex-col items-center gap-2 px-4 py-3 text-xs font-medium transition-all duration-300 ease-in-out rounded-lg",
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      ? "text-black dark:text-white scale-110 font-semibold"
+                      : "text-gray-500 dark:text-gray-400"
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.title}</span>
+                  <Icon className="h-6 w-6 transition-all duration-300 group-hover:scale-110" />
+                  <span className="transition-all duration-300 group-hover:text-black dark:group-hover:text-white group-hover:font-semibold">{item.title}</span>
                 </Link>
               );
             })}
@@ -111,36 +111,33 @@ export function Sidebar() {
         </nav>
 
         {/* Bottom Section */}
-        <div className="border-t p-4 space-y-3">
+        <div className="border-t p-2 space-y-3">
           {/* Theme Toggle */}
-          <div className="flex items-center justify-between px-2">
-            <span className="text-sm font-medium text-muted-foreground">테마</span>
+          <div className="flex items-center justify-center">
             <ThemeToggle />
           </div>
 
           {/* Auth Section */}
           <SignedOut>
             <SignInButton mode="modal">
-              <Button variant="default" className="w-full" size="sm">
-                <LogIn className="w-4 h-4 mr-2" />
+              <Button variant="default" className="w-full bg-gray-700 hover:bg-gray-800 text-white" size="sm">
+                <LogIn className="w-4 h-4 mr-1" />
                 로그인
               </Button>
             </SignInButton>
           </SignedOut>
 
           <SignedIn>
-            <div className="flex items-center gap-3 px-2">
+            <div className="flex flex-col items-center gap-2">
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
                   elements: {
-                    avatarBox: "h-9 w-9",
+                    avatarBox: "h-10 w-10",
                   },
                 }}
               />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">계정관리</p>
-              </div>
+              <p className="text-xs text-muted-foreground text-center">계정</p>
             </div>
           </SignedIn>
         </div>
