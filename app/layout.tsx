@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { koKR } from "@clerk/localizations";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 import { Sidebar } from "@/components/sidebar";
 import { MobileSidebar } from "@/components/mobile-sidebar";
@@ -96,6 +97,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </SyncUserProvider>
           </ThemeProvider>
           <Toaster />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
