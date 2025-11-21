@@ -2,29 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import dynamic from "next/dynamic";
 import { HeroSection } from "@/components/home/hero-section";
-
-// Dynamically import sections that are below the fold
-const HowItWorksSection = dynamic(
-  () =>
-    import("@/components/home/how-it-works-section").then(
-      (mod) => mod.HowItWorksSection
-    ),
-  {
-    loading: () => <div className="min-h-[500px]" />,
-  }
-);
-
-const SampleVideosSection = dynamic(
-  () =>
-    import("@/components/home/sample-videos-section").then(
-      (mod) => mod.SampleVideosSection
-    ),
-  {
-    loading: () => <div className="min-h-[500px]" />,
-  }
-);
+import { HowItWorksSection } from "@/components/home/how-it-works-section";
+import { SampleVideosSection } from "@/components/home/sample-videos-section";
 
 export default function Home() {
   const router = useRouter();
@@ -50,20 +30,16 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col">
-      {/* Hero Section and How It Works - only show for non-authenticated users */}
-      {!isSignedIn && (
-        <>
-          <HeroSection
-            onCTAClick={handleCTAClick}
-            sampleVideos={<SampleVideosSection />}
-          />
-          <HowItWorksSection />
-        </>
-      )}
+    <div className="flex flex-col min-h-screen bg-background -mt-16">
+      {/* Hero Section with Sample Videos - ALWAYS SHOW */}
+      <HeroSection
+        isSignedIn={isSignedIn}
+        onCTAClick={handleCTAClick}
+        sampleVideos={<SampleVideosSection />}
+      />
 
-      {/* Sample Videos Section - show standalone for authenticated users */}
-      {isSignedIn && <SampleVideosSection />}
+      {/* How It Works Section - only show for non-authenticated users */}
+      {!isSignedIn && <HowItWorksSection />}
     </div>
   );
 }
