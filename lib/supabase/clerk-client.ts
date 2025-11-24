@@ -41,6 +41,16 @@ export function useClerkSupabaseClient() {
       async accessToken() {
         return (await getToken()) ?? null;
       },
+      realtime: {
+        params: {
+          eventsPerSecond: 10,
+        },
+      },
+      global: {
+        headers: {
+          'x-client-info': 'clerk-supabase-client',
+        },
+      },
     });
   }, [getToken]);
 

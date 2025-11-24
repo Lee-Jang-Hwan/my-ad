@@ -85,15 +85,22 @@ export function UploadForm() {
   };
 
   const handleImageSelected = (image: ImageFile) => {
+    console.log("UploadForm: handleImageSelected called with:", image);
     setSelectedImage(image);
     setError(null);
+    console.log("UploadForm: selectedImage state updated");
   };
 
   const handleImageRemoved = () => {
+    console.log("UploadForm: handleImageRemoved called");
     setSelectedImage(null);
   };
 
   const isFormValid = selectedImage !== null && form.formState.isValid;
+
+  // Debug: Log state changes
+  console.log("UploadForm render - selectedImage:", selectedImage);
+  console.log("UploadForm render - isFormValid:", isFormValid);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -127,6 +134,42 @@ export function UploadForm() {
 
         {/* Image Preview (only shown when image is selected) */}
         {selectedImage && <ImagePreview image={selectedImage} />}
+
+        {/* Debug Info (development only) */}
+        {process.env.NODE_ENV === "development" && (
+          <Card className="p-4 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+            <details>
+              <summary className="cursor-pointer text-sm font-semibold text-blue-700 dark:text-blue-300">
+                디버그 정보 (개발 모드)
+              </summary>
+              <div className="mt-2 space-y-1 text-xs font-mono">
+                <p>
+                  <strong>선택된 이미지:</strong>{" "}
+                  {selectedImage ? selectedImage.file.name : "없음"}
+                </p>
+                {selectedImage && (
+                  <>
+                    <p>
+                      <strong>파일 크기:</strong> {selectedImage.file.size}{" "}
+                      bytes
+                    </p>
+                    <p>
+                      <strong>파일 타입:</strong> {selectedImage.file.type}
+                    </p>
+                  </>
+                )}
+                <p>
+                  <strong>폼 유효성:</strong>{" "}
+                  {form.formState.isValid ? "유효" : "무효"}
+                </p>
+                <p>
+                  <strong>전체 폼 유효성:</strong>{" "}
+                  {isFormValid ? "유효" : "무효"}
+                </p>
+              </div>
+            </details>
+          </Card>
+        )}
 
         {/* Product Info Section */}
         <Card className="p-6">

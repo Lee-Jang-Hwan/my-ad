@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, Clock, AlertCircle, Trash2 } from "lucide-react";
+import { Calendar, Clock, AlertCircle, Trash2, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,23 +19,27 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteVideo } from "@/actions/delete-video";
+import { toggleVideoPublic } from "@/actions/toggle-video-public";
 import { toast } from "sonner";
 import type { VideoWithProductName } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
 
 interface VideoCardProps {
-  video: VideoWithProductName;
+  video: VideoWithProductName & { is_public?: boolean };
   onDelete?: () => void;
+  onPublicToggle?: () => void;
 }
 
 /**
  * Video card component for dashboard grid
  * Displays thumbnail, product name, status, and action button
  */
-export function VideoCard({ video, onDelete }: VideoCardProps) {
+export function VideoCard({ video, onDelete, onPublicToggle }: VideoCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isTogglingPublic, setIsTogglingPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(video.is_public || false);
 
   // Determine link destination based on status
   const linkHref =
@@ -83,6 +87,34 @@ export function VideoCard({ video, onDelete }: VideoCardProps) {
       toast.error("영상 삭제 중 오류가 발생했습니다.");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // Handle toggle public status
+  const handleTogglePublic = async () => {
+    try {
+      setIsTogglingPublic(true);
+
+      const newIsPublic = !isPublic;
+      const result = await toggleVideoPublic(video.id, newIsPublic);
+
+      if (!result.success) {
+        toast.error(result.error || "공개 상태 변경 중 오류가 발생했습니다.");
+        return;
+      }
+
+      setIsPublic(newIsPublic);
+      toast.success(newIsPublic ? "홈 화면에 게시되었습니다." : "게시가 취소되었습니다.");
+
+      // Call optional callback to refresh list
+      if (onPublicToggle) {
+        onPublicToggle();
+      }
+    } catch (err) {
+      console.error("Toggle public error:", err);
+      toast.error("공개 상태 변경 중 오류가 발생했습니다.");
+    } finally {
+      setIsTogglingPublic(false);
     }
   };
 
@@ -163,6 +195,25 @@ export function VideoCard({ video, onDelete }: VideoCardProps) {
             {video.status === "completed" ? "영상 보기" : "진행 상태 보기"}
           </Link>
         </Button>
+
+        {/* Public toggle button - only show for completed videos */}
+        {video.status === "completed" && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isTogglingPublic}
+            onClick={handleTogglePublic}
+            className={cn(
+              "transition-colors",
+              isPublic
+                ? "text-green-600 hover:text-green-700 hover:bg-green-50"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+            title={isPublic ? "홈 화면에서 제거" : "홈 화면에 게시"}
+          >
+            {isPublic ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+          </Button>
+        )}
 
         {/* Delete button with confirmation dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

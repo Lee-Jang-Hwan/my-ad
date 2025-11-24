@@ -29,9 +29,6 @@ export type VideoStatus =
   | "ad_copy_generation"
   | "image_refinement"
   | "video_generation"
-  | "tts_generation"
-  | "subtitle_generation"
-  | "merging"
   | "completed"
   | "failed"
   | "cancelled";
@@ -50,6 +47,7 @@ export interface AdVideo {
   error_message: string | null;
   created_at: string;
   completed_at: string | null;
+  is_public: boolean;
 }
 
 export interface N8nWorkflow {

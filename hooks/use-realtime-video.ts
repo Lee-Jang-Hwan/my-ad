@@ -179,12 +179,25 @@ export function useRealtimeVideo({
               updatedVideo.status === "cancelled";
             const isCancelled = updatedVideo.status === "cancelled";
 
+            console.log("🔄 [Polling] State update:", {
+              previousStatus: prev.video.status,
+              newStatus: updatedVideo.status,
+              previousStage: prev.currentStage,
+              newStage,
+              isCompleted,
+              isFailed,
+              hasVideoUrl: !!updatedVideo.video_url,
+              videoUrl: updatedVideo.video_url,
+            });
+
             // Trigger callbacks if status changed
             if (!prev.isCompleted && isCompleted && onComplete) {
+              console.log("✅ [Polling] Triggering onComplete callback");
               onComplete(updatedVideo);
             }
 
             if (!prev.isFailed && isFailed && onError) {
+              console.log("❌ [Polling] Triggering onError callback");
               onError(updatedVideo);
             }
 
@@ -264,6 +277,7 @@ export function useRealtimeVideo({
           config: {
             broadcast: { self: false },
             presence: { key: "" },
+            private: false,
           },
         })
         .on(
@@ -306,12 +320,25 @@ export function useRealtimeVideo({
                 updatedVideo.status === "cancelled";
               const isCancelled = updatedVideo.status === "cancelled";
 
+              console.log("🔄 [Realtime] State update:", {
+                previousStatus: prev.video.status,
+                newStatus: updatedVideo.status,
+                previousStage: prev.currentStage,
+                newStage,
+                isCompleted,
+                isFailed,
+                hasVideoUrl: !!updatedVideo.video_url,
+                videoUrl: updatedVideo.video_url,
+              });
+
               // Trigger callbacks if status changed
               if (!prev.isCompleted && isCompleted && onComplete) {
+                console.log("✅ [Realtime] Triggering onComplete callback");
                 onComplete(updatedVideo);
               }
 
               if (!prev.isFailed && isFailed && onError) {
+                console.log("❌ [Realtime] Triggering onError callback");
                 onError(updatedVideo);
               }
 
@@ -331,7 +358,7 @@ export function useRealtimeVideo({
             });
           }
         )
-        .subscribe((status, err) => {
+        .subscribe(async (status, err) => {
           if (isCleanedUpRef.current) return;
 
           console.log("🔌 [Realtime] Subscription status:", status);
@@ -342,14 +369,22 @@ export function useRealtimeVideo({
             lastRealtimeEventRef.current = new Date();
           } else if (status === "CHANNEL_ERROR") {
             console.error("❌ [Realtime] Channel error:", err);
-            reconnectRealtime();
+            // Wait 2 seconds before reconnecting on error
+            setTimeout(() => {
+              if (!isCleanedUpRef.current) {
+                reconnectRealtime();
+              }
+            }, 2000);
           } else if (status === "TIMED_OUT") {
             console.error("⏱️ [Realtime] Subscription timed out");
             reconnectRealtime();
           } else if (status === "CLOSED") {
             console.warn("🔌 [Realtime] Channel closed");
-            if (!isCleanedUpRef.current) {
-              reconnectRealtime();
+            // Don't immediately reconnect on CLOSED - let polling handle it
+            // Only reconnect if we've been successfully subscribed before
+            if (!isCleanedUpRef.current && reconnectAttemptsRef.current > 0) {
+              console.log("🔌 [Realtime] Channel closed unexpectedly, will use polling fallback");
+              isUsingPollingRef.current = true;
             }
           }
         });

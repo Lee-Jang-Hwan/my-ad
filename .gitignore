@@ -76,3 +76,7 @@ LPT[1-9]
 
 # Temporary sample files
 public/sample.png
+
+# n8n workflows (may contain API keys and secrets)
+n8n/
+*.n8n.json

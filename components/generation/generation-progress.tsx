@@ -31,6 +31,18 @@ export function GenerationProgress({ initialVideo }: GenerationProgressProps) {
       initialVideo,
     });
 
+  // Debug: Log video state on every render
+  console.log("📹 [GenerationProgress] Render with state:", {
+    videoId: video?.id,
+    status: video?.status,
+    isCompleted,
+    isFailed,
+    currentStage,
+    progressPercent,
+    hasVideoUrl: !!video?.video_url,
+    videoUrl: video?.video_url,
+  });
+
   // Auto-redirect on completion
   useGenerationComplete({
     video,
@@ -67,6 +79,55 @@ export function GenerationProgress({ initialVideo }: GenerationProgressProps) {
 
   return (
     <div className="container max-w-4xl mx-auto py-8 space-y-6">
+      {/* Debug Info (development only) */}
+      {process.env.NODE_ENV === "development" && (
+        <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950">
+          <CardHeader>
+            <CardTitle className="text-sm text-blue-700 dark:text-blue-300">
+              디버그 정보 (개발 모드)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <details className="text-xs font-mono space-y-1">
+              <summary className="cursor-pointer font-semibold mb-2">
+                상태 정보 보기
+              </summary>
+              <div className="space-y-1 pl-4">
+                <p>
+                  <strong>Video ID:</strong> {video?.id}
+                </p>
+                <p>
+                  <strong>Status:</strong> {video?.status}
+                </p>
+                <p>
+                  <strong>isCompleted:</strong>{" "}
+                  {isCompleted ? "✅ true" : "❌ false"}
+                </p>
+                <p>
+                  <strong>isFailed:</strong>{" "}
+                  {isFailed ? "✅ true" : "❌ false"}
+                </p>
+                <p>
+                  <strong>Current Stage:</strong> {currentStage}
+                </p>
+                <p>
+                  <strong>Progress:</strong> {progressPercent}%
+                </p>
+                <p>
+                  <strong>Has Video URL:</strong>{" "}
+                  {video?.video_url ? "✅ Yes" : "❌ No"}
+                </p>
+                {video?.video_url && (
+                  <p className="break-all">
+                    <strong>Video URL:</strong> {video.video_url}
+                  </p>
+                )}
+              </div>
+            </details>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header Card */}
       <Card>
         <CardHeader>

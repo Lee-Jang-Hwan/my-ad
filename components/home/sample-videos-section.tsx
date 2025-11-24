@@ -3,6 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
+import { useEffect, useState } from "react";
+import { fetchPublicVideos, type PublicVideo } from "@/actions/fetch-public-videos";
 
 interface SampleVideo {
   id: string;
@@ -11,8 +13,8 @@ interface SampleVideo {
   videoUrl?: string;
 }
 
-// Sample videos from public/videos directory
-const sampleVideos: SampleVideo[] = [
+// Default sample videos from public/videos directory
+const defaultSampleVideos: SampleVideo[] = [
   {
     id: "1",
     title: "제품 홍보영상 샘플 1",
@@ -52,11 +54,34 @@ const sampleVideos: SampleVideo[] = [
 ];
 
 export function SampleVideosSection() {
+  const [displayVideos, setDisplayVideos] = useState<SampleVideo[]>(defaultSampleVideos);
+
+  useEffect(() => {
+    // Fetch public videos on mount
+    async function loadPublicVideos() {
+      const result = await fetchPublicVideos(6);
+
+      if (result.success && result.videos.length > 0) {
+        // Convert public videos to SampleVideo format
+        const publicVideos: SampleVideo[] = result.videos.map((video: PublicVideo) => ({
+          id: video.id,
+          title: video.product_name || "홍보영상",
+          duration: "0:15",
+          videoUrl: video.video_url,
+        }));
+
+        setDisplayVideos(publicVideos);
+      }
+    }
+
+    loadPublicVideos();
+  }, []);
+
   return (
     <div id="sample-videos-section" className="max-w-7xl mx-auto px-4 md:px-8">
       {/* Videos Grid - 9:16 ratio vertical videos */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-        {sampleVideos.map((video) => (
+        {displayVideos.map((video) => (
           <div
             key={video.id}
             className="relative overflow-hidden rounded-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
