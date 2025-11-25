@@ -110,30 +110,40 @@ export function useRealtimeVideo({
     const checkHeartbeat = () => {
       if (isCleanedUpRef.current) return;
 
-      const now = new Date();
-      const timeSinceLastRealtimeEvent = now.getTime() - lastRealtimeEventRef.current.getTime();
+      // Use setState to access latest state
+      setState((prev) => {
+        const now = new Date();
+        const timeSinceLastRealtimeEvent = now.getTime() - lastRealtimeEventRef.current.getTime();
 
-      // If no events for too long and video is still processing
-      if (
-        timeSinceLastRealtimeEvent > HEARTBEAT_INTERVAL_MS &&
-        !state.isCompleted &&
-        !state.isFailed
-      ) {
-        console.warn(
-          `⚠️ [Heartbeat] No realtime events for ${timeSinceLastRealtimeEvent}ms, checking connection`
-        );
+        // If no events for too long and video is still processing
+        if (
+          timeSinceLastRealtimeEvent > HEARTBEAT_INTERVAL_MS &&
+          !prev.isCompleted &&
+          !prev.isFailed
+        ) {
+          console.warn(
+            `⚠️ [Heartbeat] No realtime events for ${timeSinceLastRealtimeEvent}ms, checking connection`
+          );
 
-        // Check if channel is still connected
-        if (channelRef.current) {
-          const channelState = channelRef.current.state;
-          console.log("🔌 [Heartbeat] Channel state:", channelState);
+          // Check if channel is still connected
+          if (channelRef.current) {
+            const channelState = channelRef.current.state;
+            console.log("🔌 [Heartbeat] Channel state:", channelState);
 
-          if (channelState === "closed" || channelState === "errored") {
-            console.warn("⚠️ [Heartbeat] Channel is disconnected, attempting reconnect");
-            reconnectRealtime();
+            if (channelState === "closed" || channelState === "errored") {
+              console.warn("⚠️ [Heartbeat] Channel is disconnected, switching to polling mode");
+              isUsingPollingRef.current = true;
+              reconnectRealtime();
+            }
+          } else {
+            console.warn("⚠️ [Heartbeat] No channel exists, relying on polling");
+            isUsingPollingRef.current = true;
           }
         }
-      }
+
+        // Return unchanged state
+        return prev;
+      });
     };
 
     // Polling function: fetch latest video data from database
@@ -156,66 +166,72 @@ export function useRealtimeVideo({
         }
 
         const updatedVideo = data as AdVideo;
-        const hasChanged =
-          updatedVideo.status !== state.video.status ||
-          updatedVideo.progress_stage !== state.video.progress_stage;
 
-        if (hasChanged) {
+        // Use setState with updater to get latest state for comparison
+        setState((prev) => {
+          const hasChanged =
+            updatedVideo.status !== prev.video.status ||
+            updatedVideo.progress_stage !== prev.video.progress_stage;
+
+          if (!hasChanged) {
+            // No changes, return same state
+            return prev;
+          }
+
           console.log("🔄 [Polling] Video data changed:", {
             status: updatedVideo.status,
             progress_stage: updatedVideo.progress_stage,
-            previousStatus: state.video.status,
-            previousStage: state.video.progress_stage,
+            previousStatus: prev.video.status,
+            previousStage: prev.video.progress_stage,
           });
 
           // Update last update timestamp
           lastUpdateRef.current = new Date();
 
-          setState((prev) => {
-            const newStage = updatedVideo.progress_stage as GenerationStage;
-            const isCompleted = updatedVideo.status === "completed";
-            const isFailed =
-              updatedVideo.status === "failed" ||
-              updatedVideo.status === "cancelled";
-            const isCancelled = updatedVideo.status === "cancelled";
+          const newStage = updatedVideo.progress_stage as GenerationStage;
+          const isCompleted = updatedVideo.status === "completed";
+          const isFailed =
+            updatedVideo.status === "failed" ||
+            updatedVideo.status === "cancelled";
+          const isCancelled = updatedVideo.status === "cancelled";
 
-            console.log("🔄 [Polling] State update:", {
-              previousStatus: prev.video.status,
-              newStatus: updatedVideo.status,
-              previousStage: prev.currentStage,
-              newStage,
-              isCompleted,
-              isFailed,
-              hasVideoUrl: !!updatedVideo.video_url,
-              videoUrl: updatedVideo.video_url,
-            });
-
-            // Trigger callbacks if status changed
-            if (!prev.isCompleted && isCompleted && onComplete) {
-              console.log("✅ [Polling] Triggering onComplete callback");
-              onComplete(updatedVideo);
-            }
-
-            if (!prev.isFailed && isFailed && onError) {
-              console.log("❌ [Polling] Triggering onError callback");
-              onError(updatedVideo);
-            }
-
-            return {
-              video: updatedVideo,
-              isLoading: false,
-              error: isFailed
-                ? (isCancelled
-                    ? "사용자가 취소했습니다."
-                    : updatedVideo.error_message || "영상 생성 중 오류가 발생했습니다.")
-                : null,
-              isCompleted,
-              isFailed,
-              currentStage: newStage,
-              progressPercent: calculateProgress(newStage),
-            };
+          console.log("🔄 [Polling] State update:", {
+            previousStatus: prev.video.status,
+            newStatus: updatedVideo.status,
+            previousStage: prev.currentStage,
+            newStage,
+            isCompleted,
+            isFailed,
+            isCancelled,
+            hasVideoUrl: !!updatedVideo.video_url,
+            videoUrl: updatedVideo.video_url,
           });
-        }
+
+          // Trigger callbacks if status changed
+          if (!prev.isCompleted && isCompleted && onComplete) {
+            console.log("✅ [Polling] Triggering onComplete callback");
+            onComplete(updatedVideo);
+          }
+
+          if (!prev.isFailed && isFailed && onError) {
+            console.log("❌ [Polling] Triggering onError callback");
+            onError(updatedVideo);
+          }
+
+          return {
+            video: updatedVideo,
+            isLoading: false,
+            error: isFailed
+              ? (isCancelled
+                  ? "사용자가 취소했습니다."
+                  : updatedVideo.error_message || "영상 생성 중 오류가 발생했습니다.")
+              : null,
+            isCompleted,
+            isFailed,
+            currentStage: newStage,
+            progressPercent: calculateProgress(newStage),
+          };
+        });
       } catch (err) {
         console.error("❌ [Polling] Unexpected error:", err);
       }
@@ -292,6 +308,20 @@ export function useRealtimeVideo({
             if (isCleanedUpRef.current) return;
 
             console.log("📨 [Realtime] UPDATE received:", payload);
+
+            // Check for token expiration error
+            if (payload.error) {
+              console.error("❌ [Realtime] Error in payload:", payload.error);
+
+              // Check if it's a JWT token error
+              if (payload.error.message?.includes("InvalidJWTToken") ||
+                  payload.error.message?.includes("Token has expired")) {
+                console.warn("🔑 [Realtime] JWT token expired, reconnecting...");
+                reconnectRealtime();
+                return;
+              }
+            }
+
             const updatedVideo = payload.new as AdVideo;
             console.log("📊 [Realtime] Updated video data:", {
               status: updatedVideo.status,
@@ -361,7 +391,7 @@ export function useRealtimeVideo({
         .subscribe(async (status, err) => {
           if (isCleanedUpRef.current) return;
 
-          console.log("🔌 [Realtime] Subscription status:", status);
+          console.log("🔌 [Realtime] Subscription status:", status, err);
 
           if (status === "SUBSCRIBED") {
             console.log("✅ [Realtime] Successfully subscribed");
@@ -369,12 +399,35 @@ export function useRealtimeVideo({
             lastRealtimeEventRef.current = new Date();
           } else if (status === "CHANNEL_ERROR") {
             console.error("❌ [Realtime] Channel error:", err);
-            // Wait 2 seconds before reconnecting on error
-            setTimeout(() => {
-              if (!isCleanedUpRef.current) {
-                reconnectRealtime();
-              }
-            }, 2000);
+
+            // Check if error is JWT-related
+            const errorMessage = err?.message || err?.toString?.() || String(err || "");
+            const isJWTError = errorMessage.includes("InvalidJWTToken") ||
+                errorMessage.includes("Token has expired") ||
+                errorMessage.includes("JWT") ||
+                errorMessage.includes("jwt");
+
+            if (isJWTError) {
+              console.warn("🔑 [Realtime] JWT token error detected in subscription, reconnecting immediately");
+              reconnectRealtime();
+            } else if (err === undefined || errorMessage === "undefined") {
+              // Handle undefined error (likely connection closed)
+              console.warn("⚠️ [Realtime] Undefined error - connection likely closed, switching to polling");
+              isUsingPollingRef.current = true;
+              // Try reconnecting after a delay
+              setTimeout(() => {
+                if (!isCleanedUpRef.current) {
+                  reconnectRealtime();
+                }
+              }, 5000);
+            } else {
+              // Wait 2 seconds before reconnecting on other errors
+              setTimeout(() => {
+                if (!isCleanedUpRef.current) {
+                  reconnectRealtime();
+                }
+              }, 2000);
+            }
           } else if (status === "TIMED_OUT") {
             console.error("⏱️ [Realtime] Subscription timed out");
             reconnectRealtime();
@@ -393,6 +446,7 @@ export function useRealtimeVideo({
     };
 
     // Start polling immediately and set interval
+    console.log(`🔄 [Polling] Starting polling every ${POLLING_INTERVAL_MS}ms`);
     pollVideoData();
     pollingRef.current = setInterval(pollVideoData, POLLING_INTERVAL_MS);
 

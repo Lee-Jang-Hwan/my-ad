@@ -39,12 +39,18 @@ export function useClerkSupabaseClient() {
 
     return createClient(supabaseUrl, supabaseKey, {
       async accessToken() {
-        return (await getToken()) ?? null;
+        // Force token refresh to prevent expiration issues
+        // This is called on every request AND when Realtime needs to reauthenticate
+        const token = await getToken({ skipCache: true });
+        return token ?? null;
       },
       realtime: {
         params: {
           eventsPerSecond: 10,
         },
+        // Enable automatic token refresh for Realtime connections
+        // This tells Realtime to call accessToken() when token expires
+        timeout: 10000,
       },
       global: {
         headers: {

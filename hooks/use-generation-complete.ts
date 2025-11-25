@@ -64,8 +64,9 @@ export function useGenerationComplete({
 
       // Check if video_url is missing
       if (!video.video_url) {
-        console.warn("⚠️ [GenerationComplete] Video URL is missing! Still redirecting...");
+        console.warn("⚠️ [GenerationComplete] Video URL is missing!");
         console.warn("⚠️ [GenerationComplete] This might indicate n8n workflow didn't update video_url");
+        console.warn("⚠️ [GenerationComplete] Still redirecting - video page will handle missing URL");
       }
 
       hasRedirectedRef.current = true;
@@ -85,12 +86,15 @@ export function useGenerationComplete({
         clearTimeout(timeoutId);
       };
     } else {
-      console.log("⏳ [GenerationComplete] Waiting for completion...", {
-        isCompleted,
-        videoStatus: video?.status,
-        hasVideoUrl: !!video?.video_url,
-        shouldRedirect,
-      });
+      // Only log occasionally to avoid spam
+      if (Math.random() < 0.1) { // 10% chance to log
+        console.log("⏳ [GenerationComplete] Waiting for completion...", {
+          isCompleted,
+          videoStatus: video?.status,
+          hasVideoUrl: !!video?.video_url,
+          shouldRedirect,
+        });
+      }
     }
   }, [isCompleted, video, router, enabled]);
 }
