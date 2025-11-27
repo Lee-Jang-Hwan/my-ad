@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { loadTossPayments, type TossPaymentsWidgets } from "@tosspayments/tosspayments-sdk";
 import { Button } from "@/components/ui/button";
@@ -30,9 +30,18 @@ export function PaymentWidget({
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const paymentMethodRef = useRef<HTMLDivElement>(null);
+  const agreementRef = useRef<HTMLDivElement>(null);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
     async function initializeWidgets() {
+      // 이미 초기화되었거나 DOM 요소가 없으면 스킵
+      if (isInitialized.current) return;
+      if (!paymentMethodRef.current || !agreementRef.current) return;
+
+      isInitialized.current = true;
+
       try {
         const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
         if (!clientKey) {
@@ -69,7 +78,12 @@ export function PaymentWidget({
       }
     }
 
-    initializeWidgets();
+    // DOM이 준비된 후 초기화 실행
+    const timer = setTimeout(() => {
+      initializeWidgets();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [amount, customerKey]);
 
   const handlePayment = useCallback(async () => {
@@ -100,17 +114,6 @@ export function PaymentWidget({
   const handleCancel = () => {
     router.push("/pricing");
   };
-
-  if (isLoading) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-muted-foreground">결제 위젯 로딩 중...</span>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -144,9 +147,25 @@ export function PaymentWidget({
           </Alert>
         )}
 
-        {/* TossPayments Widget Containers */}
-        <div id="payment-method" className="min-h-[200px]" />
-        <div id="agreement" className="min-h-[50px]" />
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <span className="ml-2 text-muted-foreground">결제 위젯 로딩 중...</span>
+          </div>
+        )}
+
+        {/* TossPayments Widget Containers - 항상 렌더링 */}
+        <div
+          id="payment-method"
+          ref={paymentMethodRef}
+          className={`min-h-[200px] ${isLoading ? 'hidden' : ''}`}
+        />
+        <div
+          id="agreement"
+          ref={agreementRef}
+          className={`min-h-[50px] ${isLoading ? 'hidden' : ''}`}
+        />
       </CardContent>
 
       <CardFooter className="flex gap-4">
@@ -161,7 +180,7 @@ export function PaymentWidget({
         <Button
           className="flex-1"
           onClick={handlePayment}
-          disabled={isProcessing || !widgets}
+          disabled={isProcessing || !widgets || isLoading}
         >
           {isProcessing ? (
             <>
