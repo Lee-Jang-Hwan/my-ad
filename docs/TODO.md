@@ -22,6 +22,12 @@
 - **AI Platform**: Google Vertex AI (Gemini, Veo)
 - **Integration**: n8n Webhook → Supabase Realtime
 
+### 결제 시스템
+
+- **결제 SDK**: @tosspayments/tosspayments-sdk (V2)
+- **결제 방식**: 결제위젯 (카드, 간편결제, 계좌이체 등)
+- **크레딧**: 영상 생성당 80 크레딧 차감
+
 ### Build & Deploy
 
 - **Package Manager**: pnpm
@@ -327,6 +333,198 @@ Data & Storage Layer (Supabase + Clerk)
 
 ---
 
+## Phase 8: 결제 시스템 (구현 완료 ✅)
+
+### 데이터베이스 마이그레이션
+
+- [x] `supabase/migrations/20251127000001_add_user_credits_and_role.sql`
+  - [x] `users` 테이블에 `credit_balance`, `role` 컬럼 추가
+  - [x] 역할 검증 CHECK 제약조건
+
+- [x] `supabase/migrations/20251127000002_create_pricing_tiers.sql`
+  - [x] `pricing_tiers` 테이블 생성
+  - [x] 3개 기본 요금제 데이터 삽입
+    - Single: 100 크레딧, ₩17,900
+    - Business 5: 500 크레딧, ₩75,500 (HOT 배지)
+    - Business 10: 1000 크레딧, ₩153,000
+
+- [x] `supabase/migrations/20251127000003_create_payments.sql`
+  - [x] `payments` 테이블 생성
+  - [x] TossPayments 연동 필드 (order_id, payment_key)
+  - [x] RLS 정책 설정
+
+- [x] `supabase/migrations/20251127000004_create_credit_transactions.sql`
+  - [x] `credit_transactions` 테이블 생성
+  - [x] 거래 유형별 관리 (purchase, usage, refund, admin_grant)
+  - [x] RLS 정책 설정
+
+### 타입 정의
+
+- [x] `types/payment.ts` 결제 관련 타입
+  - [x] PricingTier 타입
+  - [x] Payment 타입
+  - [x] CreditTransaction 타입
+  - [x] PaymentStatus 타입
+  - [x] TossPaymentConfirmRequest/Response 타입
+
+### 상수 정의
+
+- [x] `lib/constants/credits.ts` 크레딧 상수
+  - [x] VIDEO_GENERATION_COST = 80
+  - [x] USER_ROLES 상수
+  - [x] formatCredits 헬퍼 함수
+
+### TossPayments 연동
+
+- [x] `lib/tosspayments/client.ts` 클라이언트 유틸리티
+  - [x] loadTossPayments 함수
+  - [x] generateOrderId 함수
+
+- [x] `lib/tosspayments/server.ts` 서버 유틸리티
+  - [x] confirmPayment 함수 (결제 승인)
+  - [x] cancelPayment 함수 (결제 취소)
+  - [x] Basic Auth 인증 처리
+
+### Server Actions - 결제
+
+- [x] `actions/payment/create-order.ts` 주문 생성
+  - [x] 요금제 조회
+  - [x] payments 레코드 생성 (pending)
+  - [x] orderId 반환
+
+- [x] `actions/payment/confirm-payment.ts` 결제 승인
+  - [x] TossPayments API 호출
+  - [x] payments 상태 업데이트 (completed)
+  - [x] 크레딧 부여
+  - [x] credit_transactions 기록
+
+- [x] `actions/payment/cancel-payment.ts` 결제 취소
+  - [x] TossPayments API 호출
+  - [x] payments 상태 업데이트 (cancelled)
+  - [x] 크레딧 회수
+
+### Server Actions - 크레딧
+
+- [x] `actions/credit/check-balance.ts` 잔액 조회
+  - [x] 사용자 크레딧 잔액 반환
+  - [x] 관리자 여부 확인
+
+- [x] `actions/credit/deduct-credit.ts` 크레딧 차감
+  - [x] 잔액 검증
+  - [x] 크레딧 차감
+  - [x] credit_transactions 기록
+
+- [x] `actions/credit/grant-credit.ts` 크레딧 부여 (관리자)
+  - [x] 관리자 권한 검증
+  - [x] 크레딧 부여
+  - [x] credit_transactions 기록
+
+### Server Actions - 관리자
+
+- [x] `actions/admin/check-admin.ts` 관리자 권한 확인
+- [x] `actions/admin/get-payments.ts` 결제 내역 조회
+- [x] `actions/admin/get-users.ts` 사용자 목록 조회
+
+### 결제 컴포넌트
+
+- [x] `components/payment/pricing-card.tsx` 요금제 카드
+  - [x] 요금제 정보 표시
+  - [x] 할인가/정가 표시
+  - [x] HOT/BEST 배지
+  - [x] 구매 버튼
+
+- [x] `components/payment/pricing-grid.tsx` 요금제 그리드
+  - [x] 요금제 목록 렌더링
+  - [x] 반응형 레이아웃
+
+- [x] `components/payment/payment-widget.tsx` 결제위젯
+  - [x] TossPayments 결제위젯 통합
+  - [x] 결제 요청/승인 처리
+
+- [x] `components/payment/payment-result.tsx` 결제 결과
+  - [x] 성공/실패 메시지 표시
+  - [x] 다음 단계 안내
+
+### 크레딧 컴포넌트
+
+- [x] `components/credit/credit-display.tsx` 크레딧 표시
+  - [x] 현재 잔액 표시
+  - [x] 충전 버튼
+
+- [x] `components/credit/insufficient-credit-modal.tsx` 크레딧 부족 모달
+  - [x] 부족 메시지
+  - [x] 요금제 페이지 이동 버튼
+
+- [x] `components/credit/credit-history.tsx` 크레딧 내역
+  - [x] 거래 내역 목록
+  - [x] 거래 유형별 아이콘
+
+### 크레딧 Hook
+
+- [x] `hooks/use-credit-balance.ts` 크레딧 잔액 훅
+  - [x] 잔액 조회
+  - [x] 관리자 여부 확인
+  - [x] 새로고침 기능
+
+### 결제 페이지
+
+- [x] `app/pricing/page.tsx` 요금제 페이지
+  - [x] PricingGrid 컴포넌트 사용
+  - [x] 요금제 선택 후 결제 진행
+
+- [x] `app/payment/success/page.tsx` 결제 성공 페이지
+  - [x] paymentKey, orderId, amount 파라미터 처리
+  - [x] 결제 승인 API 호출
+  - [x] 성공 메시지 및 크레딧 표시
+
+- [x] `app/payment/fail/page.tsx` 결제 실패 페이지
+  - [x] 에러 코드/메시지 표시
+  - [x] 재시도 버튼
+
+### 관리자 컴포넌트
+
+- [x] `components/admin/grant-credit-dialog.tsx` 크레딧 부여 다이얼로그
+  - [x] 부여할 크레딧 입력
+  - [x] 사유 입력
+  - [x] 부여 확인
+
+### 관리자 페이지
+
+- [x] `app/admin/layout.tsx` 관리자 레이아웃
+  - [x] 관리자 권한 확인
+  - [x] 사이드 네비게이션
+
+- [x] `app/admin/page.tsx` 관리자 대시보드
+  - [x] 총 사용자 수
+  - [x] 총 결제 금액
+  - [x] 총 크레딧 사용량
+
+- [x] `app/admin/payments/page.tsx` 결제 내역 관리
+  - [x] 결제 목록 테이블
+  - [x] 상태별 필터링
+  - [x] 결제 취소 기능
+
+- [x] `app/admin/users/page.tsx` 사용자 관리
+  - [x] 사용자 목록 테이블
+  - [x] 크레딧 잔액 표시
+  - [x] 크레딧 부여 버튼
+
+### 기존 코드 수정
+
+- [x] `actions/trigger-n8n.ts` 크레딧 검증 추가
+  - [x] 영상 생성 전 크레딧 잔액 확인
+  - [x] 관리자는 크레딧 검증 우회
+  - [x] 생성 성공 시 크레딧 차감
+  - [x] insufficientCredits 응답 필드 추가
+
+- [x] `types/upload.ts` 타입 수정
+  - [x] TriggerN8nResult에 insufficientCredits 필드 추가
+
+- [x] `lib/supabase/service-role.ts` alias 추가
+  - [x] createServiceRoleClient alias export
+
+---
+
 ## Phase 5: SNS 공유 (1-2주) - 추후 개발 예정
 
 > **참고:** 이 기능은 추후 개발 예정입니다. Instagram OAuth 인증 부분만 현재 완료되었습니다.
@@ -584,6 +782,14 @@ Data & Storage Layer (Supabase + Clerk)
 - [ ] 프로덕션 배포 성공
 - [ ] 실제 사용자 테스트 완료
 
+### Phase 8 완료 기준 ✅
+
+- [x] TossPayments 결제위젯 연동 완료
+- [x] 크레딧 시스템 구현 완료
+- [x] 관리자 페이지 구현 완료
+- [x] 영상 생성 시 크레딧 차감 연동 완료
+- [x] 빌드 성공
+
 ---
 
 ## 📊 프로젝트 현황
@@ -597,6 +803,12 @@ Data & Storage Layer (Supabase + Clerk)
 - ✅ Phase 3 (진행 상태 표시): 100% 완료
 - ✅ Phase 4 (영상 관리): 100% 완료
 - ✅ UI/UX 개선: 100% 완료 (다크모드, 반응형, 스켈레톤, 접근성)
+- ✅ **Phase 8 (결제 시스템): 100% 완료** 🎉
+  - TossPayments V2 결제위젯 연동
+  - 크레딧 시스템 (80 크레딧/영상)
+  - 3가지 요금제 (Single, Business 5, Business 10)
+  - 관리자 대시보드 및 사용자/결제 관리
+  - 관리자 크레딧 면제 기능
 - ⏳ Phase 5 (SNS 공유): 준비 완료 (Instagram OAuth만 구현됨)
 - ⏳ Phase 6 (n8n 워크플로우): 대기 중 (n8n 워크플로우 준비 필요)
 - ⏳ Phase 7 (테스트 & 배포): 대기 중
@@ -611,7 +823,61 @@ Data & Storage Layer (Supabase + Clerk)
 - ✅ Supabase (PostgreSQL + Storage + Realtime)
 - ✅ Clerk 인증 통합
 - ✅ Turbopack 빌드
+- ✅ **TossPayments V2 결제 시스템**
 - ⏳ n8n 워크플로우 통합 (준비 완료, 테스트 대기)
 - ⏳ Google Vertex AI (n8n 워크플로우 내)
 
-_최종 수정일: 2025-11-06_
+**구현된 주요 파일:**
+
+```
+# 결제 시스템
+├── types/payment.ts                          # 결제 타입 정의
+├── lib/constants/credits.ts                  # 크레딧 상수
+├── lib/tosspayments/
+│   ├── client.ts                             # 클라이언트 유틸리티
+│   └── server.ts                             # 서버 유틸리티
+├── actions/
+│   ├── payment/
+│   │   ├── create-order.ts                   # 주문 생성
+│   │   ├── confirm-payment.ts                # 결제 승인
+│   │   └── cancel-payment.ts                 # 결제 취소
+│   ├── credit/
+│   │   ├── check-balance.ts                  # 잔액 조회
+│   │   ├── deduct-credit.ts                  # 크레딧 차감
+│   │   └── grant-credit.ts                   # 크레딧 부여 (관리자)
+│   └── admin/
+│       ├── check-admin.ts                    # 관리자 확인
+│       ├── get-payments.ts                   # 결제 내역
+│       └── get-users.ts                      # 사용자 목록
+├── components/
+│   ├── payment/
+│   │   ├── pricing-card.tsx                  # 요금제 카드
+│   │   ├── pricing-grid.tsx                  # 요금제 그리드
+│   │   ├── payment-widget.tsx                # 결제위젯
+│   │   └── payment-result.tsx                # 결제 결과
+│   ├── credit/
+│   │   ├── credit-display.tsx                # 크레딧 표시
+│   │   ├── insufficient-credit-modal.tsx     # 크레딧 부족 모달
+│   │   └── credit-history.tsx                # 크레딧 내역
+│   └── admin/
+│       └── grant-credit-dialog.tsx           # 크레딧 부여 다이얼로그
+├── hooks/
+│   └── use-credit-balance.ts                 # 크레딧 잔액 훅
+├── app/
+│   ├── pricing/page.tsx                      # 요금제 페이지
+│   ├── payment/
+│   │   ├── success/page.tsx                  # 결제 성공
+│   │   └── fail/page.tsx                     # 결제 실패
+│   └── admin/
+│       ├── layout.tsx                        # 관리자 레이아웃
+│       ├── page.tsx                          # 관리자 대시보드
+│       ├── payments/page.tsx                 # 결제 관리
+│       └── users/page.tsx                    # 사용자 관리
+└── supabase/migrations/
+    ├── 20251127000001_add_user_credits_and_role.sql
+    ├── 20251127000002_create_pricing_tiers.sql
+    ├── 20251127000003_create_payments.sql
+    └── 20251127000004_create_credit_transactions.sql
+```
+
+_최종 수정일: 2025-11-27_

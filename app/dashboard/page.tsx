@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { fetchUserVideos } from "@/actions/fetch-user-videos";
 import type { FilterParams } from "@/types/dashboard";
 import { DashboardContent } from "@/components/dashboard/dashboard-content";
+import { CreditDisplay } from "@/components/credit/credit-display";
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -86,11 +87,14 @@ export default async function DashboardPage({
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">내 영상</h1>
-        <p className="text-muted-foreground">
-          생성한 홍보영상을 확인하고 관리하세요
-        </p>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">내 영상</h1>
+          <p className="text-muted-foreground">
+            생성한 홍보영상을 확인하고 관리하세요
+          </p>
+        </div>
+        <CreditDisplay className="md:w-80" />
       </div>
 
       <DashboardContent

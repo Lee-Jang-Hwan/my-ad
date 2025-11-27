@@ -12,8 +12,8 @@ interface UseRealtimeVideoOptions {
   onError?: (video: AdVideo) => void;
 }
 
-// Timeout duration: 5 minutes (n8n workflow should complete within this time)
-const GENERATION_TIMEOUT_MS = 5 * 60 * 1000;
+// Timeout duration: 10 minutes (n8n workflow with Veo can take longer)
+const GENERATION_TIMEOUT_MS = 10 * 60 * 1000;
 
 // Polling interval: Check database every 3 seconds as backup
 const POLLING_INTERVAL_MS = 3000;
@@ -310,12 +310,13 @@ export function useRealtimeVideo({
             console.log("📨 [Realtime] UPDATE received:", payload);
 
             // Check for token expiration error
-            if (payload.error) {
-              console.error("❌ [Realtime] Error in payload:", payload.error);
+            if (payload.errors && payload.errors.length > 0) {
+              console.error("❌ [Realtime] Error in payload:", payload.errors);
 
               // Check if it's a JWT token error
-              if (payload.error.message?.includes("InvalidJWTToken") ||
-                  payload.error.message?.includes("Token has expired")) {
+              const errorMessage = payload.errors[0]?.toString() || "";
+              if (errorMessage.includes("InvalidJWTToken") ||
+                  errorMessage.includes("Token has expired")) {
                 console.warn("🔑 [Realtime] JWT token expired, reconnecting...");
                 reconnectRealtime();
                 return;

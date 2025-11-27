@@ -9,8 +9,8 @@ import {
   Upload,
   LayoutDashboard,
   Menu,
-  X,
   LogIn,
+  Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -47,6 +47,12 @@ const menuItems: MenuItem[] = [
     title: "내 영상",
     href: "/dashboard",
     icon: LayoutDashboard,
+    requireAuth: true,
+  },
+  {
+    title: "크레딧 충전",
+    href: "/pricing",
+    icon: Coins,
     requireAuth: true,
   },
 ];

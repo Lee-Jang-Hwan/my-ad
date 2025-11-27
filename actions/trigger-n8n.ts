@@ -2,12 +2,14 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { revalidateUserVideos } from "@/lib/cache";
+import { VIDEO_GENERATION_COST, USER_ROLES } from "@/lib/constants/credits";
 import type { TriggerN8nResult } from "@/types/upload";
 
 export async function triggerN8nWorkflow(
   imageId: string,
-  productInfoId: string
+  productInfoId: string,
 ): Promise<TriggerN8nResult> {
   try {
     // Check authentication
@@ -21,8 +23,35 @@ export async function triggerN8nWorkflow(
       };
     }
 
-    // Create Supabase client
+    // Create Supabase clients
     const supabase = createClerkSupabaseClient();
+    const serviceSupabase = createServiceRoleClient();
+
+    // Check user's credit balance and role
+    const { data: user, error: userError } = await serviceSupabase
+      .from("users")
+      .select("credit_balance, role")
+      .eq("clerk_id", clerkId)
+      .single();
+
+    if (userError || !user) {
+      console.error("User lookup error:", userError);
+      return {
+        success: false,
+        error: "사용자 정보를 찾을 수 없습니다.",
+      };
+    }
+
+    const isAdmin = user.role === USER_ROLES.ADMIN;
+
+    // Check if user has enough credits (admins bypass this check)
+    if (!isAdmin && user.credit_balance < VIDEO_GENERATION_COST) {
+      return {
+        success: false,
+        error: "크레딧이 부족합니다.",
+        insufficientCredits: true,
+      };
+    }
 
     // Create ad_videos record with status "pending" and progress_stage "init"
     const { data: videoData, error: videoError } = await supabase
@@ -80,10 +109,14 @@ export async function triggerN8nWorkflow(
     });
 
     try {
+      const credentials = Buffer.from(
+        `${process.env.N8N_WEBHOOK_USER}:${process.env.N8N_WEBHOOK_PASSWORD}`,
+      ).toString("base64");
       const response = await fetch(workflowData.webhook_url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Basic ${credentials}`,
         },
         body: JSON.stringify({
           ad_video_id: videoData.id,
@@ -121,6 +154,41 @@ export async function triggerN8nWorkflow(
 
       // Note: n8n_execution_id field doesn't exist in schema yet
       // Can be added in future migration if needed for tracking
+
+      // Deduct credits for non-admin users
+      if (!isAdmin) {
+        const newBalance = user.credit_balance - VIDEO_GENERATION_COST;
+
+        // Update user's credit balance
+        const { error: creditUpdateError } = await serviceSupabase
+          .from("users")
+          .update({ credit_balance: newBalance })
+          .eq("clerk_id", clerkId);
+
+        if (creditUpdateError) {
+          console.error("Credit balance update error:", creditUpdateError);
+          // Log the error but don't fail the workflow - video generation has started
+        }
+
+        // Create credit transaction record
+        const { error: transactionError } = await serviceSupabase
+          .from("credit_transactions")
+          .insert({
+            user_id: clerkId,
+            type: "usage",
+            amount: -VIDEO_GENERATION_COST,
+            balance_after: newBalance,
+            ad_video_id: videoData.id,
+            description: "영상 생성",
+          });
+
+        if (transactionError) {
+          console.error("Credit transaction insert error:", transactionError);
+          // Non-critical error - credits were deducted, just logging failed
+        }
+
+        console.log(`Credits deducted: ${VIDEO_GENERATION_COST}, new balance: ${newBalance}`);
+      }
 
       // Revalidate user's video cache since a new video was created
       revalidateUserVideos(clerkId);

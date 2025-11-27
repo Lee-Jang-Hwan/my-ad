@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { ImageDropzone } from "./image-dropzone";
 import { ImagePreview } from "./image-preview";
 import { ProductForm } from "./product-form";
+import { CreditDisplay } from "@/components/credit/credit-display";
 import { uploadImage } from "@/actions/upload-image";
 import { saveProductInfo } from "@/actions/save-product-info";
 import { triggerN8nWorkflow } from "@/actions/trigger-n8n";
@@ -104,13 +105,16 @@ export function UploadForm() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">
-          홍보영상 만들기
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          이미지와 상품명을 입력하면 AI가 자동으로 홍보영상을 생성합니다
-        </p>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            광고영상 만들기
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            영상 1개 생성에 80 크레딧이 필요합니다.
+          </p>
+        </div>
+        <CreditDisplay className="md:w-80" />
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

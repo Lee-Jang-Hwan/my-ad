@@ -76,6 +76,11 @@
 
 - Next.js built-in (Turbopack)
 
+### 결제 시스템
+
+- TossPayments V2 SDK (@tosspayments/tosspayments-sdk)
+- 결제위젯 방식 (카드, 간편결제, 계좌이체 등 지원)
+
 ### 외부 API (Phase 5)
 
 - Instagram Graph API
@@ -147,12 +152,14 @@
 
 ## 🗄️ 데이터베이스 스키마
 
-### users 테이블 (기존)
+### users 테이블 (확장됨)
 
 ```sql
 id UUID PRIMARY KEY
 clerk_id TEXT UNIQUE NOT NULL
 name TEXT
+credit_balance INTEGER DEFAULT 0  -- 크레딧 잔액
+role TEXT DEFAULT 'user'          -- 사용자 역할 (user, admin)
 created_at TIMESTAMP DEFAULT NOW()
 ```
 
@@ -207,6 +214,56 @@ name TEXT NOT NULL -- 워크플로우 이름
 description TEXT
 webhook_url TEXT NOT NULL
 is_active BOOLEAN DEFAULT true
+created_at TIMESTAMP DEFAULT NOW()
+```
+
+### pricing_tiers 테이블 (결제 요금제)
+
+```sql
+id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+name TEXT NOT NULL          -- 요금제 이름
+description TEXT
+credits INTEGER NOT NULL    -- 제공되는 크레딧 수
+original_price INTEGER NOT NULL  -- 정가 (원)
+discount_price INTEGER NOT NULL  -- 할인가 (원)
+badge TEXT                  -- 배지 (HOT, BEST 등)
+is_active BOOLEAN DEFAULT true
+display_order INTEGER DEFAULT 0
+created_at TIMESTAMP DEFAULT NOW()
+updated_at TIMESTAMP DEFAULT NOW()
+```
+
+**기본 요금제:**
+- Single: 100 크레딧, ₩19,900 → ₩17,900
+- Business 5: 500 크레딧, ₩88,000 → ₩75,500 (HOT 배지)
+- Business 10: 1000 크레딧, ₩179,000 → ₩153,000
+
+### payments 테이블 (결제 기록)
+
+```sql
+id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+user_id TEXT NOT NULL REFERENCES users(clerk_id)
+pricing_tier_id UUID REFERENCES pricing_tiers(id)
+order_id TEXT UNIQUE NOT NULL     -- TossPayments orderId
+payment_key TEXT UNIQUE           -- TossPayments paymentKey
+amount INTEGER NOT NULL           -- 결제 금액
+credits_granted INTEGER NOT NULL  -- 부여된 크레딧
+status TEXT DEFAULT 'pending'     -- pending, completed, failed, cancelled
+method TEXT                       -- 결제 수단
+approved_at TIMESTAMP             -- 결제 승인 시간
+created_at TIMESTAMP DEFAULT NOW()
+```
+
+### credit_transactions 테이블 (크레딧 내역)
+
+```sql
+id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+user_id TEXT NOT NULL REFERENCES users(clerk_id)
+amount INTEGER NOT NULL           -- 변동량 (+/-)
+balance_after INTEGER NOT NULL    -- 변동 후 잔액
+transaction_type TEXT NOT NULL    -- purchase, usage, refund, admin_grant
+reference_id TEXT                 -- 관련 결제/영상 ID
+description TEXT
 created_at TIMESTAMP DEFAULT NOW()
 ```
 
@@ -400,6 +457,36 @@ Instagram/Facebook/YouTube API 호출
 - [ ] 성능 최적화
 - [ ] Vercel 배포
 
+### Phase 8: 결제 시스템 (구현 완료 ✅)
+
+- [x] 데이터베이스 스키마
+  - [x] `users` 테이블 확장 (credit_balance, role)
+  - [x] `pricing_tiers` 테이블 생성
+  - [x] `payments` 테이블 생성
+  - [x] `credit_transactions` 테이블 생성
+- [x] TossPayments V2 연동
+  - [x] 결제위젯 컴포넌트
+  - [x] 결제 승인 API 연동
+  - [x] 결제 취소 기능
+- [x] 크레딧 시스템
+  - [x] 영상 생성 시 크레딧 차감 (80 크레딧/회)
+  - [x] 크레딧 부족 시 결제 유도 모달
+  - [x] 크레딧 잔액 표시
+  - [x] 크레딧 내역 조회
+- [x] 요금제 페이지 (`/pricing`)
+  - [x] 3가지 요금제 카드 표시
+  - [x] 할인가/정가 표시
+  - [x] HOT 배지 표시
+- [x] 결제 결과 페이지
+  - [x] `/payment/success` (결제 성공)
+  - [x] `/payment/fail` (결제 실패)
+- [x] 관리자 기능
+  - [x] 관리자 대시보드 (`/admin`)
+  - [x] 결제 내역 관리 (`/admin/payments`)
+  - [x] 사용자 관리 (`/admin/users`)
+  - [x] 사용자에게 크레딧 부여 기능
+  - [x] 관리자는 크레딧 없이 영상 생성 가능
+
 **총 예상 개발 기간: 6-7주**
 
 ---
@@ -487,6 +574,43 @@ Instagram/Facebook/YouTube API 호출
   - 링크 복사
   - SNS 공유 (Instagram, Facebook, YouTube)
 
+### 6. 요금제 페이지 (`/pricing`)
+
+- 요금제 카드 그리드
+  - 요금제 이름
+  - 크레딧 수량
+  - 정가 (취소선)
+  - 할인가
+  - HOT/BEST 배지
+  - 구매하기 버튼
+- 구매 시 결제위젯 모달
+
+### 7. 결제 결과 페이지
+
+- `/payment/success`
+  - 결제 완료 메시지
+  - 부여된 크레딧 표시
+  - 대시보드 이동 버튼
+- `/payment/fail`
+  - 결제 실패 메시지
+  - 에러 코드/메시지 표시
+  - 재시도 버튼
+
+### 8. 관리자 페이지 (`/admin`)
+
+- 관리자 대시보드 (`/admin`)
+  - 총 사용자 수
+  - 총 결제 금액
+  - 총 크레딧 사용량
+- 결제 내역 (`/admin/payments`)
+  - 결제 목록 테이블
+  - 상태별 필터링
+  - 결제 취소 기능
+- 사용자 관리 (`/admin/users`)
+  - 사용자 목록 테이블
+  - 크레딧 잔액 표시
+  - 크레딧 부여 다이얼로그
+
 ---
 
 ## 🚨 제약사항 및 주의사항
@@ -509,12 +633,14 @@ Instagram/Facebook/YouTube API 호출
 
 ### MVP 제외 기능
 
-- 어드민 대시보드 (추후)
-- 결제 시스템 (추후)
+- ~~어드민 대시보드 (추후)~~ → ✅ 구현 완료
+- ~~결제 시스템 (추후)~~ → ✅ 구현 완료
 - 워크플로우 선택 UI (추후)
 - 영상 편집 기능 (추후)
 - 멀티플 영상 일괄 생성 (추후)
 - 영상 분석 (조회수, 공유 수) (추후)
+- 정기 구독 결제 (추후)
+- 결제 환불 자동화 (추후)
 
 ---
 
@@ -534,7 +660,12 @@ NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_STORAGE_BUCKET=uploads
+NEXT_PUBLIC_STORAGE_BUCKET_IMAGES=uploads
+NEXT_PUBLIC_STORAGE_BUCKET_VIDEOS=videos
+
+# TossPayments (결제)
+NEXT_PUBLIC_TOSS_CLIENT_KEY=    # test_gck_xxx (테스트) / live_gck_xxx (라이브)
+TOSS_SECRET_KEY=                 # test_gsk_xxx (테스트) / live_gsk_xxx (라이브)
 
 # n8n
 N8N_WEBHOOK_URL=http://localhost:5678/webhook/6632eae6-fcdf-4f22-9f71-298989a39734
@@ -607,11 +738,18 @@ n8n start
 ## 🎯 다음 단계
 
 1. ✅ PRD 검토 및 승인
-2. ⏭️ Phase 1: 데이터베이스 마이그레이션 파일 생성
-3. ⏭️ Phase 2: 업로드 페이지 UI 개발 시작
+2. ✅ Phase 1: 데이터베이스 마이그레이션 파일 생성
+3. ✅ Phase 2: 업로드 페이지 UI 개발
+4. ✅ Phase 3: 진행 상태 표시
+5. ✅ Phase 4: 영상 관리
+6. ✅ Phase 8: 결제 시스템 구현
+7. ⏭️ Phase 5: SNS 공유 연동
+8. ⏭️ Phase 6: n8n 워크플로우 수정
+9. ⏭️ Phase 7: 테스트 & 배포
 
 ---
 
 _작성일: 2025-01-06_
-_버전: 1.0.0_
+_버전: 2.0.0 (결제 시스템 추가)_
+_최종 수정일: 2025-11-27_
 _작성자: Claude Code_

@@ -33,6 +33,7 @@ export interface TriggerN8nResult {
   adVideoId?: string;
   executionId?: string;
   error?: string;
+  insufficientCredits?: boolean;
 }
 
 export interface UploadResponse {

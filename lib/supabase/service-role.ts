@@ -35,3 +35,6 @@ export function getServiceRoleClient() {
     },
   });
 }
+
+// Alias for backward compatibility
+export const createServiceRoleClient = getServiceRoleClient;
