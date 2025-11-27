@@ -35,8 +35,6 @@ export function PricingCard({
     tier.sale_price,
   );
 
-  const pricePerCredit = Math.round(tier.sale_price / tier.credits);
-
   return (
     <Card
       className={cn(
@@ -87,11 +85,6 @@ export function PricingCard({
             </p>
           </div>
 
-          <div className="pt-3 border-t">
-            <p className="text-sm text-muted-foreground">
-              크레딧당 <span className="font-semibold text-foreground">{pricePerCredit}원</span>
-            </p>
-          </div>
         </div>
       </CardContent>
 
