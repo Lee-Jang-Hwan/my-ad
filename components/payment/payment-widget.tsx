@@ -4,9 +4,10 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { loadTossPayments, type TossPaymentsWidgets } from "@tosspayments/tosspayments-sdk";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, AlertCircle, ShoppingCart, Coins, CreditCard, Shield, ChevronLeft } from "lucide-react";
 import { formatPrice, formatCredits } from "@/lib/constants/credits";
 import type { PricingTier } from "@/types/payment";
 
@@ -36,7 +37,6 @@ export function PaymentWidget({
 
   useEffect(() => {
     async function initializeWidgets() {
-      // 이미 초기화되었거나 DOM 요소가 없으면 스킵
       if (isInitialized.current) return;
       if (!paymentMethodRef.current || !agreementRef.current) return;
 
@@ -51,19 +51,16 @@ export function PaymentWidget({
         const tossPayments = await loadTossPayments(clientKey);
         const widgetInstance = tossPayments.widgets({ customerKey });
 
-        // Set amount
         await widgetInstance.setAmount({
           value: amount,
           currency: "KRW",
         });
 
-        // Render payment methods
         await widgetInstance.renderPaymentMethods({
           selector: "#payment-method",
           variantKey: "DEFAULT",
         });
 
-        // Render agreement
         await widgetInstance.renderAgreement({
           selector: "#agreement",
           variantKey: "AGREEMENT",
@@ -78,7 +75,6 @@ export function PaymentWidget({
       }
     }
 
-    // DOM이 준비된 후 초기화 실행
     const timer = setTimeout(() => {
       initializeWidgets();
     }, 100);
@@ -100,7 +96,6 @@ export function PaymentWidget({
         failUrl: `${window.location.origin}/payment/fail`,
       });
     } catch (err) {
-      // User cancelled or error occurred
       console.error("Payment request error:", err);
       if (err instanceof Error && err.message.includes("USER_CANCEL")) {
         setError("결제가 취소되었습니다.");
@@ -116,82 +111,123 @@ export function PaymentWidget({
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>결제하기</CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
-        {/* Order Summary */}
-        <div className="rounded-lg border p-4 space-y-2">
-          <h3 className="font-semibold">주문 정보</h3>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">상품</span>
-            <span>{pricingTier.display_name}</span>
+    <div className="w-full max-w-2xl mx-auto space-y-6">
+      {/* Order Summary Card */}
+      <Card className="border-2">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-primary/10 p-2">
+              <ShoppingCart className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">주문 정보</h2>
+              <p className="text-sm text-muted-foreground">결제 전 주문 내용을 확인해주세요</p>
+            </div>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">크레딧</span>
-            <span>{formatCredits(pricingTier.credits)} 크레딧</span>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          <div className="rounded-lg bg-muted/50 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Coins className="h-4 w-4 text-yellow-500" />
+                <span className="text-muted-foreground">상품명</span>
+              </div>
+              <span className="font-medium">{pricingTier.display_name}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">충전 크레딧</span>
+              <span className="font-medium text-primary">{formatCredits(pricingTier.credits)} 크레딧</span>
+            </div>
           </div>
-          <div className="flex justify-between font-semibold pt-2 border-t">
-            <span>결제 금액</span>
-            <span>{formatPrice(amount)}</span>
+
+          <Separator />
+
+          <div className="flex items-center justify-between py-2">
+            <span className="text-lg font-semibold">총 결제 금액</span>
+            <span className="text-2xl font-bold text-primary">{formatPrice(amount)}</span>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Loading Indicator */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            <span className="ml-2 text-muted-foreground">결제 위젯 로딩 중...</span>
+      {/* Payment Method Card */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-blue-500/10 p-2">
+              <CreditCard className="h-5 w-5 text-blue-500" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">결제 수단</h2>
+              <p className="text-sm text-muted-foreground">원하시는 결제 방법을 선택해주세요</p>
+            </div>
           </div>
-        )}
+        </CardHeader>
 
-        {/* TossPayments Widget Containers - 항상 렌더링 */}
-        <div
-          id="payment-method"
-          ref={paymentMethodRef}
-          className={`min-h-[200px] ${isLoading ? 'hidden' : ''}`}
-        />
-        <div
-          id="agreement"
-          ref={agreementRef}
-          className={`min-h-[50px] ${isLoading ? 'hidden' : ''}`}
-        />
-      </CardContent>
-
-      <CardFooter className="flex gap-4">
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={handleCancel}
-          disabled={isProcessing}
-        >
-          취소
-        </Button>
-        <Button
-          className="flex-1"
-          onClick={handlePayment}
-          disabled={isProcessing || !widgets || isLoading}
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              처리 중...
-            </>
-          ) : (
-            `${formatPrice(amount)} 결제하기`
+        <CardContent className="space-y-4">
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
-        </Button>
-      </CardFooter>
-    </Card>
+
+          {/* Loading Indicator */}
+          {isLoading && (
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-muted-foreground">결제 위젯을 불러오는 중...</p>
+            </div>
+          )}
+
+          {/* TossPayments Widget Containers */}
+          <div
+            id="payment-method"
+            ref={paymentMethodRef}
+            className={`min-h-[200px] ${isLoading ? 'hidden' : ''}`}
+          />
+          <div
+            id="agreement"
+            ref={agreementRef}
+            className={`min-h-[50px] ${isLoading ? 'hidden' : ''}`}
+          />
+        </CardContent>
+
+        <CardFooter className="flex flex-col gap-4 pt-4">
+          {/* Security Notice */}
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground w-full">
+            <Shield className="h-4 w-4" />
+            <span>토스페이먼츠 보안 결제</span>
+          </div>
+
+          <div className="flex gap-3 w-full">
+            <Button
+              variant="outline"
+              className="flex-1 h-12"
+              onClick={handleCancel}
+              disabled={isProcessing}
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              취소
+            </Button>
+            <Button
+              className="flex-[2] h-12 text-base font-semibold"
+              onClick={handlePayment}
+              disabled={isProcessing || !widgets || isLoading}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  결제 처리 중...
+                </>
+              ) : (
+                `${formatPrice(amount)} 결제하기`
+              )}
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }

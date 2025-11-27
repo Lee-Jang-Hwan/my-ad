@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PricingGrid } from "@/components/payment/pricing-grid";
 import { PaymentWidget } from "@/components/payment/payment-widget";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CreditCard } from "lucide-react";
 import { createOrder } from "@/actions/payment/create-order";
 import { generateCustomerKey } from "@/lib/tosspayments/client";
 import type { PricingTier } from "@/types/payment";
@@ -17,7 +16,6 @@ interface PricingPageClientProps {
 }
 
 export function PricingPageClient({ tiers, userId }: PricingPageClientProps) {
-  const router = useRouter();
   const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,12 +55,23 @@ export function PricingPageClient({ tiers, userId }: PricingPageClientProps) {
       <div className="max-w-2xl mx-auto">
         <Button
           variant="ghost"
-          className="mb-6"
+          className="mb-6 hover:bg-muted"
           onClick={handleBack}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           상품 선택으로 돌아가기
         </Button>
+
+        {/* Payment Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-500/10 px-4 py-2 mb-3">
+            <CreditCard className="h-4 w-4 text-blue-500" />
+            <span className="text-sm font-medium text-blue-500">결제하기</span>
+          </div>
+          <h2 className="text-2xl font-bold">
+            {selectedTier.display_name} 결제
+          </h2>
+        </div>
 
         <PaymentWidget
           orderId={orderId}
@@ -77,13 +86,12 @@ export function PricingPageClient({ tiers, userId }: PricingPageClientProps) {
 
   // Show pricing grid
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       <PricingGrid
         tiers={tiers}
         onSelect={handleSelectTier}
         isLoading={isLoading}
       />
-
     </div>
   );
 }
