@@ -82,13 +82,13 @@ export function PaymentResult({
 
         <CardFooter className="flex flex-col gap-3 pt-2">
           <Button asChild className="w-full h-12 text-base font-semibold" size="lg">
-            <Link href="/">
+            <Link href="/upload">
               <Video className="mr-2 h-5 w-5" />
               영상 생성하러 가기
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-full h-11">
-            <Link href="/my-videos">내 영상 보기</Link>
+            <Link href="/dashboard">내 영상 보기</Link>
           </Button>
         </CardFooter>
       </Card>
