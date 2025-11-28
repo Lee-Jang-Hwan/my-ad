@@ -4,7 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchPublicVideos, type PublicVideo } from "@/actions/fetch-public-videos";
+import {
+  fetchPublicVideos,
+  type PublicVideo,
+} from "@/actions/fetch-public-videos";
 
 interface SampleVideo {
   id: string;
@@ -25,12 +28,14 @@ export function SampleVideosSection() {
 
         if (result.success && result.videos.length > 0) {
           // Convert public videos to SampleVideo format
-          const publicVideos: SampleVideo[] = result.videos.map((video: PublicVideo) => ({
-            id: video.id,
-            title: video.product_name || "홍보영상",
-            duration: "0:15",
-            videoUrl: video.video_url,
-          }));
+          const publicVideos: SampleVideo[] = result.videos.map(
+            (video: PublicVideo) => ({
+              id: video.id,
+              title: video.product_name || "홍보영상",
+              duration: "0:12",
+              videoUrl: video.video_url,
+            }),
+          );
 
           setDisplayVideos(publicVideos);
         }
@@ -47,7 +52,10 @@ export function SampleVideosSection() {
   // Don't render anything if loading or no videos
   if (isLoading) {
     return (
-      <div id="sample-videos-section" className="max-w-7xl mx-auto px-4 md:px-8">
+      <div
+        id="sample-videos-section"
+        className="max-w-7xl mx-auto px-4 md:px-8"
+      >
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { USER_ROLES } from "@/lib/constants/credits";
 import Link from "next/link";
-import { LayoutDashboard, CreditCard, Users, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, CreditCard, Users, ArrowLeft, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const adminNavItems = [
@@ -21,6 +21,11 @@ const adminNavItems = [
     href: "/admin/users",
     label: "사용자 관리",
     icon: Users,
+  },
+  {
+    href: "/admin/analytics",
+    label: "매출 분석",
+    icon: TrendingUp,
   },
 ];
 
