@@ -11,8 +11,6 @@ export interface PublicVideo {
 
 export async function fetchPublicVideos(limit: number = 6) {
   try {
-    console.log("🔍 [fetchPublicVideos] Starting fetch...");
-
     // Join with product_info to get product_name
     const { data, error } = await supabase
       .from("ad_videos")
@@ -30,13 +28,8 @@ export async function fetchPublicVideos(limit: number = 6) {
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    console.log("🔍 [fetchPublicVideos] Query result:", {
-      dataLength: data?.length,
-      error: error?.message
-    });
-
     if (error) {
-      console.error("❌ [fetchPublicVideos] Error:", error);
+      console.error("Error fetching public videos:", error);
       return { success: false, error: "공개 영상 조회에 실패했습니다.", videos: [] };
     }
 
@@ -48,11 +41,9 @@ export async function fetchPublicVideos(limit: number = 6) {
       product_name: item.product_info?.product_name || undefined,
     }));
 
-    console.log("✅ [fetchPublicVideos] Returning", videos.length, "videos");
-
     return { success: true, videos };
   } catch (error) {
-    console.error("❌ [fetchPublicVideos] Unexpected error:", error);
+    console.error("Unexpected error fetching public videos:", error);
     return { success: false, error: "예상치 못한 오류가 발생했습니다.", videos: [] };
   }
 }
