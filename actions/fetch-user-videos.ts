@@ -135,7 +135,7 @@ export async function fetchUserVideos(
           created_at: item.created_at,
           completed_at: item.completed_at,
           product_name: productName,
-          is_public: item.is_public || false,
+          is_featured: item.is_featured || false,
         };
       })
     );

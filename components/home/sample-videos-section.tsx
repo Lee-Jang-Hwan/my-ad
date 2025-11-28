@@ -59,7 +59,9 @@ export function SampleVideosSection() {
   useEffect(() => {
     // Fetch public videos on mount
     async function loadPublicVideos() {
+      console.log("🎬 [SampleVideosSection] Loading public videos...");
       const result = await fetchPublicVideos(6);
+      console.log("🎬 [SampleVideosSection] Fetch result:", result);
 
       if (result.success && result.videos.length > 0) {
         // Convert public videos to SampleVideo format
@@ -70,7 +72,10 @@ export function SampleVideosSection() {
           videoUrl: video.video_url,
         }));
 
+        console.log("🎬 [SampleVideosSection] Setting public videos:", publicVideos);
         setDisplayVideos(publicVideos);
+      } else {
+        console.log("🎬 [SampleVideosSection] No public videos found, keeping defaults");
       }
     }
 

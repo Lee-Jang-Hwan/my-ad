@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, Clock, AlertCircle, Trash2, Eye, EyeOff } from "lucide-react";
+import { Calendar, Clock, AlertCircle, Trash2, Star } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import type { VideoWithProductName } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
 
 interface VideoCardProps {
-  video: VideoWithProductName & { is_public?: boolean };
+  video: VideoWithProductName & { is_featured?: boolean };
   onDelete?: () => void;
   onPublicToggle?: () => void;
 }
@@ -39,7 +39,7 @@ export function VideoCard({ video, onDelete, onPublicToggle }: VideoCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
-  const [isPublic, setIsPublic] = useState(video.is_public || false);
+  const [isPublic, setIsPublic] = useState(video.is_featured || false);
 
   // Determine link destination based on status
   const linkHref =
@@ -204,14 +204,19 @@ export function VideoCard({ video, onDelete, onPublicToggle }: VideoCardProps) {
             disabled={isTogglingPublic}
             onClick={handleTogglePublic}
             className={cn(
-              "transition-colors",
+              "transition-all duration-300",
               isPublic
-                ? "text-green-600 hover:text-green-700 hover:bg-green-50"
+                ? "text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-500/10"
                 : "text-muted-foreground hover:text-foreground"
             )}
             title={isPublic ? "홈 화면에서 제거" : "홈 화면에 게시"}
           >
-            {isPublic ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            <Star
+              className={cn(
+                "w-4 h-4 transition-all duration-300",
+                isPublic && "fill-yellow-500 drop-shadow-[0_0_6px_rgba(234,179,8,0.8)]"
+              )}
+            />
           </Button>
         )}
 

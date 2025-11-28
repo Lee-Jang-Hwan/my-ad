@@ -105,7 +105,7 @@ export async function fetchVideoDetail(
       error_message: videoData.error_message,
       created_at: videoData.created_at,
       completed_at: videoData.completed_at,
-      is_public: videoData.is_public,
+      is_featured: videoData.is_featured,
       product_name: productName,
     };
 

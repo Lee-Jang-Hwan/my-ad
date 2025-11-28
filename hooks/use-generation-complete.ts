@@ -22,6 +22,8 @@ export function useGenerationComplete({
 }: UseGenerationCompleteOptions): void {
   const router = useRouter();
   const hasRedirectedRef = useRef(false);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const targetVideoIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     console.log("🎬 [GenerationComplete] Effect triggered:", {
@@ -69,22 +71,22 @@ export function useGenerationComplete({
         console.warn("⚠️ [GenerationComplete] Still redirecting - video page will handle missing URL");
       }
 
-      hasRedirectedRef.current = true;
+      // Store the video ID for redirect
+      targetVideoIdRef.current = video.id;
 
-      // Show completion notification (could use toast here)
-      console.log(`🚀 [GenerationComplete] Redirecting to /video/${video.id} in ${COMPLETION_REDIRECT_DELAY}ms...`);
+      // Only set timeout if not already set
+      if (!redirectTimeoutRef.current) {
+        console.log(`🚀 [GenerationComplete] Scheduling redirect to /video/${video.id} in ${COMPLETION_REDIRECT_DELAY}ms...`);
 
-      // Redirect after delay
-      const timeoutId = setTimeout(() => {
-        console.log(`🔄 [GenerationComplete] Executing redirect to /video/${video.id}`);
-        router.push(`/video/${video.id}`);
-      }, COMPLETION_REDIRECT_DELAY);
-
-      // Cleanup timeout on unmount
-      return () => {
-        console.log("🧹 [GenerationComplete] Cleaning up timeout");
-        clearTimeout(timeoutId);
-      };
+        redirectTimeoutRef.current = setTimeout(() => {
+          const targetId = targetVideoIdRef.current;
+          if (targetId && !hasRedirectedRef.current) {
+            hasRedirectedRef.current = true;
+            console.log(`🔄 [GenerationComplete] Executing redirect to /video/${targetId}`);
+            router.push(`/video/${targetId}`);
+          }
+        }, COMPLETION_REDIRECT_DELAY);
+      }
     } else {
       // Only log occasionally to avoid spam
       if (Math.random() < 0.1) { // 10% chance to log
@@ -97,4 +99,15 @@ export function useGenerationComplete({
       }
     }
   }, [isCompleted, video, router, enabled]);
+
+  // Cleanup timeout only on unmount
+  useEffect(() => {
+    return () => {
+      console.log("🧹 [GenerationComplete] Component unmounting, cleaning up timeout");
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+        redirectTimeoutRef.current = null;
+      }
+    };
+  }, []);
 }

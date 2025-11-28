@@ -30,10 +30,10 @@ export async function toggleVideoPublic(videoId: string, isPublic: boolean) {
       return { success: false, error: "이 영상을 수정할 권한이 없습니다." };
     }
 
-    // Update the video
+    // Update the video (using is_featured column in database)
     const { data, error } = await supabase
       .from("ad_videos")
-      .update({ is_public: isPublic })
+      .update({ is_featured: isPublic })
       .eq("id", videoId)
       .select()
       .single();

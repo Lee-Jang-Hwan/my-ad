@@ -84,7 +84,7 @@ export async function fetchGenerationStatus(
       error_message: data.error_message,
       created_at: data.created_at,
       completed_at: data.completed_at,
-      is_public: data.is_public,
+      is_featured: data.is_featured,
       product_name: data.product_info?.product_name || null,
     };
 
