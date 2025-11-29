@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Black_And_White_Picture } from "next/font/google";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +72,9 @@ export function MobileSidebar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-64 p-0">
+          <VisuallyHidden>
+            <SheetTitle>메뉴</SheetTitle>
+          </VisuallyHidden>
           <div className="flex h-full flex-col">
             {/* Logo */}
             <div className="flex h-16 items-center justify-center border-b px-6">
