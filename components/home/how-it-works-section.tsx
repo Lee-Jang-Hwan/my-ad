@@ -20,7 +20,7 @@ const steps: Step[] = [
     number: 2,
     icon: MousePointerClick,
     title: "광고문구 선택",
-    description: "AI가 생성한 6개의 광고문구 중 마음에 드는 하나를 선택하세요."
+    description: "AI가 생성한 5개의 광고문구 중 선택하거나 직접 입력하세요."
   },
   {
     number: 3,

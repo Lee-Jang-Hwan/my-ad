@@ -16,10 +16,13 @@ const N8N_ADVIDEO_WEBHOOK_URL =
  * - 선택된 광고문구 저장 (ad_copies.is_selected, ad_videos.selected_ad_copy)
  * - 크레딧 차감 (이 시점에 차감)
  * - advideo webhook 호출 (selected_ad_copy 포함)
+ *
+ * @param selectedCopyId - 선택된 광고문구 ID (직접 입력 시 null)
+ * @param selectedCopyText - 선택된 광고문구 텍스트 (직접 입력 시 사용자가 입력한 텍스트)
  */
 export async function selectAdCopyAndGenerate(
   adVideoId: string,
-  selectedCopyId: string,
+  selectedCopyId: string | null,
   selectedCopyText: string
 ): Promise<SelectAdCopyResult> {
   try {
@@ -91,18 +94,20 @@ export async function selectAdCopyAndGenerate(
       };
     }
 
-    // Update selected ad_copy
-    const { error: updateCopyError } = await supabase
-      .from("ad_copies")
-      .update({ is_selected: true })
-      .eq("id", selectedCopyId);
+    // Update selected ad_copy (직접 입력이 아닌 경우에만)
+    if (selectedCopyId) {
+      const { error: updateCopyError } = await supabase
+        .from("ad_copies")
+        .update({ is_selected: true })
+        .eq("id", selectedCopyId);
 
-    if (updateCopyError) {
-      console.error("ad_copy update error:", updateCopyError);
-      return {
-        success: false,
-        error: "광고문구 선택에 실패했습니다.",
-      };
+      if (updateCopyError) {
+        console.error("ad_copy update error:", updateCopyError);
+        return {
+          success: false,
+          error: "광고문구 선택에 실패했습니다.",
+        };
+      }
     }
 
     // Update ad_videos with selected_ad_copy and change progress_stage
