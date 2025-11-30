@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, Sparkles, Download } from "lucide-react";
+import { Upload, MousePointerClick, Sparkles, Download } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface Step {
@@ -18,12 +18,18 @@ const steps: Step[] = [
   },
   {
     number: 2,
-    icon: Sparkles,
-    title: "AI가 자동으로 영상 생성",
-    description: "광고 문구, 이미지 정제, 영상, TTS, 자막을 AI가 자동으로 생성합니다."
+    icon: MousePointerClick,
+    title: "광고문구 선택",
+    description: "AI가 생성한 6개의 광고문구 중 마음에 드는 하나를 선택하세요."
   },
   {
     number: 3,
+    icon: Sparkles,
+    title: "AI가 자동으로 영상 생성",
+    description: "이미지 정제, 영상, TTS, 자막을 AI가 자동으로 생성합니다."
+  },
+  {
+    number: 4,
     icon: Download,
     title: "다운로드 & SNS 공유",
     description: "완성된 영상을 다운로드하거나 SNS에 바로 공유하세요."
@@ -37,7 +43,7 @@ export function HowItWorksSection() {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            간단한 3단계로 시작하세요
+            간단한 4단계로 시작하세요
           </h2>
           <p className="text-lg text-muted-foreground">
             복잡한 영상 편집 경험이 필요 없습니다
@@ -45,7 +51,7 @@ export function HowItWorksSection() {
         </div>
 
         {/* Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -71,9 +77,9 @@ export function HowItWorksSection() {
                   </CardContent>
                 </Card>
 
-                {/* Connector Arrow (hidden on mobile and after last item) */}
+                {/* Connector Arrow (hidden on mobile/tablet and after last item) */}
                 {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-border z-10">
+                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-border z-10">
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-r-2 border-t-2 border-border rotate-45" />
                   </div>
                 )}

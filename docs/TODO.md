@@ -525,6 +525,95 @@ Data & Storage Layer (Supabase + Clerk)
 
 ---
 
+## Phase 9: 광고문구 선택 기능 (진행 중) 🚧
+
+> **개요:** 영상 생성 전 사용자가 AI 생성 광고문구 5개 중 1개를 선택하는 기능 추가
+
+### n8n 워크플로우
+
+- **sapp-studio-adcopy**: `https://n8n.sappstudio.kr/webhook/84e18e95-00b9-4963-9a6f-c14225a84d15`
+  - 광고문구 5개 생성 (Gemini 2.5 Pro, B급 키치 마케팅 스타일)
+- **sapp-studio-advideo**: `https://n8n.sappstudio.kr/webhook/70980457-f61e-42f1-84c3-5245f1438435`
+  - selected_ad_copy 파라미터로 선택된 광고문구 전달
+
+### 데이터베이스 마이그레이션
+
+- [ ] `supabase/migrations/20251129000001_create_ad_copies.sql`
+  - [ ] ad_copies 테이블 생성 (광고문구 5개 저장)
+  - [ ] 인덱스 및 RLS 정책
+
+- [ ] `supabase/migrations/20251129000002_update_ad_videos_for_ad_copy.sql`
+  - [ ] ad_videos.progress_stage에 'ad_copy_selection' 추가
+  - [ ] ad_videos.selected_ad_copy 칼럼 추가
+
+### 타입 정의
+
+- [ ] `types/ad-copy.ts` 광고문구 관련 타입
+  - [ ] AdCopy 타입
+  - [ ] AdCopyResponse 타입 (webhook 응답)
+  - [ ] GenerateAdCopiesResult 타입
+  - [ ] SelectAdCopyResult 타입
+
+### 상수 수정
+
+- [ ] `constants/generation.ts` 진행 단계 업데이트
+  - [ ] STAGE_ORDER에 'ad_copy_selection' 추가
+  - [ ] STAGE_LABELS, STAGE_DESCRIPTIONS 업데이트
+  - [ ] 6단계 진행 표시기로 변경
+
+- [ ] `types/generation.ts` GenerationStage 업데이트
+
+### Server Actions
+
+- [ ] `actions/generate-ad-copies.ts` 광고문구 생성
+  - [ ] adcopy webhook 호출
+  - [ ] ad_copies 테이블에 5개 저장
+  - [ ] ad_videos.progress_stage → 'ad_copy_selection'
+
+- [ ] `actions/select-ad-copy.ts` 광고문구 선택 & 영상생성 진행
+  - [ ] 선택된 광고문구 저장
+  - [ ] 크레딧 차감 (이 시점에 차감)
+  - [ ] advideo webhook 호출 (selected_ad_copy 포함)
+
+- [ ] `actions/fetch-ad-copies.ts` 광고문구 조회
+  - [ ] ad_video_id로 5개 광고문구 조회
+
+- [ ] `actions/trigger-n8n.ts` 수정
+  - [ ] selected_ad_copy 파라미터 추가
+
+### UI 컴포넌트
+
+- [ ] `components/upload/ad-copy-card.tsx` 광고문구 카드
+  - [ ] 카드 번호 (1~5)
+  - [ ] 광고문구 텍스트
+  - [ ] 선택 버튼 및 하이라이트
+
+- [ ] `components/upload/ad-copy-selection.tsx` 광고문구 선택 메인
+  - [ ] 5개 카드 그리드
+  - [ ] "다시 생성" 버튼
+  - [ ] "선택 완료 & 진행" 버튼
+  - [ ] 상품 정보 요약 표시
+
+- [ ] `components/upload/ad-copy-skeleton.tsx` 로딩 스켈레톤
+
+- [ ] `components/upload/upload-form.tsx` 수정
+  - [ ] 4단계 워크플로우로 변경
+  - [ ] Step 3: 광고문구 생성 & 선택
+
+### 진행 상태 UI 수정
+
+- [ ] `components/generation/step-indicator.tsx` 6단계로 수정
+- [ ] `lib/generation-utils.ts` 진행률 계산 로직 수정
+
+### 환경변수
+
+```bash
+N8N_ADCOPY_WEBHOOK_URL=https://n8n.sappstudio.kr/webhook/84e18e95-00b9-4963-9a6f-c14225a84d15
+N8N_ADVIDEO_WEBHOOK_URL=https://n8n.sappstudio.kr/webhook/70980457-f61e-42f1-84c3-5245f1438435
+```
+
+---
+
 ## Phase 5: SNS 공유 (1-2주) - 추후 개발 예정
 
 > **참고:** 이 기능은 추후 개발 예정입니다. Instagram OAuth 인증 부분만 현재 완료되었습니다.
@@ -790,6 +879,16 @@ Data & Storage Layer (Supabase + Clerk)
 - [x] 영상 생성 시 크레딧 차감 연동 완료
 - [x] 빌드 성공
 
+### Phase 9 완료 기준 (광고문구 선택 기능)
+
+- [ ] ad_copies 테이블 생성 마이그레이션
+- [ ] ad_videos 테이블 수정 마이그레이션 (ad_copy_selection 단계, selected_ad_copy 칼럼)
+- [ ] 광고문구 생성/선택/조회 Server Actions
+- [ ] 광고문구 선택 UI 컴포넌트
+- [ ] 업로드 폼 4단계 워크플로우
+- [ ] 진행 표시기 6단계로 업데이트
+- [ ] 전체 플로우 테스트
+
 ---
 
 ## 📊 프로젝트 현황
@@ -812,6 +911,11 @@ Data & Storage Layer (Supabase + Clerk)
 - ⏳ Phase 5 (SNS 공유): 준비 완료 (Instagram OAuth만 구현됨)
 - ⏳ Phase 6 (n8n 워크플로우): 대기 중 (n8n 워크플로우 준비 필요)
 - ⏳ Phase 7 (테스트 & 배포): 대기 중
+- 🚧 **Phase 9 (광고문구 선택 기능): 진행 중**
+  - sapp-studio-adcopy webhook 연동 (광고문구 5개 생성)
+  - 광고문구 선택 UI (카드 형태, 다시 생성)
+  - sapp-studio-advideo webhook에 selected_ad_copy 전달
+  - 4단계 업로드 워크플로우
 
 **기술 스택 구현 상태:**
 

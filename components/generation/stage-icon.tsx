@@ -3,6 +3,7 @@
 import {
   Loader2,
   FileText,
+  MousePointerClick,
   ImagePlus,
   Video,
   Mic,
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 const ICON_MAP = {
   Loader2,
   FileText,
+  MousePointerClick,
   ImagePlus,
   Video,
   Mic,
@@ -45,6 +47,7 @@ export function StageIcon({
     const iconMap: Record<string, keyof typeof ICON_MAP> = {
       init: "Loader2",
       ad_copy_generation: "FileText",
+      ad_copy_selection: "MousePointerClick",
       image_refinement: "ImagePlus",
       video_generation: "Video",
       tts_generation: "Mic",

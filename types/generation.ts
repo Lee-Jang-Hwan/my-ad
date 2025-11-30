@@ -3,12 +3,13 @@ import type { AdVideo } from "./database";
 /**
  * Video generation stage values from database schema
  * These match the progress_stage CHECK constraint in ad_videos table
- * Updated: 2025-11-24 - Removed TTS, subtitle, and merging stages
- * n8n workflow now generates complete video in one step
+ * Updated: 2025-11-29 - Added ad_copy_selection stage for user selection
+ * Flow: init -> ad_copy_generation -> ad_copy_selection -> image_refinement -> video_generation -> completed
  */
 export type GenerationStage =
   | "init"
   | "ad_copy_generation"
+  | "ad_copy_selection"
   | "image_refinement"
   | "video_generation"
   | "completed";
