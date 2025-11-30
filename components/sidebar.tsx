@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home,
-  Upload,
+  ImagePlus,
+  Clapperboard,
   LayoutDashboard,
   LogIn,
   Coins,
@@ -35,13 +36,19 @@ const menuItems: MenuItem[] = [
     icon: Home,
   },
   {
-    title: "영상 만들기",
-    href: "/upload",
-    icon: Upload,
+    title: "이미지 만들기",
+    href: "/image",
+    icon: ImagePlus,
     requireAuth: true,
   },
   {
-    title: "내 영상",
+    title: "영상 만들기",
+    href: "/video",
+    icon: Clapperboard,
+    requireAuth: true,
+  },
+  {
+    title: "마이 페이지",
     href: "/dashboard",
     icon: LayoutDashboard,
     requireAuth: true,

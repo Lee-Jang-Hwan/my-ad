@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { HeroSection } from "@/components/home/hero-section";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
 import { SampleVideosSection } from "@/components/home/sample-videos-section";
+import { SampleImagesSection } from "@/components/home/sample-images-section";
 
 export default function Home() {
   const router = useRouter();
@@ -31,11 +32,12 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background -mt-16">
-      {/* Hero Section with Sample Videos - ALWAYS SHOW */}
+      {/* Hero Section with Sample Videos and Images - ALWAYS SHOW */}
       <HeroSection
         isSignedIn={isSignedIn}
         onCTAClick={handleCTAClick}
         sampleVideos={<SampleVideosSection />}
+        sampleImages={<SampleImagesSection />}
       />
 
       {/* How It Works Section - only show for non-authenticated users */}

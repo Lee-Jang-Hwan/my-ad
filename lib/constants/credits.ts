@@ -8,9 +8,19 @@
 export const VIDEO_GENERATION_COST = 80;
 
 /**
+ * Cost in credits for generating one image
+ */
+export const IMAGE_GENERATION_COST = 25;
+
+/**
  * Minimum credit balance required to generate a video
  */
 export const MIN_CREDITS_FOR_GENERATION = VIDEO_GENERATION_COST;
+
+/**
+ * Minimum credit balance required to generate an image
+ */
+export const MIN_CREDITS_FOR_IMAGE_GENERATION = IMAGE_GENERATION_COST;
 
 /**
  * Credit transaction types
@@ -81,3 +91,4 @@ export function generateOrderId(): string {
   const random = Math.random().toString(36).substring(2, 8);
   return `ORDER_${timestamp}_${random}`;
 }
+
