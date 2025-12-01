@@ -24,17 +24,60 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sapp Studio",
+  title: {
+    default: "삽가능 스튜디오 | AI 광고 영상 · 이미지 자동 생성",
+    template: "%s | 삽가능 스튜디오",
+  },
   description:
-    "이미지와 상품명만으로 전문적인 홍보영상을 자동 생성하는 AI 기반 플랫폼",
-  keywords: ["AI", "홍보영상", "자동생성", "소상공인", "마케팅", "영상제작"],
-  authors: [{ name: "AI Video Service" }],
+    "이미지와 상품명만 있으면 OK! AI가 자동으로 전문적인 광고 영상과 이미지를 생성해드립니다. 복잡한 편집 없이 누구나 쉽게 SNS 광고 콘텐츠를 만들어보세요.",
+  keywords: [
+    "AI 광고 영상",
+    "광고 이미지 생성",
+    "자동 영상 제작",
+    "소상공인 마케팅",
+    "SNS 광고",
+    "홍보영상",
+    "AI 마케팅",
+    "삽가능",
+  ],
+  authors: [{ name: "삽가능 스튜디오" }],
+  creator: "삽가능 스튜디오",
+  publisher: "삽가능 스튜디오",
+  metadataBase: new URL("https://sappstudio.kr"),
   openGraph: {
-    title: "광고영상 자동 생성 플랫폼",
+    title: "삽가능 스튜디오 | AI 광고 영상 · 이미지 자동 생성",
     description:
-      "이미지와 상품명만으로 전문적인 홍보영상을 자동 생성하는 AI 기반 플랫폼",
+      "이미지와 상품명만 있으면 OK! AI가 자동으로 전문적인 광고 영상과 이미지를 생성해드립니다.",
     type: "website",
     locale: "ko_KR",
+    url: "https://sappstudio.kr",
+    siteName: "삽가능 스튜디오",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "삽가능 스튜디오 - AI 광고 영상 · 이미지 자동 생성",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "삽가능 스튜디오 | AI 광고 영상 · 이미지 자동 생성",
+    description:
+      "이미지와 상품명만 있으면 OK! AI가 자동으로 전문적인 광고 영상과 이미지를 생성해드립니다.",
+    images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
