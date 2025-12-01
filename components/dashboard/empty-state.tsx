@@ -6,6 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 interface EmptyStateProps {
   filterApplied?: boolean;
   statusFilter?: string;
+  title?: string;
+  description?: string;
+  actionLabel?: string;
+  actionHref?: string;
 }
 
 /**
@@ -15,6 +19,10 @@ interface EmptyStateProps {
 export function EmptyState({
   filterApplied = false,
   statusFilter,
+  title,
+  description,
+  actionLabel,
+  actionHref,
 }: EmptyStateProps) {
   if (filterApplied) {
     // User has filtered but no results
@@ -39,23 +47,26 @@ export function EmptyState({
     );
   }
 
-  // User has no videos at all
+  // Default or custom empty state
+  const displayTitle = title || "첫 홍보영상을 만들어보세요";
+  const displayDescription = description || "이미지와 상품명만 있으면 AI가 자동으로 전문적인 홍보영상을 만들어드립니다.";
+  const displayActionLabel = actionLabel || "영상 만들기";
+  const displayActionHref = actionHref || "/upload";
+
   return (
     <Card className="border-dashed">
       <CardContent className="flex flex-col items-center justify-center py-16 px-4">
         <div className="rounded-full bg-primary/10 p-4 mb-4">
           <Upload className="w-12 h-12 text-primary" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">첫 홍보영상을 만들어보세요</h3>
+        <h3 className="text-xl font-semibold mb-2">{displayTitle}</h3>
         <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">
-          이미지와 상품명만 있으면 AI가 자동으로
-          <br />
-          전문적인 홍보영상을 만들어드립니다.
+          {displayDescription}
         </p>
         <Button asChild size="lg">
-          <Link href="/upload">
+          <Link href={displayActionHref}>
             <Upload className="w-4 h-4 mr-2" />
-            영상 만들기
+            {displayActionLabel}
           </Link>
         </Button>
       </CardContent>
