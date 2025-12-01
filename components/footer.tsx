@@ -9,7 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Clock, Mail } from "lucide-react";
+import { Clock, Mail, Phone } from "lucide-react";
+import { FaYoutube, FaInstagram } from "react-icons/fa";
+import { SiThreads } from "react-icons/si";
 import Link from "next/link";
 
 export function Footer() {
@@ -27,7 +29,7 @@ export function Footer() {
               <li>대표자명: 김수현</li>
               <li>사업자등록번호: 641-40-01131</li>
               <li>통신판매업신고번호: 2024-강원춘천-0856</li>
-              <li>주소: 강원특별자치도 춘천시 소양로 번개시장길32</li>
+              <li>주소: 강원특별자치도 춘천시 소양로 번개시장길32(소양로1가), 106호</li>
             </ul>
           </div>
 
@@ -54,6 +56,18 @@ export function Footer() {
                         <div>
                           <p className="text-sm text-muted-foreground">상담가능시간</p>
                           <p className="font-medium">09:00 ~ 18:00</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">전화번호</p>
+                          <a
+                            href="tel:010-7266-0807"
+                            className="font-medium hover:underline"
+                          >
+                            010-7266-0807
+                          </a>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -100,14 +114,14 @@ export function Footer() {
             Copyright © {currentYear} 삽가능 스튜디오. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link href="#" className="hover:text-foreground transition-colors">
-              Twitter
+            <Link href="https://www.youtube.com/@%EC%82%BD%EA%B0%80%EB%8A%A5%EC%8A%A4%ED%8A%9C%EB%94%94%EC%98%A4" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer" aria-label="Youtube">
+              <FaYoutube className="h-5 w-5" />
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
-              Facebook
+            <Link href="https://www.instagram.com/sapp_studio/" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <FaInstagram className="h-5 w-5" />
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
-              Instagram
+            <Link href="https://www.threads.com/@sapp_studio" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer" aria-label="Threads">
+              <SiThreads className="h-5 w-5" />
             </Link>
           </div>
         </div>

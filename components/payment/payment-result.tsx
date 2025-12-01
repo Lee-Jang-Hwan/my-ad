@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { CheckCircle, XCircle, Coins, Receipt, Video, Home, RefreshCw, Sparkles } from "lucide-react";
+import { CheckCircle, XCircle, Coins, Receipt, Video, Home, RefreshCw, Sparkles, Image } from "lucide-react";
 import { formatPrice, formatCredits } from "@/lib/constants/credits";
 
 interface PaymentResultProps {
@@ -82,13 +82,19 @@ export function PaymentResult({
 
         <CardFooter className="flex flex-col gap-3 pt-2">
           <Button asChild className="w-full h-12 text-base font-semibold" size="lg">
-            <Link href="/upload">
+            <Link href="/video">
               <Video className="mr-2 h-5 w-5" />
               영상 생성하러 가기
             </Link>
           </Button>
+          <Button asChild className="w-full h-12 text-base font-semibold" size="lg">
+            <Link href="/image">
+              <Image className="mr-2 h-5 w-5" />
+              이미지 생성하러 가기
+            </Link>
+          </Button>
           <Button asChild variant="outline" className="w-full h-11">
-            <Link href="/dashboard">내 영상 보기</Link>
+            <Link href="/dashboard">마이 페이지</Link>
           </Button>
         </CardFooter>
       </Card>

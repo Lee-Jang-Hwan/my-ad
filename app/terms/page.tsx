@@ -42,16 +42,13 @@ export default function TermsPage() {
 
         {/* 제3조 */}
         <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">제3조 (결제)</h2>
+          <h2 className="text-xl font-semibold mb-4">제3조 (크레딧 충전)</h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              1. 상세 내용은 회사 웹사이트의 요금제 페이지에서 확인할 수
-              있습니다.
+              1. 상세 내용은 삽가능 스튜디오 웹사이트의 크레딧 충전 페이지에서
+              확인할 수 있습니다.
             </p>
-            <p>2. 회원은 언제든지 요금제를 변경할 수 있습니다.</p>
-            <p>
-              3. 해당 월에 미사용한 서비스 이용량은 다음 달로 이월되지 않습니다.
-            </p>
+            <p>2. 충전 된 크레딧은 사용자간 양도·양수가 불가합니다.</p>
           </div>
         </Card>
 
