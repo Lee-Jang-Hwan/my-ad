@@ -31,7 +31,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background -mt-16">
+    <div className="flex flex-col min-h-screen bg-background lg:-mt-16">
       {/* Hero Section with Sample Videos and Images - ALWAYS SHOW */}
       <HeroSection
         isSignedIn={isSignedIn}
