@@ -17,7 +17,6 @@ import { formatDuration } from "@/lib/format-utils";
 interface VideoPlayerProps {
   videoUrl: string;
   thumbnailUrl?: string | null;
-  productName?: string;
 }
 
 /**
@@ -27,7 +26,6 @@ interface VideoPlayerProps {
 export function VideoPlayer({
   videoUrl,
   thumbnailUrl,
-  productName,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -145,9 +143,6 @@ export function VideoPlayer({
   const handleError = () => {
     setError(true);
   };
-
-  // Calculate progress percentage
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   if (error) {
     return (

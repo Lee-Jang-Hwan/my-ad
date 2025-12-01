@@ -220,6 +220,7 @@ export function ImageUploadForm() {
               <Card className="p-4">
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 shrink-0 rounded-md overflow-hidden border border-border">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={selectedImage.preview}
                       alt="상품 이미지"

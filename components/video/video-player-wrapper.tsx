@@ -19,19 +19,16 @@ const VideoPlayer = dynamic(
 interface VideoPlayerWrapperProps {
   videoUrl: string;
   thumbnailUrl?: string | null;
-  productName?: string;
 }
 
 export function VideoPlayerWrapper({
   videoUrl,
   thumbnailUrl,
-  productName,
 }: VideoPlayerWrapperProps) {
   return (
     <VideoPlayer
       videoUrl={videoUrl}
       thumbnailUrl={thumbnailUrl}
-      productName={productName}
     />
   );
 }

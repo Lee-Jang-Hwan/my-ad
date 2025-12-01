@@ -53,12 +53,10 @@ export function DashboardContent({
   // Image state
   const [images, setImages] = useState<ImageWithProductName[]>([]);
   const [imagePagination, setImagePagination] = useState<PaginationInfo>({
-    page: 1,
-    pageSize: 12,
+    currentPage: 1,
     totalPages: 1,
     totalCount: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
+    limit: 12,
   });
   const [imagesLoaded, setImagesLoaded] = useState(false);
 

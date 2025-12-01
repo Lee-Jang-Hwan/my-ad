@@ -145,7 +145,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
           <VideoPlayerWrapper
             videoUrl={video.video_url}
             thumbnailUrl={video.thumbnail_url}
-            productName={video.product_name || undefined}
           />
 
           {/* Action buttons on smaller screens */}

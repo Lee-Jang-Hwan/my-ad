@@ -15,12 +15,10 @@ interface FilterParams {
 }
 
 interface PaginationInfo {
-  page: number;
-  pageSize: number;
+  currentPage: number;
   totalPages: number;
   totalCount: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
+  limit: number;
 }
 
 interface FetchUserImagesResult {
@@ -106,12 +104,10 @@ export async function fetchUserImages(
       success: true,
       images,
       pagination: {
-        page: filter.page,
-        pageSize: PAGE_SIZE,
+        currentPage: filter.page,
         totalPages,
         totalCount,
-        hasNextPage: filter.page < totalPages,
-        hasPreviousPage: filter.page > 1,
+        limit: PAGE_SIZE,
       },
     };
   } catch (error) {
