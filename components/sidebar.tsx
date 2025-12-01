@@ -124,11 +124,6 @@ export function Sidebar() {
 
         {/* Bottom Section */}
         <div className="border-t p-2 space-y-3">
-          {/* Theme Toggle */}
-          <div className="flex items-center justify-center">
-            <ThemeToggle />
-          </div>
-
           {/* Auth Section */}
           <SignedOut>
             <SignInButton mode="modal">
@@ -151,6 +146,11 @@ export function Sidebar() {
               />
             </div>
           </SignedIn>
+
+          {/* Theme Toggle */}
+          <div className="flex items-center justify-center">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </aside>
