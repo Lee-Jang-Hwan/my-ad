@@ -4,11 +4,12 @@ import { ArrowRight, Video, ImageIcon } from "lucide-react";
 interface HeroSectionProps {
   isSignedIn?: boolean;
   onCTAClick?: () => void;
+  howItWorks?: React.ReactNode;
   sampleVideos?: React.ReactNode;
   sampleImages?: React.ReactNode;
 }
 
-export function HeroSection({ isSignedIn, onCTAClick, sampleVideos, sampleImages }: HeroSectionProps) {
+export function HeroSection({ isSignedIn, onCTAClick, howItWorks, sampleVideos, sampleImages }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden">
       {/* Hero Headline - only show when NOT signed in */}
@@ -17,7 +18,9 @@ export function HeroSection({ isSignedIn, onCTAClick, sampleVideos, sampleImages
           <div className="max-w-4xl mx-auto text-center px-4 md:px-8 bg-muted/10 rounded-2xl py-12">
             {/* Main Headline */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">
-              만들기 힘들던 광고영상
+              만들기 힘들던
+              <br />
+              광고 영상 · 이미지
               <br />
               쉽게 <span className="text-5xl md:text-6xl lg:text-7xl font-extrabold bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-600 bg-clip-text text-transparent">삽가능</span>!
             </h1>
@@ -41,6 +44,9 @@ export function HeroSection({ isSignedIn, onCTAClick, sampleVideos, sampleImages
           </div>
         </div>
       )}
+
+      {/* How It Works Section - above sample content */}
+      {howItWorks}
 
       {/* Sample Videos Section */}
       {sampleVideos && (

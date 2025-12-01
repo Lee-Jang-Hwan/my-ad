@@ -65,7 +65,7 @@ export function ImageStepIndicator({ currentStage, status }: ImageStepIndicatorP
                 </div>
 
                 {/* Step Label */}
-                <div className="mt-2 text-center h-10">
+                <div className="mt-2 text-center">
                   <p
                     className={cn("text-xs font-medium", {
                       "text-primary": isStageCompleted || isActive,
@@ -74,9 +74,6 @@ export function ImageStepIndicator({ currentStage, status }: ImageStepIndicatorP
                     })}
                   >
                     {stage.label}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    {stage.estimatedSeconds > 0 ? `약 ${stage.estimatedSeconds}초` : "\u00A0"}
                   </p>
                 </div>
               </div>

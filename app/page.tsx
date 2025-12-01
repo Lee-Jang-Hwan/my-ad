@@ -36,12 +36,10 @@ export default function Home() {
       <HeroSection
         isSignedIn={isSignedIn}
         onCTAClick={handleCTAClick}
+        howItWorks={!isSignedIn ? <HowItWorksSection /> : undefined}
         sampleVideos={<SampleVideosSection />}
         sampleImages={<SampleImagesSection />}
       />
-
-      {/* How It Works Section - only show for non-authenticated users */}
-      {!isSignedIn && <HowItWorksSection />}
     </div>
   );
 }
