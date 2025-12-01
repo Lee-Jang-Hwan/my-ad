@@ -24,7 +24,7 @@ export function SampleVideosSection() {
     // Fetch public videos on mount
     async function loadPublicVideos() {
       try {
-        const result = await fetchPublicVideos(6);
+        const result = await fetchPublicVideos(10);
 
         if (result.success && result.videos.length > 0) {
           // Convert public videos to SampleVideo format
