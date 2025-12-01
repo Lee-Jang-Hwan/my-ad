@@ -45,9 +45,9 @@ export const metadata: Metadata = {
   publisher: "삽가능 스튜디오",
   metadataBase: new URL("https://sappstudio.kr"),
   openGraph: {
-    title: "삽가능 스튜디오 | AI 광고 영상 · 이미지 자동 생성",
+    title: "삽가능 스튜디오 | AI 광고 영상 · 이미지 생성",
     description:
-      "이미지와 상품명만 있으면 OK! AI가 자동으로 전문적인 광고 영상과 이미지를 생성해드립니다.",
+      "이미지와 상품명만 있으면 OK! 소상공인을 위해 저렴한 비용으로 전문적인 광고 영상과 이미지를 생성해드립니다.",
     type: "website",
     locale: "ko_KR",
     url: "https://sappstudio.kr",
