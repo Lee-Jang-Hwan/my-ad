@@ -178,7 +178,6 @@ export function ImageGenerationProgress({ initialImage }: ImageGenerationProgres
           {isFailed && (
             <ImageErrorMessage
               message={image.error_message || "이미지 생성 중 오류가 발생했습니다."}
-              adImageId={image.id}
             />
           )}
         </CardContent>

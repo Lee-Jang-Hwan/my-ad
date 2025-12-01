@@ -6,13 +6,12 @@ import Link from "next/link";
 
 interface ImageErrorMessageProps {
   message: string;
-  adImageId: string;
 }
 
 /**
  * Error message display for failed image generation
  */
-export function ImageErrorMessage({ message, adImageId }: ImageErrorMessageProps) {
+export function ImageErrorMessage({ message }: ImageErrorMessageProps) {
   return (
     <div className="rounded-lg bg-destructive/10 p-6 space-y-4">
       <div className="flex items-center gap-3">

@@ -37,7 +37,7 @@ export function CreditHistory() {
         } else {
           setError(result.error || "거래 내역 조회에 실패했습니다.");
         }
-      } catch (err) {
+      } catch {
         setError("거래 내역 조회 중 오류가 발생했습니다.");
       } finally {
         setIsLoading(false);

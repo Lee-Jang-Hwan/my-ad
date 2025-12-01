@@ -17,10 +17,6 @@ export function StepIndicator({
   const isFailed = status === "failed";
 
   const currentStageIndex = STAGE_INFO.findIndex((s) => s.key === currentStage);
-  const progressPercentage =
-    currentStageIndex >= 0
-      ? (currentStageIndex / (STAGE_INFO.length - 1)) * 100
-      : 0;
 
   return (
     <div className="w-full space-y-4">

@@ -17,6 +17,7 @@ export function ImagePreview({ image }: ImagePreviewProps) {
       <div className="space-y-4">
         <h3 className="font-semibold text-lg">이미지 미리보기</h3>
         <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image.preview}
             alt="Selected product"

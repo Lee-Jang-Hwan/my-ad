@@ -128,6 +128,7 @@ export function ImageDropzone({
         <Card className="relative border-2 p-4">
           <div className="flex items-center gap-4">
             <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={selectedImage.preview}
                 alt="Preview"

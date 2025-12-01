@@ -62,7 +62,7 @@ export function GrantCreditDialog({
       } else {
         toast.error(result.error || "크레딧 부여에 실패했습니다.");
       }
-    } catch (error) {
+    } catch {
       toast.error("크레딧 부여 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
