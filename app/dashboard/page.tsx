@@ -89,9 +89,9 @@ export default async function DashboardPage({
     <div className="container max-w-7xl mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">내 영상</h1>
+          <h1 className="text-3xl font-bold mb-2">마이 페이지</h1>
           <p className="text-muted-foreground">
-            생성한 홍보영상을 확인하고 관리하세요
+            생성한 광고 영상 · 이미지를 확인하고 관리하세요
           </p>
         </div>
         <CreditDisplay className="md:w-80" />

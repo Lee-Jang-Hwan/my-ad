@@ -6,8 +6,9 @@ import { HeroSection } from "@/components/home/hero-section";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
 import { SampleVideosSection } from "@/components/home/sample-videos-section";
 import { SampleImagesSection } from "@/components/home/sample-images-section";
+import { IntroScreen } from "@/components/intro/intro-screen";
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter();
   const { isSignedIn, isLoaded } = useAuth();
 
@@ -41,5 +42,13 @@ export default function Home() {
         sampleImages={<SampleImagesSection />}
       />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <IntroScreen>
+      <HomeContent />
+    </IntroScreen>
   );
 }
