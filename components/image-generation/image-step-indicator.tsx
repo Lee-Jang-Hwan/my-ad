@@ -23,17 +23,17 @@ export function ImageStepIndicator({ currentStage, status }: ImageStepIndicatorP
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-center">생성 단계</h3>
 
-      <div className="flex items-center justify-center">
-        {displayStages.map((stage, index) => {
+      <div className="flex items-center justify-center gap-4">
+        {displayStages.map((stage) => {
           const stageIndex = getImageStageIndex(stage.key);
           const isActive = currentIndex === stageIndex;
           const isPast = currentIndex > stageIndex;
           const isStageCompleted = isPast || (isCompleted && stageIndex <= currentIndex);
 
           return (
-            <div key={stage.key} className="flex items-center">
+            <div key={stage.key} className="flex items-center w-24">
               {/* Step Circle */}
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center w-full">
                 <div
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
@@ -65,7 +65,7 @@ export function ImageStepIndicator({ currentStage, status }: ImageStepIndicatorP
                 </div>
 
                 {/* Step Label */}
-                <div className="mt-2 text-center">
+                <div className="mt-2 text-center h-10">
                   <p
                     className={cn("text-xs font-medium", {
                       "text-primary": isStageCompleted || isActive,
@@ -75,26 +75,12 @@ export function ImageStepIndicator({ currentStage, status }: ImageStepIndicatorP
                   >
                     {stage.label}
                   </p>
-                  {stage.estimatedSeconds > 0 && (
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                      약 {stage.estimatedSeconds}초
-                    </p>
-                  )}
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {stage.estimatedSeconds > 0 ? `약 ${stage.estimatedSeconds}초` : "\u00A0"}
+                  </p>
                 </div>
               </div>
 
-              {/* Connector Line */}
-              {index < displayStages.length - 1 && (
-                <div
-                  className={cn(
-                    "w-12 sm:w-20 h-0.5 mx-2 transition-colors duration-300",
-                    {
-                      "bg-primary": isPast,
-                      "bg-muted": !isPast,
-                    }
-                  )}
-                />
-              )}
             </div>
           );
         })}

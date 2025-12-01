@@ -29,7 +29,7 @@ export function ImageGrid({ images, statusFilter, onImageDeleted }: ImageGridPro
             : `${getStatusLabel(statusFilter)} 상태의 이미지가 없습니다.`
         }
         actionLabel="이미지 만들기"
-        actionHref="/upload-image"
+        actionHref="/image"
       />
     );
   }

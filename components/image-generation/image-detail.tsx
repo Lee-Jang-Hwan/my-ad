@@ -133,7 +133,7 @@ export function ImageDetail({ image }: ImageDetailProps) {
         <CardContent className="py-4">
           <div className="flex items-center justify-center gap-4">
             <Button variant="outline" asChild>
-              <Link href="/upload-image">
+              <Link href="/image">
                 <ImagePlus className="w-4 h-4 mr-2" />
                 새 이미지 만들기
               </Link>

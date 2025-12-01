@@ -176,9 +176,11 @@ export function VideoPlayer({
       {/* Video element */}
       <video
         ref={videoRef}
-        src={videoUrl}
+        src={`${videoUrl}#t=0.1`}
         poster={thumbnailUrl || undefined}
         className="w-full h-full object-contain"
+        preload="auto"
+        playsInline
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
         onPlay={() => setIsPlaying(true)}

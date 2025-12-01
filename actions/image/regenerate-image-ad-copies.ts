@@ -4,9 +4,10 @@ import { auth } from "@clerk/nextjs/server";
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
 import type { GenerateImageAdCopiesResult } from "@/types/ad-image";
 
-const N8N_ADCOPY_WEBHOOK_URL =
-  process.env.N8N_ADCOPY_WEBHOOK_URL ||
-  "https://n8n.sappstudio.kr/webhook/84e18e95-00b9-4963-9a6f-c14225a84d15";
+// 이미지 광고문구 전용 웹훅 URL (sapp-studio-adcopy-picture)
+const N8N_ADCOPY_IMAGE_WEBHOOK_URL =
+  process.env.N8N_ADCOPY_IMAGE_WEBHOOK_URL ||
+  "https://n8n.sappstudio.kr/webhook/2efce208-c7d7-4105-aba2-5278dda3602c";
 
 /**
  * 이미지용 광고문구 재생성
@@ -82,14 +83,14 @@ export async function regenerateImageAdCopies(
       .eq("id", adImageId);
 
     // Trigger adcopy webhook
-    console.log("Regenerating image ad copies, triggering webhook:", N8N_ADCOPY_WEBHOOK_URL);
+    console.log("Regenerating image ad copies, triggering webhook:", N8N_ADCOPY_IMAGE_WEBHOOK_URL);
 
     try {
       const credentials = Buffer.from(
         `${process.env.N8N_WEBHOOK_USER}:${process.env.N8N_WEBHOOK_PASSWORD}`
       ).toString("base64");
 
-      const response = await fetch(N8N_ADCOPY_WEBHOOK_URL, {
+      const response = await fetch(N8N_ADCOPY_IMAGE_WEBHOOK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

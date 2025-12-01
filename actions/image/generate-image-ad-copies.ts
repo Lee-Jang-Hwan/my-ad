@@ -4,9 +4,10 @@ import { auth } from "@clerk/nextjs/server";
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
 import type { GenerateImageAdCopiesResult } from "@/types/ad-image";
 
-const N8N_ADCOPY_WEBHOOK_URL =
-  process.env.N8N_ADCOPY_WEBHOOK_URL ||
-  "https://n8n.sappstudio.kr/webhook/84e18e95-00b9-4963-9a6f-c14225a84d15";
+// 이미지 광고문구 전용 웹훅 URL (sapp-studio-adcopy-picture)
+const N8N_ADCOPY_IMAGE_WEBHOOK_URL =
+  process.env.N8N_ADCOPY_IMAGE_WEBHOOK_URL ||
+  "https://n8n.sappstudio.kr/webhook/2efce208-c7d7-4105-aba2-5278dda3602c";
 
 /**
  * 이미지용 광고문구 5개 생성 (sapp-studio-adcopy webhook 호출)
@@ -64,14 +65,14 @@ export async function generateImageAdCopies(
       .eq("id", imageData.id);
 
     // Trigger adcopy webhook (같은 webhook 재사용)
-    console.log("Triggering adcopy webhook for image:", N8N_ADCOPY_WEBHOOK_URL);
+    console.log("Triggering adcopy webhook for image:", N8N_ADCOPY_IMAGE_WEBHOOK_URL);
 
     try {
       const credentials = Buffer.from(
         `${process.env.N8N_WEBHOOK_USER}:${process.env.N8N_WEBHOOK_PASSWORD}`
       ).toString("base64");
 
-      const response = await fetch(N8N_ADCOPY_WEBHOOK_URL, {
+      const response = await fetch(N8N_ADCOPY_IMAGE_WEBHOOK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,8 +93,24 @@ export async function generateImageAdCopies(
         throw new Error(`adcopy webhook failed with status ${response.status}`);
       }
 
+      // Get response text first to debug
+      const responseText = await response.text();
+      console.log("adcopy webhook raw response:", responseText);
+
+      // Check if response is empty
+      if (!responseText || responseText.trim() === "") {
+        console.error("adcopy webhook returned empty response");
+        throw new Error("광고문구 생성 응답이 비어있습니다. n8n 워크플로우를 확인해주세요.");
+      }
+
       // Parse response
-      const responseData = await response.json();
+      let responseData;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse response as JSON:", responseText);
+        throw new Error("광고문구 생성 응답을 파싱할 수 없습니다.");
+      }
       console.log("adcopy webhook response:", JSON.stringify(responseData, null, 2));
 
       // 응답 구조 검증 - ad_copies 배열 확인

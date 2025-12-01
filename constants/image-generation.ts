@@ -25,7 +25,7 @@ export const IMAGE_STAGE_INFO: ImageStageInfo[] = [
   },
   {
     key: "ad_copy_generation",
-    label: "광고 문구 생성",
+    label: "광고 문구 적용",
     description: "AI가 광고 문구를 생성하고 있습니다",
     estimatedSeconds: 10,
     iconName: "Sparkles",

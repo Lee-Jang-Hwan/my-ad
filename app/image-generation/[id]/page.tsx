@@ -24,7 +24,7 @@ export default async function ImageGenerationPage({
   // Handle errors
   if (!result.success || !result.image) {
     // Redirect to upload page if image not found or access denied
-    redirect("/upload-image");
+    redirect("/image");
   }
 
   const image = result.image;

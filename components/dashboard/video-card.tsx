@@ -136,9 +136,9 @@ export function VideoCard({ video, onDelete, onPublicToggle }: VideoCardProps) {
         ) : shouldShowVideo ? (
           // Show video first frame if no thumbnail
           <video
-            src={video.video_url}
+            src={`${video.video_url}#t=0.1`}
             className="w-full h-full object-cover"
-            preload="metadata"
+            preload="auto"
             muted
             playsInline
           >

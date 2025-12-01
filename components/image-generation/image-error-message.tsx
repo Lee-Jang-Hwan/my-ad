@@ -25,7 +25,7 @@ export function ImageErrorMessage({ message, adImageId }: ImageErrorMessageProps
 
       <div className="flex items-center gap-3">
         <Button variant="outline" asChild>
-          <Link href="/upload-image">
+          <Link href="/image">
             <RefreshCw className="w-4 h-4 mr-2" />
             다시 시도
           </Link>

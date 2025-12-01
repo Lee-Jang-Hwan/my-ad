@@ -83,6 +83,8 @@ export function SampleVideosSection() {
               loop
               muted
               playsInline
+              autoPlay
+              preload="auto"
             >
               <track kind="captions" />
             </video>
