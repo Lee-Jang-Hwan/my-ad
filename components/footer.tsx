@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Clock, Mail, Phone } from "lucide-react";
-import { FaYoutube, FaInstagram, FaXTwitter } from "react-icons/fa6";
+import { FaYoutube, FaInstagram, FaXTwitter, FaTiktok } from "react-icons/fa6";
 import { SiThreads } from "react-icons/si";
 import Link from "next/link";
 
@@ -116,6 +116,9 @@ export function Footer() {
           <div className="flex gap-6">
             <Link href="https://www.youtube.com/@%EC%82%BD%EA%B0%80%EB%8A%A5%EC%8A%A4%ED%8A%9C%EB%94%94%EC%98%A4" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer" aria-label="Youtube">
               <FaYoutube className="h-5 w-5" />
+            </Link>
+            <Link href="https://www.tiktok.com/@sappable" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+              <FaTiktok className="h-5 w-5" />
             </Link>
             <Link href="https://x.com/sappablestudio" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer" aria-label="X">
               <FaXTwitter className="h-5 w-5" />
