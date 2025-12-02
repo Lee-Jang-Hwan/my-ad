@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Sparkles, ArrowLeft, ArrowRight } from "lucide-react";
+import { Loader2, Sparkles, ArrowLeft, ArrowRight, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ImageDropzone } from "./image-dropzone";
@@ -366,7 +366,8 @@ export function UploadForm() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
+            <Video className="h-8 w-8 md:h-10 md:w-10" />
             광고영상 만들기
           </h1>
           <p className="text-lg text-muted-foreground">

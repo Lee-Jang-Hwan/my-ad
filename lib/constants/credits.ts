@@ -10,7 +10,7 @@ export const VIDEO_GENERATION_COST = 80;
 /**
  * Cost in credits for generating one image
  */
-export const IMAGE_GENERATION_COST = 25;
+export const IMAGE_GENERATION_COST = 20;
 
 /**
  * Minimum credit balance required to generate a video
