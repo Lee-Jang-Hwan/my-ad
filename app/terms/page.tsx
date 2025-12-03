@@ -101,7 +101,7 @@ export default function TermsPage() {
               <strong className="text-foreground">
                 [크레딧 사용 기간의 제한]
               </strong>{" "}
-              토스페이먼츠 입점 정책에 따라 크레딧의 유효기간은 1년으로 합니다.
+              토스페이먼츠 입점 정책에 따라 크레딧의 유효기간은 6개월로 합니다.
             </p>
           </div>
         </Card>
