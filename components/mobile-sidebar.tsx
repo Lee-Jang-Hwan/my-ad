@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   ImagePlus,
@@ -68,6 +68,15 @@ const menuItems: MenuItem[] = [
 export function MobileSidebar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { isSignedIn } = useAuth();
+
+  const handleMenuClick = (item: MenuItem) => {
+    setOpen(false);
+    if (item.requireAuth && !isSignedIn) {
+      router.push("/sign-in");
+    }
+  };
 
   return (
     <div className="lg:hidden">
@@ -101,31 +110,11 @@ export function MobileSidebar() {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
 
-                  if (item.requireAuth) {
-                    return (
-                      <SignedIn key={item.href}>
-                        <Link
-                          href={item.href}
-                          onClick={() => setOpen(false)}
-                          className={cn(
-                            "group flex flex-col items-center gap-2 px-4 py-3 text-xs font-medium transition-all duration-300 ease-in-out rounded-lg",
-                            isActive
-                              ? "text-black dark:text-white scale-110 font-semibold"
-                              : "text-gray-500 dark:text-gray-400"
-                          )}
-                        >
-                          <Icon className="h-6 w-6 transition-all duration-300 group-hover:scale-110" />
-                          <span className="transition-all duration-300 group-hover:text-black dark:group-hover:text-white group-hover:font-semibold">{item.title}</span>
-                        </Link>
-                      </SignedIn>
-                    );
-                  }
-
                   return (
                     <Link
                       key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
+                      href={item.requireAuth && !isSignedIn ? "/sign-in" : item.href}
+                      onClick={() => handleMenuClick(item)}
                       className={cn(
                         "group flex flex-col items-center gap-2 px-4 py-3 text-xs font-medium transition-all duration-300 ease-in-out rounded-lg",
                         isActive
