@@ -96,6 +96,13 @@ export default function TermsPage() {
               회사의 중대한 귀책 사유로 서비스를 정상적으로 이용할 수 없는 경우,
               잔여 크레딧은 전액 환불 조치합니다.
             </p>
+            <p>
+              5.{" "}
+              <strong className="text-foreground">
+                [크레딧 사용 기간의 제한]
+              </strong>{" "}
+              토스페이먼츠 입점 정책에 따라 크레딧의 유효기간은 1년으로 합니다.
+            </p>
           </div>
         </Card>
 
