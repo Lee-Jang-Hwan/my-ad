@@ -72,6 +72,10 @@ export async function generateAdCopies(
         `${process.env.N8N_WEBHOOK_USER}:${process.env.N8N_WEBHOOK_PASSWORD}`
       ).toString("base64");
 
+      // 2분 타임아웃 설정
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+
       const response = await fetch(N8N_ADCOPY_WEBHOOK_URL, {
         method: "POST",
         headers: {
@@ -83,7 +87,10 @@ export async function generateAdCopies(
           product_image_id: imageId,
           product_info_id: productInfoId,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       console.log("adcopy webhook response status:", response.status);
 
