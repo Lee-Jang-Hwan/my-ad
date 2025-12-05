@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>삽가능 스튜디오 - 서비스 기획서</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold-primary: oklch(0.78 0.14 75);
+      --gold-secondary: oklch(0.65 0.12 55);
+      --bg-dark: #0a0a0a;
+      --bg-card: #141414;
+      --bg-card-hover: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-muted: #666666;
+      --border-color: #2a2a2a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.8;
+      min-height: 100vh;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 100;
+      padding: 0.75rem 2rem;
+    }
+
+    .nav-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: var(--gold-primary);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      width: 280px;
+      height: calc(100vh - 60px);
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      overflow-y: auto;
+      padding: 1.5rem 0;
+      z-index: 50;
+    }
+
+    .sidebar-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .sidebar-title {
+      padding: 0.5rem 1.5rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .sidebar-item {
+      display: block;
+      padding: 0.5rem 1.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-item:hover {
+      color: var(--text-primary);
+      background: var(--bg-card-hover);
+    }
+
+    .sidebar-item.active {
+      color: var(--gold-primary);
+      border-left-color: var(--gold-primary);
+      background: rgba(200, 170, 100, 0.1);
+    }
+
+    /* Main Content */
+    .main {
+      margin-left: 280px;
+      padding: 80px 3rem 3rem;
+      min-height: 100vh;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 3rem 0 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 2rem 0 1rem;
+      color: var(--text-primary);
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem;
+      color: var(--gold-primary);
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    /* Meta Info */
+    .meta-info {
+      display: flex;
+      gap: 2rem;
+      padding: 1rem 1.5rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .meta-value {
+      font-size: 0.875rem;
+      color: var(--text-primary);
+    }
+
+    .meta-value a {
+      color: var(--gold-primary);
+      text-decoration: none;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    td {
+      color: var(--text-secondary);
+    }
+
+    tr:hover td {
+      background: var(--bg-card-hover);
+    }
+
+    /* Code/Pre */
+    pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin: 1rem 0;
+      white-space: pre;
+    }
+
+    code {
+      font-family: 'Consolas', 'Monaco', monospace;
+      background: var(--bg-card);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+      color: var(--text-secondary);
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    /* Blockquote */
+    blockquote {
+      border-left: 4px solid var(--gold-primary);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      background: rgba(200, 170, 100, 0.05);
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    /* Persona Card */
+    .persona-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .persona-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .persona-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .persona-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .persona-desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .persona-section {
+      margin-top: 1rem;
+    }
+
+    .persona-section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Value Box */
+    .value-box {
+      background: linear-gradient(135deg, rgba(200, 170, 100, 0.1), rgba(150, 120, 70, 0.05));
+      border: 1px solid rgba(200, 170, 100, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .value-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gold-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    /* KPI Card */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .kpi-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold-primary);
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Feature Tree */
+    .feature-tree {
+      font-family: 'Consolas', 'Monaco', monospace;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .feature-must { color: #ef4444; }
+    .feature-should { color: #eab308; }
+    .feature-could { color: #22c55e; }
+
+    /* Wireframe */
+    .wireframe {
+      background: #1a1a1a;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--text-secondary);
+      margin: 1.5rem 0;
+    }
+
+    /* Pricing */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .pricing-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold-primary);
+    }
+
+    .pricing-card.popular {
+      border-color: var(--gold-primary);
+    }
+
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+      color: #000;
+      padding: 0.25rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .pricing-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .pricing-credits {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold-primary);
+    }
+
+    .pricing-credits span {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .pricing-original {
+      color: var(--text-muted);
+      text-decoration: line-through;
+      font-size: 0.875rem;
+    }
+
+    .pricing-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0.5rem 0;
+    }
+
+    .pricing-discount {
+      display: inline-block;
+      background: rgba(200, 170, 100, 0.2);
+      color: var(--gold-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Tech Stack */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .tech-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .tech-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .tech-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Competitor Table */
+    .competitor-table {
+      width: 100%;
+      margin: 1.5rem 0;
+    }
+
+    .competitor-table th:first-child,
+    .competitor-table td:first-child {
+      width: 25%;
+    }
+
+    /* Risk Matrix */
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .risk-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .risk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .risk-title {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .risk-level {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+    }
+
+    .risk-high {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .risk-medium {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+    }
+
+    .risk-low {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+
+    /* TOC */
+    .toc {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .toc-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .toc-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .toc-list li {
+      margin: 0.5rem 0;
+    }
+
+    .toc-list a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc-list a:hover {
+      color: var(--gold-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 80px 1.5rem 2rem;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Section divider */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+      margin: 3rem 0;
+    }
+
+    /* Highlight */
+    .highlight {
+      background: linear-gradient(135deg, rgba(200, 170, 100, 0.2), rgba(150, 120, 70, 0.1));
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      color: var(--gold-primary);
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-must {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .badge-should {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+    }
+
+    .badge-could {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+
+    /* Print */
+    @media print {
+      .nav, .sidebar {
+        display: none;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 0;
+      }
+
+      body {
+        background: white;
+        color: black;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-content">
+      <div class="nav-logo">삽가능 스튜디오 기획서</div>
+      <div class="nav-links">
+        <a href="https://sappstudio.kr" target="_blank" class="nav-link">서비스 바로가기 →</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">목차</div>
+      <a href="#overview" class="sidebar-item active">1. 서비스 개요</a>
+      <a href="#kpi" class="sidebar-item">2. 목적 및 핵심 가치</a>
+      <a href="#features" class="sidebar-item">3. 주요 기능 정의</a>
+      <a href="#ux" class="sidebar-item">4. 화면 설계</a>
+      <a href="#tech" class="sidebar-item">5. 기술 요구사항</a>
+      <a href="#competitor" class="sidebar-item">6. 경쟁 서비스 분석</a>
+      <a href="#scenario" class="sidebar-item">7. 사용자 시나리오</a>
+      <a href="#risk" class="sidebar-item">8. 기대 효과 및 리스크</a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="content">
+      <!-- Header -->
+      <h1>삽가능 스튜디오 서비스 기획서</h1>
+
+      <div class="meta-info">
+        <div class="meta-item">
+          <span class="meta-label">버전</span>
+          <span class="meta-value">v1.0</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">작성일</span>
+          <span class="meta-value">2024년 12월</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">서비스 URL</span>
+          <span class="meta-value"><a href="https://sappstudio.kr" target="_blank">sappstudio.kr</a></span>
+        </div>
+      </div>
+
+      <!-- Section 1: 서비스 개요 -->
+      <section id="overview">
+        <h2>1. 서비스 개요</h2>
+
+        <h3>1) 프로젝트 명</h3>
+        <p><strong>삽가능 스튜디오 (Sappstudio)</strong></p>
+
+        <h3>2) 한 줄 소개</h3>
+        <blockquote>
+          "이미지와 상품명만 있으면 OK! AI가 5분 만에 전문적인 광고 영상을 만들어드립니다"
+        </blockquote>
+
+        <h3>3) 기획 배경 & 문제 정의</h3>
+
+        <h4>시장 현황</h4>
+        <ul>
+          <li>국내 소상공인 약 <span class="highlight">650만 개</span> 사업체 (전체 사업체의 87%)</li>
+          <li>SNS 광고 시장 <span class="highlight">연평균 15% 성장</span> 지속</li>
+          <li>숏폼 콘텐츠(릴스, 쇼츠, 틱톡) 수요 급증</li>
+        </ul>
+
+        <h4>문제 정의</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>문제</th>
+              <th>현황</th>
+              <th>영향</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>높은 제작 비용</strong></td>
+              <td>영상 외주 시 건당 30~100만 원</td>
+              <td>소상공인 마케팅 예산 부담</td>
+            </tr>
+            <tr>
+              <td><strong>긴 제작 시간</strong></td>
+              <td>평균 1~3일 소요</td>
+              <td>시의성 있는 마케팅 불가</td>
+            </tr>
+            <tr>
+              <td><strong>기술 진입 장벽</strong></td>
+              <td>영상 편집 도구 학습 필요</td>
+              <td>디지털 마케팅 포기</td>
+            </tr>
+            <tr>
+              <td><strong>광고 문구 고민</strong></td>
+              <td>전문 카피라이터 부재</td>
+              <td>효과적인 메시지 전달 실패</td>
+            </tr>
+            <tr>
+              <td><strong>AI 도구 복잡성</strong></td>
+              <td>프롬프트 엔지니어링 필요</td>
+              <td>일반인 활용 어려움</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>기회</h4>
+        <ul>
+          <li>AI 기술 발전으로 <strong>영상 자동 생성</strong> 기술 성숙</li>
+          <li>정부의 <strong>소상공인 디지털 전환</strong> 정책 지원 확대</li>
+          <li>간편한 <strong>크레딧 기반 SaaS 모델</strong> 확산</li>
+        </ul>
+
+        <h3>4) 타깃 사용자 (페르소나)</h3>
+
+        <!-- Persona 1 -->
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar">👤</div>
+            <div>
+              <div class="persona-name">김소상 (45세, 남성)</div>
+              <div class="persona-desc">서울시 동대문구 | 의류 도매 및 온라인 판매</div>
+            </div>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">직업 정보</div>
+            <p>온라인 의류 쇼핑몰 대표 (5년차)<br>월 매출: 3,000만 원 / 마케팅 예산: 월 50만 원<br>디지털 역량: 중하 (스마트폰 사용 가능, PC 기본 작업)</p>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">Pain Points</div>
+            <ul>
+              <li>인스타그램 릴스 올리고 싶은데 영상 만들 줄 모름</li>
+              <li>외주 맡기자니 한 건에 50만 원... 부담됨</li>
+              <li>상품 사진은 많은데 활용을 못하고 있음</li>
+              <li>광고 문구 쓰는 것도 어려움</li>
+            </ul>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">Goals</div>
+            <ul>
+              <li>저렴하게 전문적인 광고 영상 만들고 싶다</li>
+              <li>SNS에 꾸준히 콘텐츠 올려서 매출 올리고 싶다</li>
+              <li>복잡한 거 배울 시간 없으니 쉽게 만들고 싶다</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Persona 2 -->
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar">👩</div>
+            <div>
+              <div class="persona-name">이마케터 (28세, 여성)</div>
+              <div class="persona-desc">서울시 강남구 | 스타트업 마케팅팀</div>
+            </div>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">직업 정보</div>
+            <p>스타트업 마케팅 담당자 (3년차)<br>디지털 역량: 상 (다양한 마케팅 툴 사용 경험)</p>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">Pain Points</div>
+            <ul>
+              <li>매주 여러 개의 광고 소재 제작해야 함 (업무 과부하)</li>
+              <li>디자이너 리소스 한정적, 대기 시간 길음</li>
+              <li>A/B 테스트용 다양한 버전 빠르게 만들어야 함</li>
+            </ul>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">Goals</div>
+            <ul>
+              <li>대량의 광고 소재를 빠르게 생산하고 싶다</li>
+              <li>디자이너 의존도 줄이고 직접 제작하고 싶다</li>
+              <li>광고 문구 아이디어 빠르게 얻고 싶다</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Persona 3 -->
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar">👨</div>
+            <div>
+              <div class="persona-name">박창업 (32세, 남성)</div>
+              <div class="persona-desc">부산시 해운대구 | 핸드메이드 악세서리 판매</div>
+            </div>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">직업 정보</div>
+            <p>스마트스토어 + 인스타 판매 (1년차)<br>월 매출: 500만 원 / 마케팅 예산: 월 10만 원 이하<br>디지털 역량: 중 (SNS 활발, 기본 편집 가능)</p>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">Pain Points</div>
+            <ul>
+              <li>혼자서 제작, 배송, 마케팅 다 해야 해서 시간 부족</li>
+              <li>영상 편집 배우고 싶지만 시간이 없음</li>
+              <li>경쟁자들은 다 영상 올리는데 나만 뒤처지는 느낌</li>
+            </ul>
+          </div>
+          <div class="persona-section">
+            <div class="persona-section-title">Goals</div>
+            <ul>
+              <li>최소 비용으로 프로페셔널해 보이는 콘텐츠 만들기</li>
+              <li>시간 들이지 않고 빠르게 영상 만들기</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>5) 사용자 주요 니즈</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>니즈</th>
+              <th>중요도</th>
+              <th>현재 해결책</th>
+              <th>문제점</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>저렴한 영상 제작</strong></td>
+              <td>⭐⭐⭐⭐⭐</td>
+              <td>외주, DIY</td>
+              <td>비용 높음, 시간 소요</td>
+            </tr>
+            <tr>
+              <td><strong>쉬운 사용성</strong></td>
+              <td>⭐⭐⭐⭐⭐</td>
+              <td>템플릿 기반 앱</td>
+              <td>여전히 편집 필요</td>
+            </tr>
+            <tr>
+              <td><strong>빠른 제작 속도</strong></td>
+              <td>⭐⭐⭐⭐⭐</td>
+              <td>없음</td>
+              <td>1~3일 소요</td>
+            </tr>
+            <tr>
+              <td><strong>전문적인 품질</strong></td>
+              <td>⭐⭐⭐⭐</td>
+              <td>전문 에이전시</td>
+              <td>고비용</td>
+            </tr>
+            <tr>
+              <td><strong>광고 문구 자동 생성</strong></td>
+              <td>⭐⭐⭐⭐</td>
+              <td>ChatGPT 직접 사용</td>
+              <td>프롬프트 작성 어려움</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 2: 목적 및 핵심 가치 -->
+      <section id="kpi">
+        <h2>2. 목적 및 핵심 가치(KPI)</h2>
+
+        <h3>1) 삽가능 스튜디오 핵심 가치</h3>
+
+        <div class="value-box">
+          <div class="value-title">🎯 VALUE 1: 극강의 간편함</div>
+          <p><strong>Before:</strong> 이미지 촬영 → 편집 → 음악 삽입 → 자막 → 렌더링</p>
+          <p><strong>After:</strong> 이미지 업로드 → 상품명 입력 → 끝!</p>
+          <ul>
+            <li>4단계 간단 프로세스</li>
+            <li>영상 편집 지식 불필요</li>
+            <li>드래그 앤 드롭 이미지 업로드</li>
+          </ul>
+        </div>
+
+        <div class="value-box">
+          <div class="value-title">💰 VALUE 2: 압도적 경제성</div>
+          <p><strong>외주 제작:</strong> 30~100만 원/건</p>
+          <p><strong>삽가능:</strong> 1.2~1.5만 원/건 (약 95% 절감)</p>
+          <ul>
+            <li>크레딧 기반 유연한 결제</li>
+            <li>대량 구매 시 추가 할인</li>
+            <li>신규 가입 20크레딧 무료 제공</li>
+          </ul>
+        </div>
+
+        <div class="value-box">
+          <div class="value-title">🏆 VALUE 3: 전문가 수준 품질</div>
+          <ul>
+            <li>AI 기반 광고 문구 5개 자동 생성</li>
+            <li>이미지 자동 정제 (배경 처리, 색감 보정)</li>
+            <li>전문 TTS 음성 + 자막 자동 삽입</li>
+            <li>세로형 9:16 숏폼 최적화</li>
+          </ul>
+        </div>
+
+        <div class="value-box">
+          <div class="value-title">⚡ VALUE 4: 압도적 속도</div>
+          <p><strong>외주 제작:</strong> 1~3일</p>
+          <p><strong>삽가능:</strong> 3~5분 (약 99% 시간 절감)</p>
+          <ul>
+            <li>실시간 진행 상황 추적</li>
+            <li>즉시 다운로드 및 활용</li>
+          </ul>
+        </div>
+
+        <h3>2) 핵심 지표(KPI)</h3>
+
+        <h4>비즈니스 KPI (목표: 서비스 런칭 후 1년)</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>지표</th>
+              <th>정의</th>
+              <th>1분기</th>
+              <th>2분기</th>
+              <th>3분기</th>
+              <th>4분기</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>MAU</strong></td>
+              <td>월간 활성 사용자</td>
+              <td>500</td>
+              <td>1,500</td>
+              <td>3,000</td>
+              <td>5,000</td>
+            </tr>
+            <tr>
+              <td><strong>MRR</strong></td>
+              <td>월간 반복 매출</td>
+              <td>5백만</td>
+              <td>15백만</td>
+              <td>30백만</td>
+              <td>50백만</td>
+            </tr>
+            <tr>
+              <td><strong>유료 전환율</strong></td>
+              <td>가입→결제 비율</td>
+              <td>8%</td>
+              <td>10%</td>
+              <td>12%</td>
+              <td>15%</td>
+            </tr>
+            <tr>
+              <td><strong>ARPU</strong></td>
+              <td>사용자당 월 매출</td>
+              <td>20,000</td>
+              <td>25,000</td>
+              <td>28,000</td>
+              <td>30,000</td>
+            </tr>
+            <tr>
+              <td><strong>Retention</strong></td>
+              <td>월간 재방문율</td>
+              <td>30%</td>
+              <td>40%</td>
+              <td>50%</td>
+              <td>60%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>서비스 품질 KPI</h4>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-value">95%+</div>
+            <div class="kpi-label">생성 성공률</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value">5분</div>
+            <div class="kpi-label">평균 생성 시간</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value">40+</div>
+            <div class="kpi-label">NPS 점수</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value">99.5%</div>
+            <div class="kpi-label">시스템 가용성</div>
+          </div>
+        </div>
+
+        <h4>North Star Metric</h4>
+        <div class="card">
+          <div class="card-title">⭐ 월간 생성 콘텐츠 수</div>
+          <p><strong>목표:</strong> 월 40,000건 (영상 10,000건 + 이미지 30,000건)</p>
+          <p><strong>선정 이유:</strong></p>
+          <ul>
+            <li>사용자 가치 반영: 많이 만들수록 많은 가치 제공</li>
+            <li>매출 연동: 생성 = 크레딧 소비 = 매출</li>
+            <li>성장 예측: 콘텐츠 수 증가 = 서비스 성장</li>
+          </ul>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 3: 주요 기능 정의 -->
+      <section id="features">
+        <h2>3. 주요 기능 정의</h2>
+
+        <h3>1) 서비스 핵심 기능</h3>
+
+        <div class="feature-tree">
+삽가능 스튜디오 기능 구조
+│
+├── 🎬 콘텐츠 생성
+│   ├── AI 광고 영상 생성 <span class="feature-must">[MUST]</span>
+│   ├── AI 광고 이미지 생성 <span class="feature-must">[MUST]</span>
+│   └── AI 광고 문구 생성 <span class="feature-must">[MUST]</span>
+│
+├── 📊 콘텐츠 관리
+│   ├── 대시보드 (마이페이지) <span class="feature-must">[MUST]</span>
+│   ├── 생성 이력 관리 <span class="feature-must">[MUST]</span>
+│   └── 공개/비공개 설정 <span class="feature-should">[SHOULD]</span>
+│
+├── 💳 결제 시스템
+│   ├── 크레딧 충전 <span class="feature-must">[MUST]</span>
+│   ├── 결제 내역 확인 <span class="feature-must">[MUST]</span>
+│   └── 환불 처리 <span class="feature-should">[SHOULD]</span>
+│
+├── 👤 사용자 관리
+│   ├── 회원가입/로그인 <span class="feature-must">[MUST]</span>
+│   ├── 소셜 로그인 (Google) <span class="feature-must">[MUST]</span>
+│   └── 프로필 관리 <span class="feature-could">[COULD]</span>
+│
+├── 🏠 홈 & 랜딩
+│   ├── 서비스 소개 <span class="feature-must">[MUST]</span>
+│   ├── 샘플 영상/이미지 <span class="feature-must">[MUST]</span>
+│   └── 프로모션 팝업 <span class="feature-should">[SHOULD]</span>
+│
+└── 🔧 관리자 기능
+    ├── 사용자 관리 <span class="feature-must">[MUST]</span>
+    ├── 결제 내역 조회 <span class="feature-must">[MUST]</span>
+    ├── 크레딧 수동 지급 <span class="feature-must">[MUST]</span>
+    └── 서비스 통계 <span class="feature-should">[SHOULD]</span>
+        </div>
+
+        <h3>2) 각 기능의 사용 목적</h3>
+
+        <h4>🎬 기능 1: AI 광고 영상 생성 <span class="badge badge-must">MUST</span></h4>
+        <div class="card">
+          <table>
+            <tr>
+              <td><strong>기능명</strong></td>
+              <td>AI 광고 영상 자동 생성</td>
+            </tr>
+            <tr>
+              <td><strong>사용 목적</strong></td>
+              <td>상품 이미지와 정보만으로 전문적인 광고 영상 제작</td>
+            </tr>
+            <tr>
+              <td><strong>소모 크레딧</strong></td>
+              <td>80 크레딧/건 (약 12,000~14,000원)</td>
+            </tr>
+          </table>
+
+          <h4 style="margin-top: 1.5rem;">사용 시나리오</h4>
+          <ol>
+            <li>사용자가 "영상 만들기" 메뉴 클릭</li>
+            <li>상품 이미지 드래그 앤 드롭으로 업로드 (JPG/PNG/WebP, 최대 10MB)</li>
+            <li>상품명 입력 (예: "프리미엄 무선 이어폰")</li>
+            <li>"광고문구 생성" 버튼 클릭 → AI가 5개 광고 문구 생성 (30초)</li>
+            <li>마음에 드는 문구 1개 선택</li>
+            <li>"영상 생성" 버튼 클릭 → 크레딧 80 차감</li>
+            <li>실시간 진행 상황 화면에서 8단계 추적</li>
+            <li>3~5분 후 영상 완성 → 미리보기 및 다운로드 (MP4, 세로 9:16)</li>
+          </ol>
+
+          <h4 style="margin-top: 1.5rem;">기대 효과</h4>
+          <ul>
+            <li>영상 제작 비용 <span class="highlight">95% 절감</span> (50만 원 → 1.5만 원)</li>
+            <li>제작 시간 <span class="highlight">99% 단축</span> (2일 → 5분)</li>
+            <li>전문가 수준 품질로 브랜드 이미지 향상</li>
+          </ul>
+        </div>
+
+        <h4>🖼️ 기능 2: AI 광고 이미지 생성 <span class="badge badge-must">MUST</span></h4>
+        <div class="card">
+          <table>
+            <tr>
+              <td><strong>기능명</strong></td>
+              <td>AI 광고 이미지 자동 생성</td>
+            </tr>
+            <tr>
+              <td><strong>사용 목적</strong></td>
+              <td>상품 이미지를 광고용 이미지로 변환</td>
+            </tr>
+            <tr>
+              <td><strong>소모 크레딧</strong></td>
+              <td>20 크레딧/건 (약 3,000~3,500원)</td>
+            </tr>
+          </table>
+        </div>
+
+        <h4>💳 기능 3: 크레딧 충전 시스템 <span class="badge badge-must">MUST</span></h4>
+
+        <h3>요금제</h3>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <div class="pricing-name">Single</div>
+            <div class="pricing-credits">100 <span>크레딧</span></div>
+            <div class="pricing-original">₩19,900</div>
+            <div class="pricing-price">₩17,900</div>
+            <div class="pricing-discount">10% 할인</div>
+          </div>
+          <div class="pricing-card popular">
+            <div class="pricing-badge">🔥 HOT</div>
+            <div class="pricing-name">Business 5</div>
+            <div class="pricing-credits">500 <span>크레딧</span></div>
+            <div class="pricing-original">₩88,000</div>
+            <div class="pricing-price">₩75,500</div>
+            <div class="pricing-discount">14% 할인</div>
+          </div>
+          <div class="pricing-card">
+            <div class="pricing-name">Business 10</div>
+            <div class="pricing-credits">1,000 <span>크레딧</span></div>
+            <div class="pricing-original">₩179,000</div>
+            <div class="pricing-price">₩153,000</div>
+            <div class="pricing-discount">15% 할인</div>
+          </div>
+        </div>
+
+        <h3>3) 우선 순위</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>우선순위</th>
+              <th>기능</th>
+              <th>이유</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-must">MUST</span></td>
+              <td>AI 영상 생성</td>
+              <td>핵심 가치 제안, 없으면 서비스 의미 없음</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-must">MUST</span></td>
+              <td>AI 이미지 생성</td>
+              <td>영상 대비 저렴, 진입 장벽 낮춤</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-must">MUST</span></td>
+              <td>크레딧 충전</td>
+              <td>수익 모델의 핵심</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-should">SHOULD</span></td>
+              <td>프로모션 팝업</td>
+              <td>신규 가입 유도, 이벤트 홍보</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-could">COULD</span></td>
+              <td>SNS 직접 업로드</td>
+              <td>Phase 2에서 고려</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 4: 화면 설계 -->
+      <section id="ux">
+        <h2>4. 화면 설계 (UX Flow)</h2>
+
+        <h3>1) 전체 사용자 플로우</h3>
+        <div class="wireframe">
+                              ┌─────────┐
+                              │  시작   │
+                              └────┬────┘
+                                   │
+                                   ▼
+                         ┌─────────────────┐
+                         │    홈 화면      │
+                         │  (인트로 후)    │
+                         └────────┬────────┘
+                                  │
+                    ┌─────────────┼─────────────┐
+                    │             │             │
+                    ▼             ▼             ▼
+            ┌───────────┐ ┌───────────┐ ┌───────────┐
+            │ 로그인/   │ │ 샘플 영상 │ │ 서비스    │
+            │ 회원가입  │ │ 둘러보기  │ │ 소개 확인 │
+            └─────┬─────┘ └───────────┘ └───────────┘
+                  │
+                  ▼
+         ┌────────────────┐
+         │   로그인 완료   │
+         │ (20크레딧 지급) │
+         └───────┬────────┘
+                 │
+                 ▼
+┌────────────────────────────────────────────────────────────────┐
+│                         메인 네비게이션                          │
+├────────────┬────────────┬────────────┬────────────┬────────────┤
+│    홈      │  영상만들기  │ 이미지만들기 │  크레딧    │  마이페이지 │
+└────────────┴────────────┴────────────┴────────────┴────────────┘
+        </div>
+
+        <h3>2) 핵심 화면 와이어프레임</h3>
+
+        <h4>화면 1: 홈 화면 (/)</h4>
+        <div class="wireframe">
+┌─────────────────────────────────────────────────────────────────┐
+│ [로고] 삽가능 스튜디오              [로그인] [무료로 시작하기]    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│                    ✨ 삽가능 스튜디오 ✨                         │
+│                                                                 │
+│              이미지와 상품명만 있으면 OK!                        │
+│        AI가 자동으로 전문적인 광고 영상을 만들어드립니다          │
+│                                                                 │
+│                 [ 무료로 시작하기 (20크레딧) ]                   │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                      📌 이용 방법                               │
+│   ┌─────┐      ┌─────┐      ┌─────┐      ┌─────┐              │
+│   │  1  │  →   │  2  │  →   │  3  │  →   │  4  │              │
+│   │ 📷  │      │ ✏️  │      │ ✅  │      │ ⬇️  │              │
+│   └─────┘      └─────┘      └─────┘      └─────┘              │
+│   이미지        상품명       광고문구      완성!                 │
+│   업로드        입력         선택         다운로드               │
+└─────────────────────────────────────────────────────────────────┘
+        </div>
+
+        <h4>화면 2: 영상 만들기 - Step 1 (/video)</h4>
+        <div class="wireframe">
+┌─────────────────────────────────────────────────────────────────┐
+│ [←] 영상 만들기                              크레딧: 💰 100     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Step 1 ─────●───────────────────────────────────  (1/4)       │
+│  이미지 업로드                                                   │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │                         🖼️                               │ │
+│  │         이미지를 드래그하거나 클릭하여 업로드              │ │
+│  │         지원 형식: JPG, PNG, WebP                         │ │
+│  │         최대 크기: 10MB                                   │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│                                              [다음 →]          │
+└─────────────────────────────────────────────────────────────────┘
+        </div>
+
+        <h4>화면 3: 영상 생성 진행 상황</h4>
+        <div class="wireframe">
+┌─────────────────────────────────────────────────────────────────┐
+│                       영상 생성 중...                            │
+├─────────────────────────────────────────────────────────────────┤
+│                    🎬 영상을 만들고 있어요                       │
+│           ████████████████░░░░░░░░░░░░░░  45%                  │
+│                  예상 완료 시간: 약 2분 30초                     │
+├─────────────────────────────────────────────────────────────────┤
+│    [✓] 1. 초기화                              완료              │
+│    [✓] 2. 광고문구 생성                       완료              │
+│    [✓] 3. 광고문구 선택                       완료              │
+│    [→] 4. 이미지 정제                         진행 중...        │
+│    [ ] 5. 영상 생성                           대기 중           │
+│    [ ] 6. 음성 생성 (TTS)                     대기 중           │
+│    [ ] 7. 자막 생성                           대기 중           │
+│    [ ] 8. 최종 합성                           대기 중           │
+└─────────────────────────────────────────────────────────────────┘
+        </div>
+
+        <h4>화면 4: 대시보드 (/dashboard)</h4>
+        <div class="wireframe">
+┌─────────────────────────────────────────────────────────────────┐
+│ 마이페이지                                   크레딧: 💰 420     │
+│                                              [충전하기]         │
+├─────────────────────────────────────────────────────────────────┤
+│  [전체]  [영상 11]  [이미지 25]  [진행중 2]                     │
+│  정렬: [최신순 ▼]                                               │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐              │
+│  │ 🎬      │ │ 🖼️      │ │ 🎬      │ │ ⏳      │              │
+│  │         │ │         │ │         │ │         │              │
+│  │         │ │         │ │         │ │ 진행중  │              │
+│  │─────────│ │─────────│ │─────────│ │─────────│              │
+│  │무선이어폰│ │가디건    │ │운동화   │ │새상품   │              │
+│  │12.05    │ │12.04    │ │12.03    │ │45%     │              │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘              │
+└─────────────────────────────────────────────────────────────────┘
+        </div>
+
+        <h3>3) 화면별 입력값 및 예외 처리</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>화면</th>
+              <th>입력값</th>
+              <th>유효성 검증</th>
+              <th>예외 처리</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>이미지 업로드</td>
+              <td>이미지 파일</td>
+              <td>JPG/PNG/WebP, 최대 10MB</td>
+              <td>형식 오류 시 안내 메시지</td>
+            </tr>
+            <tr>
+              <td>상품 정보 입력</td>
+              <td>상품명(필수), 설명(선택)</td>
+              <td>상품명 1~200자</td>
+              <td>미입력 시 경고 표시</td>
+            </tr>
+            <tr>
+              <td>광고문구 선택</td>
+              <td>5개 중 1개 선택</td>
+              <td>필수 선택</td>
+              <td>미선택 시 버튼 비활성화</td>
+            </tr>
+            <tr>
+              <td>영상 생성</td>
+              <td>크레딧 차감 동의</td>
+              <td>잔액 ≥ 80 확인</td>
+              <td>부족 시 충전 모달 표시</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 5: 기술 요구사항 -->
+      <section id="tech">
+        <h2>5. 기술 요구사항</h2>
+
+        <h3>1) 기술 스택</h3>
+        <div class="tech-grid">
+          <div class="tech-item">
+            <div class="tech-name">Next.js 15</div>
+            <div class="tech-desc">React 기반 풀스택 프레임워크</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">React 19</div>
+            <div class="tech-desc">사용자 인터페이스 라이브러리</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">TypeScript</div>
+            <div class="tech-desc">정적 타입 검사</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Tailwind CSS v4</div>
+            <div class="tech-desc">유틸리티 기반 스타일링</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Clerk</div>
+            <div class="tech-desc">사용자 인증 서비스</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Supabase</div>
+            <div class="tech-desc">PostgreSQL + 스토리지</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">TossPayments</div>
+            <div class="tech-desc">결제 처리 서비스</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">n8n</div>
+            <div class="tech-desc">AI 워크플로우 자동화</div>
+          </div>
+        </div>
+
+        <h3>2) 데이터 모델</h3>
+        <div class="wireframe">
+users (사용자)
+├── id: UUID (PK)
+├── clerk_id: TEXT (Unique)
+├── name: TEXT
+├── credit_balance: INTEGER
+├── role: TEXT ('user' | 'admin')
+└── created_at: TIMESTAMP
+
+product_images (상품 이미지)
+├── id: UUID (PK)
+├── user_id: TEXT (FK → users.clerk_id)
+├── storage_path: TEXT
+├── original_filename: TEXT
+├── file_size: INTEGER (≤10MB)
+└── created_at: TIMESTAMP
+
+ad_videos (광고 영상)
+├── id: UUID (PK)
+├── user_id: TEXT (FK)
+├── product_image_id: UUID (FK)
+├── video_url: TEXT
+├── status: TEXT (pending|processing|completed|failed)
+├── progress_stage: TEXT (8단계)
+└── created_at: TIMESTAMP
+
+payments (결제)
+├── id: UUID (PK)
+├── user_id: TEXT (FK)
+├── order_id: TEXT (Unique)
+├── payment_key: TEXT
+├── amount: INTEGER
+├── status: TEXT
+└── created_at: TIMESTAMP
+        </div>
+
+        <h3>3) 외부 API</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>서비스</th>
+              <th>용도</th>
+              <th>API/SDK</th>
+              <th>필수 여부</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Clerk</strong></td>
+              <td>사용자 인증</td>
+              <td>@clerk/nextjs</td>
+              <td>필수</td>
+            </tr>
+            <tr>
+              <td><strong>Supabase</strong></td>
+              <td>데이터베이스 + 스토리지</td>
+              <td>@supabase/supabase-js</td>
+              <td>필수</td>
+            </tr>
+            <tr>
+              <td><strong>TossPayments</strong></td>
+              <td>결제 처리</td>
+              <td>@tosspayments/tosspayments-sdk</td>
+              <td>필수</td>
+            </tr>
+            <tr>
+              <td><strong>n8n</strong></td>
+              <td>AI 워크플로우</td>
+              <td>Webhook API</td>
+              <td>필수</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>4) AI 워크플로우 구조</h3>
+        <div class="card">
+          <h4>광고문구 생성 (n8n Webhook)</h4>
+          <p><strong>INPUT:</strong></p>
+          <pre>{
+  "ad_video_id": "uuid-xxxx",
+  "product_image_id": "uuid-yyyy",
+  "product_info_id": "uuid-zzzz"
+}</pre>
+          <p><strong>OUTPUT:</strong></p>
+          <pre>{
+  "ad_copies": [
+    { "id": 1, "text": "프리미엄 사운드의 새로운 기준..." },
+    { "id": 2, "text": "당신의 일상에 음악을 더하다..." },
+    { "id": 3, "text": "끊김 없는 연결, 완벽한 사운드..." },
+    { "id": 4, "text": "하루종일 편안한 착용감..." },
+    { "id": 5, "text": "지금 만나보세요..." }
+  ]
+}</pre>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 6: 경쟁 서비스 분석 -->
+      <section id="competitor">
+        <h2>6. 경쟁 서비스 분석</h2>
+
+        <h3>주요 경쟁사 비교</h3>
+        <table class="competitor-table">
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>Canva</th>
+              <th>Vrew</th>
+              <th>망고보드</th>
+              <th>삽가능</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>주요 기능</strong></td>
+              <td>범용 디자인</td>
+              <td>AI 자막 영상</td>
+              <td>템플릿 디자인</td>
+              <td>AI 광고 영상</td>
+            </tr>
+            <tr>
+              <td><strong>타깃</strong></td>
+              <td>일반/전문가</td>
+              <td>영상 제작자</td>
+              <td>마케터/디자이너</td>
+              <td>소상공인</td>
+            </tr>
+            <tr>
+              <td><strong>가격</strong></td>
+              <td>월 14,900원~</td>
+              <td>월 9,900원~</td>
+              <td>월 9,900원~</td>
+              <td>건당 1.2만원~</td>
+            </tr>
+            <tr>
+              <td><strong>학습 곡선</strong></td>
+              <td>중간</td>
+              <td>중간</td>
+              <td>낮음</td>
+              <td>매우 낮음</td>
+            </tr>
+            <tr>
+              <td><strong>AI 문구 생성</strong></td>
+              <td>△ 제한적</td>
+              <td>X</td>
+              <td>X</td>
+              <td>✓ 핵심 기능</td>
+            </tr>
+            <tr>
+              <td><strong>영상 완전 자동화</strong></td>
+              <td>X</td>
+              <td>△ 부분</td>
+              <td>X</td>
+              <td>✓ 완전 자동</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>삽가능의 차별점</h3>
+        <div class="value-box">
+          <ul>
+            <li><strong>타깃 집중:</strong> 소상공인 특화 (기존 서비스는 범용)</li>
+            <li><strong>극한의 단순화:</strong> 이미지 업로드 → 상품명 입력 → 끝</li>
+            <li><strong>AI 문구 생성:</strong> 광고 문구까지 자동 생성</li>
+            <li><strong>건당 과금:</strong> 구독 부담 없는 종량제</li>
+            <li><strong>숏폼 최적화:</strong> 9:16 세로형 영상 전문</li>
+          </ul>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 7: 사용자 시나리오 -->
+      <section id="scenario">
+        <h2>7. 사용자 시나리오</h2>
+
+        <h3>시나리오 1: 신규 가입 후 첫 영상 제작</h3>
+        <div class="card">
+          <p><strong>사용자:</strong> 김소상 (의류 쇼핑몰 운영)</p>
+          <p><strong>상황:</strong> 인스타그램에 올릴 신상품 광고 영상이 필요함</p>
+
+          <ol>
+            <li><strong>검색/유입</strong>: "AI 광고 영상 만들기" 검색 → 삽가능 스튜디오 발견</li>
+            <li><strong>회원가입</strong>: Google 계정으로 3초 만에 가입 → 20크레딧 지급 확인</li>
+            <li><strong>영상 제작</strong>:
+              <ul>
+                <li>상품 이미지 드래그 앤 드롭 업로드</li>
+                <li>상품명 "봄 신상 플로럴 원피스" 입력</li>
+                <li>AI가 생성한 5개 문구 중 마음에 드는 것 선택</li>
+                <li>"영상 생성" 클릭 → 무료 크레딧 20개로는 부족</li>
+              </ul>
+            </li>
+            <li><strong>결제</strong>: Single 요금제 (100크레딧, 17,900원) 결제</li>
+            <li><strong>완성</strong>: 4분 후 영상 완성 → 다운로드 → 인스타 릴스 업로드</li>
+          </ol>
+
+          <p><strong>결과:</strong> 만족스러운 품질에 놀람. "외주 맡기면 50만 원인데..." 라며 재사용 의지 표명</p>
+        </div>
+
+        <h3>시나리오 2: 대량 콘텐츠 제작 (마케터)</h3>
+        <div class="card">
+          <p><strong>사용자:</strong> 이마케터 (스타트업 마케팅 담당)</p>
+          <p><strong>상황:</strong> A/B 테스트용 광고 소재 10개 필요, 디자이너 리소스 부족</p>
+
+          <ol>
+            <li><strong>크레딧 충전</strong>: Business 10 (1,000크레딧, 153,000원) 결제</li>
+            <li><strong>이미지 제작</strong>: 같은 상품으로 다른 문구 5개씩 선택 → 이미지 10개 생성</li>
+            <li><strong>영상 제작</strong>: 상위 성과 2개 선택 → 영상으로 제작</li>
+            <li><strong>활용</strong>: Facebook/Instagram 광고에 소재 업로드</li>
+          </ol>
+
+          <p><strong>소요 시간:</strong> 총 2시간 (기존: 디자이너 요청 시 3일)</p>
+          <p><strong>결과:</strong> 빠른 테스트 가능, 디자이너 부담 감소</p>
+        </div>
+
+        <h3>시나리오 3: 1인 창업자의 일상적 활용</h3>
+        <div class="card">
+          <p><strong>사용자:</strong> 박창업 (핸드메이드 악세서리 판매)</p>
+          <p><strong>상황:</strong> 매주 신상품 1~2개 출시, SNS 콘텐츠 지속 필요</p>
+
+          <ol>
+            <li><strong>루틴</strong>: 매주 금요일 신상품 촬영 → 삽가능에서 영상/이미지 제작</li>
+            <li><strong>주간 사용량</strong>: 영상 1개 (80크레딧) + 이미지 2개 (40크레딧) = 120크레딧</li>
+            <li><strong>월간 비용</strong>: Business 5 (500크레딧, 75,500원) → 약 4주 사용 가능</li>
+            <li><strong>업로드</strong>: 월요일 인스타 릴스, 수요일 스마트스토어 상세페이지</li>
+          </ol>
+
+          <p><strong>결과:</strong> 꾸준한 콘텐츠 업로드로 팔로워 증가, 월 매출 20% 향상</p>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 8: 기대 효과 및 리스크 -->
+      <section id="risk">
+        <h2>8. 기대 효과 및 리스크</h2>
+
+        <h3>기대 효과</h3>
+
+        <h4>사용자 관점</h4>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-value">95%</div>
+            <div class="kpi-label">비용 절감</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value">99%</div>
+            <div class="kpi-label">시간 절감</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value">5분</div>
+            <div class="kpi-label">영상 완성까지</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">필요 기술 수준</div>
+          </div>
+        </div>
+
+        <h4>비즈니스 관점</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>지표</th>
+              <th>1년차 목표</th>
+              <th>3년차 목표</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MAU</td>
+              <td>5,000명</td>
+              <td>50,000명</td>
+            </tr>
+            <tr>
+              <td>MRR</td>
+              <td>5,000만 원</td>
+              <td>5억 원</td>
+            </tr>
+            <tr>
+              <td>월간 콘텐츠 생성</td>
+              <td>40,000건</td>
+              <td>400,000건</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>리스크 분석</h3>
+        <div class="risk-grid">
+          <div class="risk-card">
+            <div class="risk-header">
+              <span class="risk-title">AI 생성 품질 불만족</span>
+              <span class="risk-level risk-high">높음</span>
+            </div>
+            <p><strong>영향:</strong> 사용자 이탈, 부정적 리뷰</p>
+            <p><strong>대응:</strong> 재생성 기능 제공, 품질 지속 개선, 환불 정책</p>
+          </div>
+
+          <div class="risk-card">
+            <div class="risk-header">
+              <span class="risk-title">경쟁사 유사 서비스 출시</span>
+              <span class="risk-level risk-medium">중간</span>
+            </div>
+            <p><strong>영향:</strong> 시장 점유율 경쟁 심화</p>
+            <p><strong>대응:</strong> 소상공인 특화 기능 강화, 커뮤니티 구축</p>
+          </div>
+
+          <div class="risk-card">
+            <div class="risk-header">
+              <span class="risk-title">AI API 비용 상승</span>
+              <span class="risk-level risk-medium">중간</span>
+            </div>
+            <p><strong>영향:</strong> 수익성 악화</p>
+            <p><strong>대응:</strong> 다중 모델 전략, 자체 모델 개발 검토</p>
+          </div>
+
+          <div class="risk-card">
+            <div class="risk-header">
+              <span class="risk-title">서버 장애/다운타임</span>
+              <span class="risk-level risk-low">낮음</span>
+            </div>
+            <p><strong>영향:</strong> 서비스 신뢰도 하락</p>
+            <p><strong>대응:</strong> 이중화 구성, 모니터링 강화, SLA 99.5%</p>
+          </div>
+        </div>
+
+        <h3>리스크 매트릭스</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>리스크</th>
+              <th>발생 가능성</th>
+              <th>영향도</th>
+              <th>우선순위</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AI 생성 품질 불만족</td>
+              <td>중</td>
+              <td>높음</td>
+              <td>1순위</td>
+            </tr>
+            <tr>
+              <td>경쟁사 유사 서비스</td>
+              <td>높음</td>
+              <td>중</td>
+              <td>2순위</td>
+            </tr>
+            <tr>
+              <td>AI API 비용 상승</td>
+              <td>중</td>
+              <td>중</td>
+              <td>3순위</td>
+            </tr>
+            <tr>
+              <td>서버 장애</td>
+              <td>낮음</td>
+              <td>높음</td>
+              <td>4순위</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Footer -->
+      <footer style="text-align: center; padding: 2rem 0; color: var(--text-muted);">
+        <p>© 2024 삽가능 스튜디오. All rights reserved.</p>
+        <p style="margin-top: 0.5rem;">
+          <a href="https://sappstudio.kr" target="_blank" style="color: var(--gold-primary); text-decoration: none;">sappstudio.kr</a>
+        </p>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    // Sidebar active state on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.sidebar-item');
+
+    function setActiveLink() {
+      let current = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (window.scrollY >= sectionTop - 100) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', setActiveLink);
+
+    // Smooth scroll
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
