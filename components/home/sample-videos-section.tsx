@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Loader2 } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   fetchPublicVideos,
   type PublicVideo,
@@ -21,92 +22,90 @@ function VideoCard({ video }: { video: SampleVideo }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showPlayButton, setShowPlayButton] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Intersection Observer로 뷰포트에 보일 때만 재생 시도
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    const containerElement = containerRef.current;
-    if (!videoElement || !containerElement) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // 뷰포트에 보이면 재생 시도
-            videoElement.play().then(() => {
-              setIsPlaying(true);
-              setShowPlayButton(false);
-            }).catch(() => {
-              // 자동 재생 실패 시 재생 버튼 표시
-              setShowPlayButton(true);
-              setIsPlaying(false);
-            });
-          } else {
-            // 뷰포트에서 벗어나면 일시정지
-            videoElement.pause();
-            setIsPlaying(false);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(containerElement);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  // 비디오 이벤트 핸들러
+  // 비디오 로드 완료 및 이벤트 핸들러
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement) return;
+
+    const handleCanPlay = () => {
+      setIsLoaded(true);
+    };
 
     const handlePlay = () => {
       setIsPlaying(true);
-      setShowPlayButton(false);
     };
+
     const handlePause = () => {
       setIsPlaying(false);
     };
-    const handleEnded = () => {
-      setIsPlaying(false);
+
+    const handleWaiting = () => {
+      // 버퍼링 중
     };
 
+    videoElement.addEventListener("canplay", handleCanPlay);
+    videoElement.addEventListener("canplaythrough", handleCanPlay);
     videoElement.addEventListener("play", handlePlay);
     videoElement.addEventListener("pause", handlePause);
-    videoElement.addEventListener("ended", handleEnded);
+    videoElement.addEventListener("waiting", handleWaiting);
+
+    // 이미 로드된 경우
+    if (videoElement.readyState >= 3) {
+      setIsLoaded(true);
+    }
 
     return () => {
+      videoElement.removeEventListener("canplay", handleCanPlay);
+      videoElement.removeEventListener("canplaythrough", handleCanPlay);
       videoElement.removeEventListener("play", handlePlay);
       videoElement.removeEventListener("pause", handlePause);
-      videoElement.removeEventListener("ended", handleEnded);
+      videoElement.removeEventListener("waiting", handleWaiting);
     };
   }, []);
 
-  // 재생/일시정지 토글
-  const handlePlayPause = useCallback(() => {
+  // 재생/일시정지 토글 - 모바일 최적화
+  const handlePlayPause = useCallback(async () => {
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
-    if (videoElement.paused) {
-      videoElement.muted = true; // 모바일에서 재생을 위해 muted 유지
-      videoElement.play().then(() => {
+    try {
+      if (videoElement.paused) {
+        // 모바일에서 재생을 위한 필수 설정
+        videoElement.muted = true;
+        videoElement.playsInline = true;
+
+        // 비디오가 로드되지 않았으면 먼저 로드
+        if (videoElement.readyState < 2) {
+          videoElement.load();
+          // 로드 완료 대기
+          await new Promise<void>((resolve) => {
+            const onCanPlay = () => {
+              videoElement.removeEventListener("canplay", onCanPlay);
+              resolve();
+            };
+            videoElement.addEventListener("canplay", onCanPlay);
+          });
+        }
+
+        // 재생 시도
+        await videoElement.play();
         setIsPlaying(true);
-        setShowPlayButton(false);
-      }).catch((error) => {
-        console.error("Video play failed:", error);
-      });
-    } else {
-      videoElement.pause();
+      } else {
+        videoElement.pause();
+        setIsPlaying(false);
+      }
+    } catch (error) {
+      console.error("Video play failed:", error);
+      // 재생 실패 시 상태 초기화
       setIsPlaying(false);
     }
   }, []);
 
-  // 컨테이너 클릭 시 재생/일시정지 (모바일 터치 지원)
-  const handleContainerClick = useCallback(() => {
+  // 컨테이너 터치/클릭 시 재생/일시정지
+  const handleContainerClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
     handlePlayPause();
   }, [handlePlayPause]);
 
@@ -116,6 +115,7 @@ function VideoCard({ video }: { video: SampleVideo }) {
       className="relative overflow-hidden rounded-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
       style={{ aspectRatio: "9/16", minHeight: "400px", width: "100%" }}
       onClick={handleContainerClick}
+      onTouchEnd={handleContainerClick}
     >
       <video
         ref={videoRef}
@@ -124,28 +124,25 @@ function VideoCard({ video }: { video: SampleVideo }) {
         loop
         muted
         playsInline
-        preload="metadata"
-        poster=""
+        webkit-playsinline="true"
+        preload="auto"
+        crossOrigin="anonymous"
       >
         <track kind="captions" />
       </video>
 
-      {/* 재생 버튼 오버레이 - 재생 중이 아닐 때 또는 hover 시 표시 */}
+      {/* 재생 버튼 오버레이 */}
       <div
         className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
-          showPlayButton || !isPlaying
+          !isPlaying
             ? "bg-black/40 opacity-100"
-            : "bg-black/30 opacity-0 group-hover:opacity-100"
+            : "bg-transparent opacity-0"
         }`}
       >
         <Button
           size="icon"
           variant="secondary"
-          className="rounded-full w-14 h-14 md:w-16 md:h-16 shadow-lg"
-          onClick={(e) => {
-            e.stopPropagation();
-            handlePlayPause();
-          }}
+          className="rounded-full w-14 h-14 md:w-16 md:h-16 shadow-lg pointer-events-none"
         >
           {isPlaying ? (
             <Pause className="w-6 h-6 md:w-7 md:h-7 fill-current" />

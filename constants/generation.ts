@@ -33,8 +33,8 @@ export const STAGE_DESCRIPTIONS: Record<GenerationStage, string> = {
   init: "영상 생성 준비 중입니다",
   ad_copy_generation: "AI가 광고 문구를 생성하고 있습니다",
   ad_copy_selection: "생성된 광고 문구 중 하나를 선택해주세요",
-  image_refinement: "Gemini 2.5 Flash로 이미지를 정제하고 있습니다",
-  video_generation: "OpenAI Sora 2로 영상을 생성하고 있습니다",
+  image_refinement: "Nano Banana Pro로 이미지를 정제하고 있습니다",
+  video_generation: "OpenAI Sora 2 Pro로 영상을 생성하고 있습니다",
   completed: "영상 생성이 완료되었습니다",
 };
 
