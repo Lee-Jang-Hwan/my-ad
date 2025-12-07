@@ -40,7 +40,7 @@ export const IMAGE_STAGE_INFO: ImageStageInfo[] = [
   {
     key: "image_generation",
     label: "이미지 생성",
-    description: "AI가 광고 이미지를 생성하고 있습니다",
+    description: "Nano Banana Pro가 광고 이미지를 생성하고 있습니다",
     estimatedSeconds: 45,
     iconName: "ImagePlus",
   },
