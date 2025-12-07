@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClerkSupabaseClient } from "@/lib/supabase/server";
+import { getServiceRoleClient } from "@/lib/supabase/service-role";
 import type { AdImage } from "@/types/ad-image";
 
 interface ImageWithProductName extends AdImage {
@@ -47,7 +47,7 @@ export async function fetchUserImages(
       };
     }
 
-    const supabase = createClerkSupabaseClient();
+    const supabase = getServiceRoleClient();
 
     // Build query
     let query = supabase

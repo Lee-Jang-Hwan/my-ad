@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClerkSupabaseClient } from "@/lib/supabase/server";
+import { getServiceRoleClient } from "@/lib/supabase/service-role";
 import type {
   FilterParams,
   FetchUserVideosResult,
@@ -32,11 +32,12 @@ export async function fetchUserVideos(
     // Parse and validate parameters
     const status = params.status || "all";
     const sortBy = params.sortBy || "newest";
-    const page = Math.max(1, params.page || 1); // Ensure page >= 1
+    const page = Math.max(1, params.page || 1);
     const limit = DEFAULT_LIMIT;
+    const ascending = sortBy === "oldest";
 
-    // Create Supabase client with Clerk auth
-    const supabase = createClerkSupabaseClient();
+    // Create Supabase client with Service Role
+    const supabase = getServiceRoleClient();
 
     console.log("🔍 Fetching videos for user:", clerkId, "with filters:", {
       status,
@@ -45,77 +46,110 @@ export async function fetchUserVideos(
       limit,
     });
 
-    // Build base query (fetch all ad_videos first)
-    let query = supabase
+    // First, get total count
+    let countQuery = supabase
       .from("ad_videos")
-      .select("*", { count: "exact" })
+      .select("*", { count: "exact", head: true })
       .eq("user_id", clerkId);
 
-    // Apply status filter (skip if "all")
     if (status !== "all") {
-      // "failed" tab includes both failed and cancelled videos
       if (status === "failed") {
-        query = query.in("status", ["failed", "cancelled"]);
+        countQuery = countQuery.in("status", ["failed", "cancelled"]);
       } else {
-        query = query.eq("status", status);
+        countQuery = countQuery.eq("status", status);
       }
     }
 
-    // Apply sorting
-    const ascending = sortBy === "oldest";
-    query = query.order("created_at", { ascending });
+    const { count, error: countError } = await countQuery;
 
-    // Apply pagination
-    const offset = (page - 1) * limit;
-    query = query.range(offset, offset + limit - 1);
-
-    // Execute query
-    const { data, error, count } = await query;
-
-    if (error) {
-      console.error("❌ Fetch user videos error:", {
-        error,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-      });
+    if (countError) {
+      console.error("❌ Count query error:", countError.message);
       return {
         success: false,
-        error: "영상 목록을 불러오는 중 오류가 발생했습니다.",
+        error: `영상 목록을 불러오는 중 오류가 발생했습니다. (${countError.message || "알 수 없는 오류"})`,
       };
     }
 
-    console.log("✅ Fetched videos count:", count, "data length:", data?.length);
+    const totalCount = count || 0;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    console.log("📊 Total count:", totalCount, "Total pages:", totalPages);
+
+    // If no data, return empty result
+    if (totalCount === 0) {
+      return {
+        success: true,
+        videos: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalCount: 0,
+          limit,
+        },
+      };
+    }
+
+    // If page exceeds total pages, return empty result (not error)
+    if (page > totalPages) {
+      return {
+        success: true,
+        videos: [],
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalCount,
+          limit,
+        },
+      };
+    }
+
+    // Fetch paginated data
+    const offset = (page - 1) * limit;
+
+    let dataQuery = supabase
+      .from("ad_videos")
+      .select("*")
+      .eq("user_id", clerkId);
+
+    if (status !== "all") {
+      if (status === "failed") {
+        dataQuery = dataQuery.in("status", ["failed", "cancelled"]);
+      } else {
+        dataQuery = dataQuery.eq("status", status);
+      }
+    }
+
+    dataQuery = dataQuery
+      .order("created_at", { ascending })
+      .range(offset, offset + limit - 1);
+
+    const { data, error } = await dataQuery;
+
+    if (error) {
+      console.error("❌ Fetch user videos error:", error.message);
+      return {
+        success: false,
+        error: `영상 목록을 불러오는 중 오류가 발생했습니다. (${error.message || "알 수 없는 오류"})`,
+      };
+    }
+
+    console.log("✅ Fetched videos:", data?.length);
 
     // Fetch product names separately for each video
     const videos: VideoWithProductName[] = await Promise.all(
-      (data || []).map(async (item, index) => {
+      (data || []).map(async (item) => {
         let productName: string | null = null;
 
         if (item.product_info_id) {
           try {
-            const { data: productData, error: productError } = await supabase
+            const { data: productData } = await supabase
               .from("product_info")
               .select("product_name")
               .eq("id", item.product_info_id)
               .single();
 
-            if (productError) {
-              console.error(`⚠️ Error fetching product for video ${index}:`, {
-                video_id: item.id,
-                product_info_id: item.product_info_id,
-                error: productError,
-              });
-            }
-
             productName = productData?.product_name || null;
-          } catch (productFetchError) {
-            console.error(`❌ Exception fetching product for video ${index}:`, {
-              video_id: item.id,
-              product_info_id: item.product_info_id,
-              error: productFetchError,
-            });
+          } catch {
             // Continue with null product name
           }
         }
@@ -141,18 +175,6 @@ export async function fetchUserVideos(
     );
 
     console.log("✅ Successfully processed all videos with product names");
-
-    // Calculate pagination info
-    const totalCount = count || 0;
-    const totalPages = Math.ceil(totalCount / limit);
-
-    // If requested page exceeds total pages, return error
-    if (page > totalPages && totalCount > 0) {
-      return {
-        success: false,
-        error: `페이지 ${page}는 존재하지 않습니다. (총 ${totalPages} 페이지)`,
-      };
-    }
 
     return {
       success: true,

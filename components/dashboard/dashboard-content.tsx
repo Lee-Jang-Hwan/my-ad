@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Video, ImageIcon } from "lucide-react";
+import { Video, ImageIcon, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FilterBar } from "./filter-bar";
 import { VideoGrid } from "./video-grid";
 import { ImageGrid } from "./image-grid";
-import { Pagination } from "./pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUserVideos } from "@/actions/fetch-user-videos";
 import { fetchUserImages } from "@/actions/image/fetch-user-images";
@@ -30,8 +29,7 @@ interface DashboardContentProps {
 
 /**
  * Main dashboard content component (Client Component)
- * Manages URL-based state for filtering, sorting, and pagination
- * Includes tabs for videos and images
+ * Uses infinite scroll for loading more items
  */
 export function DashboardContent({
   initialVideos,
@@ -48,100 +46,193 @@ export function DashboardContent({
 
   // Video state
   const [videos, setVideos] = useState(initialVideos);
-  const [videoPagination, setVideoPagination] = useState(initialPagination);
+  const [videoPage, setVideoPage] = useState(1);
+  const [videoHasMore, setVideoHasMore] = useState(
+    initialPagination.currentPage < initialPagination.totalPages
+  );
+  const [videoTotalCount, setVideoTotalCount] = useState(initialPagination.totalCount);
 
   // Image state
   const [images, setImages] = useState<ImageWithProductName[]>([]);
-  const [imagePagination, setImagePagination] = useState<PaginationInfo>({
-    currentPage: 1,
-    totalPages: 1,
-    totalCount: 0,
-    limit: 12,
-  });
+  const [imagePage, setImagePage] = useState(1);
+  const [imageHasMore, setImageHasMore] = useState(true);
+  const [imageTotalCount, setImageTotalCount] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState(false);
 
   // Shared state
-  const [filter, setFilter] = useState(initialFilter);
+  const [filter, setFilter] = useState<Omit<FilterParams, "page">>({
+    status: initialFilter.status,
+    sortBy: initialFilter.sortBy,
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Track if this is the very first render
-  const [isFirstRender, setIsFirstRender] = useState(true);
+  // Refs for infinite scroll
+  const videoObserverRef = useRef<HTMLDivElement>(null);
+  const imageObserverRef = useRef<HTMLDivElement>(null);
 
-  // Sync state with URL params
+  // Sync filter with URL params (only status and sortBy)
   useEffect(() => {
     const status =
       (searchParams.get("status") as FilterParams["status"]) || "all";
     const sortBy =
       (searchParams.get("sortBy") as FilterParams["sortBy"]) || "newest";
-    const page = parseInt(searchParams.get("page") || "1");
     const tab = (searchParams.get("tab") as "videos" | "images") || "videos";
 
-    setFilter({ status, sortBy, page });
+    setFilter({ status, sortBy });
     setActiveTab(tab);
   }, [searchParams]);
 
-  // Fetch videos when filter changes
-  const refetchVideos = useCallback(async () => {
+  // Load more videos
+  const loadMoreVideos = useCallback(async () => {
+    if (isLoadingMore || !videoHasMore) return;
+
+    setIsLoadingMore(true);
+    const nextPage = videoPage + 1;
+
+    const result = await fetchUserVideos({
+      ...filter,
+      page: nextPage,
+    });
+
+    setIsLoadingMore(false);
+
+    if (result.success && result.videos && result.pagination) {
+      setVideos((prev) => [...prev, ...result.videos!]);
+      setVideoPage(nextPage);
+      setVideoHasMore(nextPage < result.pagination.totalPages);
+      setVideoTotalCount(result.pagination.totalCount);
+    }
+  }, [filter, videoPage, videoHasMore, isLoadingMore]);
+
+  // Load more images
+  const loadMoreImages = useCallback(async () => {
+    if (isLoadingMore || !imageHasMore) return;
+
+    setIsLoadingMore(true);
+    const nextPage = imagePage + 1;
+
+    const result = await fetchUserImages({
+      ...filter,
+      page: nextPage,
+    });
+
+    setIsLoadingMore(false);
+
+    if (result.success && result.images && result.pagination) {
+      setImages((prev) => [...prev, ...result.images!]);
+      setImagePage(nextPage);
+      setImageHasMore(nextPage < result.pagination.totalPages);
+      setImageTotalCount(result.pagination.totalCount);
+    }
+  }, [filter, imagePage, imageHasMore, isLoadingMore]);
+
+  // Reset and fetch videos when filter changes
+  const resetAndFetchVideos = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setVideoPage(1);
 
-    const result = await fetchUserVideos(filter);
+    const result = await fetchUserVideos({
+      ...filter,
+      page: 1,
+    });
 
     setIsLoading(false);
 
     if (result.success && result.videos && result.pagination) {
       setVideos(result.videos);
-      setVideoPagination(result.pagination);
+      setVideoHasMore(1 < result.pagination.totalPages);
+      setVideoTotalCount(result.pagination.totalCount);
     } else {
       setError(result.error || "영상 목록을 불러올 수 없습니다.");
     }
   }, [filter]);
 
-  // Fetch images when filter changes
-  const refetchImages = useCallback(async () => {
+  // Reset and fetch images when filter changes
+  const resetAndFetchImages = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setImagePage(1);
 
-    const result = await fetchUserImages(filter);
+    const result = await fetchUserImages({
+      ...filter,
+      page: 1,
+    });
 
     setIsLoading(false);
 
     if (result.success && result.images && result.pagination) {
       setImages(result.images);
-      setImagePagination(result.pagination);
+      setImageHasMore(1 < result.pagination.totalPages);
+      setImageTotalCount(result.pagination.totalCount);
       setImagesLoaded(true);
     } else {
       setError(result.error || "이미지 목록을 불러올 수 없습니다.");
     }
   }, [filter]);
 
-  // Refetch when filter or tab changes (but not on initial mount)
+  // Video infinite scroll observer
   useEffect(() => {
-    // Skip only the very first render to avoid duplicate fetch
-    if (isFirstRender) {
-      setIsFirstRender(false);
-      return;
+    if (activeTab !== "videos") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && videoHasMore && !isLoadingMore && !isLoading) {
+          loadMoreVideos();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    const currentRef = videoObserverRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
-    // Refetch based on active tab
-    if (activeTab === "videos") {
-      refetchVideos();
-    } else {
-      refetchImages();
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [activeTab, videoHasMore, isLoadingMore, isLoading, loadMoreVideos]);
+
+  // Image infinite scroll observer
+  useEffect(() => {
+    if (activeTab !== "images") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && imageHasMore && !isLoadingMore && !isLoading) {
+          loadMoreImages();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    const currentRef = imageObserverRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
-  }, [filter, activeTab, refetchVideos, refetchImages, isFirstRender]);
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [activeTab, imageHasMore, isLoadingMore, isLoading, loadMoreImages]);
 
   // Load images when switching to images tab for the first time
   useEffect(() => {
-    if (activeTab === "images" && !imagesLoaded && !isFirstRender) {
-      refetchImages();
+    if (activeTab === "images" && !imagesLoaded) {
+      resetAndFetchImages();
     }
-  }, [activeTab, imagesLoaded, refetchImages, isFirstRender]);
+  }, [activeTab, imagesLoaded, resetAndFetchImages]);
 
   // Update URL params
   const updateUrlParams = useCallback(
-    (newFilter: Partial<FilterParams>, newTab?: "videos" | "images") => {
+    (newFilter: Partial<Omit<FilterParams, "page">>, newTab?: "videos" | "images") => {
       const updatedFilter = { ...filter, ...newFilter };
       const tab = newTab || activeTab;
       const params = new URLSearchParams();
@@ -155,9 +246,6 @@ export function DashboardContent({
       if (updatedFilter.sortBy !== "newest") {
         params.set("sortBy", updatedFilter.sortBy);
       }
-      if (updatedFilter.page !== 1) {
-        params.set("page", updatedFilter.page.toString());
-      }
 
       const queryString = params.toString();
       router.push(queryString ? `/dashboard?${queryString}` : "/dashboard");
@@ -165,20 +253,52 @@ export function DashboardContent({
     [filter, activeTab, router]
   );
 
-  const handleFilterChange = (newFilter: Partial<FilterParams>) => {
-    updateUrlParams({ ...newFilter, page: 1 }); // Reset to page 1 when filter changes
-  };
+  // Handle filter change - reset and refetch
+  const handleFilterChange = useCallback(
+    (newFilter: Partial<FilterParams>) => {
+      updateUrlParams(newFilter, activeTab);
 
-  const handlePageChange = (page: number) => {
-    updateUrlParams({ page });
-  };
+      // Reset data and refetch
+      if (activeTab === "videos") {
+        setVideos([]);
+        setVideoPage(1);
+        setVideoHasMore(true);
+      } else {
+        setImages([]);
+        setImagePage(1);
+        setImageHasMore(true);
+        setImagesLoaded(false);
+      }
+    },
+    [activeTab, updateUrlParams]
+  );
 
-  const handleTabChange = (tab: string) => {
-    updateUrlParams({ page: 1 }, tab as "videos" | "images");
-  };
+  // Handle tab change
+  const handleTabChange = useCallback(
+    (tab: string) => {
+      updateUrlParams({}, tab as "videos" | "images");
+    },
+    [updateUrlParams]
+  );
 
-  // Get current pagination based on active tab
-  const currentPagination = activeTab === "videos" ? videoPagination : imagePagination;
+  // Refetch when filter changes
+  useEffect(() => {
+    if (activeTab === "videos" && videos.length === 0 && !isLoading) {
+      resetAndFetchVideos();
+    } else if (activeTab === "images" && images.length === 0 && imagesLoaded === false) {
+      // Will be handled by the images tab effect
+    }
+  }, [filter, activeTab, videos.length, images.length, isLoading, imagesLoaded, resetAndFetchVideos]);
+
+  // Handle video deleted
+  const handleVideoDeleted = useCallback(() => {
+    resetAndFetchVideos();
+  }, [resetAndFetchVideos]);
+
+  // Handle image deleted
+  const handleImageDeleted = useCallback(() => {
+    resetAndFetchImages();
+  }, [resetAndFetchImages]);
 
   return (
     <div className="space-y-6">
@@ -187,17 +307,20 @@ export function DashboardContent({
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="videos" className="gap-2">
             <Video className="w-4 h-4" />
-            영상
+            영상 {videoTotalCount > 0 && `(${videoTotalCount})`}
           </TabsTrigger>
           <TabsTrigger value="images" className="gap-2">
             <ImageIcon className="w-4 h-4" />
-            이미지
+            이미지 {imageTotalCount > 0 && `(${imageTotalCount})`}
           </TabsTrigger>
         </TabsList>
 
         {/* Filter bar */}
         <div className="mt-4">
-          <FilterBar currentFilter={filter} onFilterChange={handleFilterChange} />
+          <FilterBar
+            currentFilter={{ ...filter, page: 1 }}
+            onFilterChange={handleFilterChange}
+          />
         </div>
 
         {/* Error message */}
@@ -209,7 +332,7 @@ export function DashboardContent({
 
         {/* Videos Tab */}
         <TabsContent value="videos" className="mt-6">
-          {isLoading ? (
+          {isLoading && videos.length === 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="space-y-3">
@@ -220,17 +343,29 @@ export function DashboardContent({
               ))}
             </div>
           ) : (
-            <VideoGrid
-              videos={videos}
-              statusFilter={filter.status}
-              onVideoDeleted={refetchVideos}
-            />
+            <>
+              <VideoGrid
+                videos={videos}
+                statusFilter={filter.status}
+                onVideoDeleted={handleVideoDeleted}
+              />
+
+              {/* Infinite scroll trigger */}
+              <div ref={videoObserverRef} className="h-10 flex items-center justify-center">
+                {isLoadingMore && (
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                )}
+                {!videoHasMore && videos.length > 0 && (
+                  <p className="text-sm text-muted-foreground">모든 영상을 불러왔습니다</p>
+                )}
+              </div>
+            </>
           )}
         </TabsContent>
 
         {/* Images Tab */}
         <TabsContent value="images" className="mt-6">
-          {isLoading ? (
+          {isLoading && images.length === 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="space-y-3">
@@ -241,19 +376,26 @@ export function DashboardContent({
               ))}
             </div>
           ) : (
-            <ImageGrid
-              images={images}
-              statusFilter={filter.status}
-              onImageDeleted={refetchImages}
-            />
+            <>
+              <ImageGrid
+                images={images}
+                statusFilter={filter.status}
+                onImageDeleted={handleImageDeleted}
+              />
+
+              {/* Infinite scroll trigger */}
+              <div ref={imageObserverRef} className="h-10 flex items-center justify-center">
+                {isLoadingMore && (
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                )}
+                {!imageHasMore && images.length > 0 && (
+                  <p className="text-sm text-muted-foreground">모든 이미지를 불러왔습니다</p>
+                )}
+              </div>
+            </>
           )}
         </TabsContent>
       </Tabs>
-
-      {/* Pagination */}
-      {!isLoading && (
-        <Pagination pagination={currentPagination} onPageChange={handlePageChange} />
-      )}
     </div>
   );
 }
