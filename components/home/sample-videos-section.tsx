@@ -20,8 +20,9 @@ function VideoCard({ video }: { video: SampleVideo }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // 비디오 이벤트 리스너
+  // 비디오 로드 및 첫 프레임 표시
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement) return;
@@ -30,14 +31,33 @@ function VideoCard({ video }: { video: SampleVideo }) {
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => setIsPlaying(false);
 
+    // 메타데이터 로드 완료 시 첫 프레임으로 이동
+    const handleLoadedMetadata = () => {
+      videoElement.currentTime = 0.1; // 첫 프레임 표시
+    };
+
+    // 프레임 이동 완료 시 로드 상태 업데이트
+    const handleSeeked = () => {
+      setIsLoaded(true);
+    };
+
     videoElement.addEventListener("play", handlePlay);
     videoElement.addEventListener("pause", handlePause);
     videoElement.addEventListener("ended", handleEnded);
+    videoElement.addEventListener("loadedmetadata", handleLoadedMetadata);
+    videoElement.addEventListener("seeked", handleSeeked);
+
+    // 이미 로드된 경우 처리
+    if (videoElement.readyState >= 1) {
+      videoElement.currentTime = 0.1;
+    }
 
     return () => {
       videoElement.removeEventListener("play", handlePlay);
       videoElement.removeEventListener("pause", handlePause);
       videoElement.removeEventListener("ended", handleEnded);
+      videoElement.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      videoElement.removeEventListener("seeked", handleSeeked);
     };
   }, []);
 
@@ -98,19 +118,25 @@ function VideoCard({ video }: { video: SampleVideo }) {
       <video
         ref={videoRef}
         src={video.videoUrl}
-        className="absolute inset-0 w-full h-full object-cover bg-black"
+        className="absolute inset-0 w-full h-full object-cover bg-gray-900"
         loop
         muted
         playsInline
         preload="metadata"
-        poster=""
         style={{
           WebkitTransform: "translateZ(0)", // iOS 하드웨어 가속
         }}
       />
 
+      {/* 로딩 중일 때 로딩 인디케이터 표시 */}
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        </div>
+      )}
+
       {/* 정지 상태일 때만 어두운 오버레이 표시 */}
-      {!isPlaying && (
+      {!isPlaying && isLoaded && (
         <div className="absolute inset-0 bg-black/30 pointer-events-none" />
       )}
 
