@@ -5,6 +5,12 @@ import { createClerkSupabaseClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { IMAGE_GENERATION_COST, USER_ROLES } from "@/lib/constants/credits";
 import type { SelectImageAdCopyResult } from "@/types/ad-image";
+import {
+  logStageStart,
+  logStageComplete,
+  logStageFailed,
+  GENERATION_STAGES,
+} from "@/lib/log-generation";
 
 const N8N_ADPICTURE_WEBHOOK_URL =
   process.env.N8N_ADPICTURE_WEBHOOK_URL ||
@@ -109,6 +115,12 @@ export async function selectImageAdCopyAndGenerate(
       }
     }
 
+    // 로그: 광고문구 선택 완료
+    await logStageComplete(clerkId, adImageId, "image", GENERATION_STAGES.AD_COPY_SELECTION, "app", {
+      selectedCopyId,
+      isCustomText: !selectedCopyId,
+    });
+
     // Update ad_images with selected_ad_copy and change progress_stage
     const { error: updateImageError } = await supabase
       .from("ad_images")
@@ -126,6 +138,9 @@ export async function selectImageAdCopyAndGenerate(
         error: "이미지 정보 업데이트에 실패했습니다.",
       };
     }
+
+    // 로그: 이미지 생성 시작
+    await logStageStart(clerkId, adImageId, "image", GENERATION_STAGES.IMAGE_GENERATION, "app");
 
     // Deduct credits for non-admin users
     if (!isAdmin) {

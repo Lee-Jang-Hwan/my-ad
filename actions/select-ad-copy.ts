@@ -6,6 +6,12 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { revalidateUserVideos } from "@/lib/cache";
 import { VIDEO_GENERATION_COST, USER_ROLES } from "@/lib/constants/credits";
 import type { SelectAdCopyResult } from "@/types/ad-copy";
+import {
+  logStageStart,
+  logStageComplete,
+  logStageFailed,
+  GENERATION_STAGES,
+} from "@/lib/log-generation";
 
 const N8N_ADVIDEO_WEBHOOK_URL =
   process.env.N8N_ADVIDEO_WEBHOOK_URL ||
@@ -110,6 +116,12 @@ export async function selectAdCopyAndGenerate(
       }
     }
 
+    // 로그: 광고문구 선택 완료
+    await logStageComplete(clerkId, adVideoId, "video", GENERATION_STAGES.AD_COPY_SELECTION, "app", {
+      selectedCopyId,
+      isCustomText: !selectedCopyId,
+    });
+
     // Update ad_videos with selected_ad_copy and change progress_stage
     const { error: updateVideoError } = await supabase
       .from("ad_videos")
@@ -127,6 +139,9 @@ export async function selectAdCopyAndGenerate(
         error: "영상 정보 업데이트에 실패했습니다.",
       };
     }
+
+    // 로그: 이미지 정제 시작
+    await logStageStart(clerkId, adVideoId, "video", GENERATION_STAGES.IMAGE_REFINEMENT, "app");
 
     // Deduct credits for non-admin users
     if (!isAdmin) {
@@ -197,6 +212,11 @@ export async function selectAdCopyAndGenerate(
         throw new Error(`advideo webhook failed with status ${response.status}`);
       }
 
+      // 로그: 영상 생성 워크플로우 시작됨 (n8n에서 비동기로 진행)
+      await logStageStart(clerkId, adVideoId, "video", GENERATION_STAGES.VIDEO_GENERATION, "n8n", {
+        webhookStatus: response.status,
+      });
+
       // Revalidate user's video cache
       revalidateUserVideos(clerkId);
 
@@ -205,6 +225,17 @@ export async function selectAdCopyAndGenerate(
       };
     } catch (fetchError) {
       console.error("advideo webhook error:", fetchError);
+
+      // 로그: 영상 생성 요청 실패
+      await logStageFailed(
+        clerkId,
+        adVideoId,
+        "video",
+        GENERATION_STAGES.IMAGE_REFINEMENT,
+        "N8N_WEBHOOK_ERROR",
+        fetchError instanceof Error ? fetchError.message : "영상 생성 요청에 실패했습니다.",
+        "n8n"
+      );
 
       // Update ad_videos status to failed
       await supabase

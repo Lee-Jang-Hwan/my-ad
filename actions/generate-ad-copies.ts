@@ -4,6 +4,12 @@ import { auth } from "@clerk/nextjs/server";
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
 import { revalidateUserVideos } from "@/lib/cache";
 import type { GenerateAdCopiesResult } from "@/types/ad-copy";
+import {
+  logStageStart,
+  logStageComplete,
+  logStageFailed,
+  GENERATION_STAGES,
+} from "@/lib/log-generation";
 
 const N8N_ADCOPY_WEBHOOK_URL =
   process.env.N8N_ADCOPY_WEBHOOK_URL ||
@@ -55,6 +61,12 @@ export async function generateAdCopies(
       };
     }
 
+    // 로그: 초기화 완료
+    await logStageComplete(clerkId, videoData.id, "video", GENERATION_STAGES.INIT, "app", {
+      imageId,
+      productInfoId,
+    });
+
     // Update progress_stage to ad_copy_generation
     await supabase
       .from("ad_videos")
@@ -63,6 +75,9 @@ export async function generateAdCopies(
         progress_stage: "ad_copy_generation",
       })
       .eq("id", videoData.id);
+
+    // 로그: 광고문구 생성 시작
+    await logStageStart(clerkId, videoData.id, "video", GENERATION_STAGES.AD_COPY_GENERATION, "app");
 
     // Trigger adcopy webhook
     console.log("Triggering adcopy webhook:", N8N_ADCOPY_WEBHOOK_URL);
@@ -139,6 +154,11 @@ export async function generateAdCopies(
         })
         .eq("id", videoData.id);
 
+      // 로그: 광고문구 생성 완료
+      await logStageComplete(clerkId, videoData.id, "video", GENERATION_STAGES.AD_COPY_GENERATION, "n8n", {
+        copiesCount: savedCopies?.length || 0,
+      });
+
       // Revalidate user's video cache
       revalidateUserVideos(clerkId);
 
@@ -149,6 +169,17 @@ export async function generateAdCopies(
       };
     } catch (fetchError) {
       console.error("adcopy webhook error:", fetchError);
+
+      // 로그: 광고문구 생성 실패
+      await logStageFailed(
+        clerkId,
+        videoData.id,
+        "video",
+        GENERATION_STAGES.AD_COPY_GENERATION,
+        "N8N_WEBHOOK_ERROR",
+        fetchError instanceof Error ? fetchError.message : "광고문구 생성에 실패했습니다.",
+        "n8n"
+      );
 
       // Update ad_videos status to failed
       await supabase

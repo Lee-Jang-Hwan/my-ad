@@ -3,6 +3,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
 import type { GenerateImageAdCopiesResult } from "@/types/ad-image";
+import {
+  logStageStart,
+  logStageComplete,
+  logStageFailed,
+  GENERATION_STAGES,
+} from "@/lib/log-generation";
 
 // 이미지 광고문구 전용 웹훅 URL (sapp-studio-adcopy-picture)
 const N8N_ADCOPY_IMAGE_WEBHOOK_URL =
@@ -55,6 +61,12 @@ export async function generateImageAdCopies(
       };
     }
 
+    // 로그: 초기화 완료
+    await logStageComplete(clerkId, imageData.id, "image", GENERATION_STAGES.INIT, "app", {
+      imageId,
+      productInfoId,
+    });
+
     // Update progress_stage to ad_copy_generation
     await supabase
       .from("ad_images")
@@ -63,6 +75,9 @@ export async function generateImageAdCopies(
         progress_stage: "ad_copy_generation",
       })
       .eq("id", imageData.id);
+
+    // 로그: 광고문구 생성 시작
+    await logStageStart(clerkId, imageData.id, "image", GENERATION_STAGES.AD_COPY_GENERATION, "app");
 
     // Trigger adcopy webhook (같은 webhook 재사용)
     console.log("Triggering adcopy webhook for image:", N8N_ADCOPY_IMAGE_WEBHOOK_URL);
@@ -155,6 +170,11 @@ export async function generateImageAdCopies(
         })
         .eq("id", imageData.id);
 
+      // 로그: 광고문구 생성 완료
+      await logStageComplete(clerkId, imageData.id, "image", GENERATION_STAGES.AD_COPY_GENERATION, "n8n", {
+        copiesCount: savedCopies?.length || 0,
+      });
+
       return {
         success: true,
         adImageId: imageData.id,
@@ -162,6 +182,17 @@ export async function generateImageAdCopies(
       };
     } catch (fetchError) {
       console.error("adcopy webhook error:", fetchError);
+
+      // 로그: 광고문구 생성 실패
+      await logStageFailed(
+        clerkId,
+        imageData.id,
+        "image",
+        GENERATION_STAGES.AD_COPY_GENERATION,
+        "N8N_WEBHOOK_ERROR",
+        fetchError instanceof Error ? fetchError.message : "광고문구 생성에 실패했습니다.",
+        "n8n"
+      );
 
       // Update ad_images status to failed
       await supabase
