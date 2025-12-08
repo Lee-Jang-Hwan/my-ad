@@ -87,9 +87,9 @@ export async function generateAdCopies(
         `${process.env.N8N_WEBHOOK_USER}:${process.env.N8N_WEBHOOK_PASSWORD}`
       ).toString("base64");
 
-      // 2분 타임아웃 설정
+      // 3분 타임아웃 설정 (네트워크 환경에 따라 지연될 수 있음)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      const timeoutId = setTimeout(() => controller.abort(), 180000);
 
       const response = await fetch(N8N_ADCOPY_WEBHOOK_URL, {
         method: "POST",
