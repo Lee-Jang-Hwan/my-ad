@@ -88,6 +88,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/faq"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  자주 묻는 질문
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/terms"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
