@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -13,10 +14,16 @@ import { Clock, Mail, Phone } from "lucide-react";
 import { FaYoutube, FaInstagram, FaXTwitter, FaTiktok, FaFacebook } from "react-icons/fa6";
 import { SiThreads } from "react-icons/si";
 import Link from "next/link";
+import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { isSignedIn, isLoaded } = useAuth();
   const [isCustomerServiceOpen, setIsCustomerServiceOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // 로그인 상태가 로드되었고 로그인된 경우에만 회원탈퇴 버튼 표시
+  const showDeleteAccount = isLoaded && isSignedIn;
 
   return (
     <footer className="border-t bg-muted/50">
@@ -110,6 +117,16 @@ export function Footer() {
                   개인정보 처리방침
                 </Link>
               </li>
+              {showDeleteAccount && (
+                <li>
+                  <button
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    className="text-xs text-muted-foreground/60 hover:text-destructive transition-colors"
+                  >
+                    회원탈퇴
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -143,6 +160,14 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* 회원탈퇴 모달 */}
+      {showDeleteAccount && (
+        <DeleteAccountDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+        />
+      )}
     </footer>
   );
 }

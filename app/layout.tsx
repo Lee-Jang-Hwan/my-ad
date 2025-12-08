@@ -10,6 +10,7 @@ import { MobileSidebar } from "@/components/mobile-sidebar";
 import { SyncUserProvider } from "@/components/providers/sync-user-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Footer } from "@/components/footer";
+import { Chatbot } from "@/components/chatbot";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -158,6 +159,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
             </SyncUserProvider>
+            <Chatbot />
           </ThemeProvider>
           <Toaster />
           <Analytics />

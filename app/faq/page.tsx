@@ -35,7 +35,7 @@ export default function FAQPage() {
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
                 <ul className="list-disc ml-4 space-y-1">
-                  <li><strong className="text-foreground">광고 문구 생성</strong>: 최신 AI 언어 모델을 활용하여 상품에 맞는 매력적인 광고 카피를 생성합니다.</li>
+                  <li><strong className="text-foreground">광고 문구 생성</strong>: Google Gemini 3.0을 활용하여 상품에 맞는 매력적인 광고 카피를 생성합니다.</li>
                   <li><strong className="text-foreground">이미지 정제</strong>: Nano Banana Pro를 사용하여 상품 이미지를 고품질로 정제합니다.</li>
                   <li><strong className="text-foreground">영상 생성</strong>: OpenAI Sora 2 Pro를 사용하여 역동적인 광고 영상을 제작합니다.</li>
                 </ul>
@@ -77,8 +77,8 @@ export default function FAQPage() {
                 Q. 회원가입은 어떻게 하나요?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
-                홈페이지 우측 상단의 <strong className="text-foreground">로그인</strong> 버튼을 클릭하면 회원가입 및 로그인이 가능합니다.
-                이메일, Google, Kakao 계정으로 간편하게 가입할 수 있습니다.
+                홈페이지 좌측 하단의 <strong className="text-foreground">로그인</strong> 버튼을 클릭하면 회원가입 및 로그인이 가능합니다.
+                이메일, Google, Tiktok, Github 계정으로 간편하게 가입할 수 있습니다.
               </AccordionContent>
             </AccordionItem>
 
@@ -97,7 +97,7 @@ export default function FAQPage() {
                 Q. 회원 탈퇴는 어떻게 하나요?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
-                마이 페이지 &gt; 설정에서 회원 탈퇴를 진행할 수 있습니다.
+                오른쪽 하단 회원탈퇴에서 회원 탈퇴를 진행할 수 있습니다.
                 탈퇴 시 모든 데이터(생성된 영상, 이미지, 잔여 크레딧)가 삭제되며 복구가 불가능하니 신중하게 결정해 주세요.
               </AccordionContent>
             </AccordionItem>
@@ -160,24 +160,13 @@ export default function FAQPage() {
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
                 <ul className="list-disc ml-4 space-y-1">
-                  <li><strong className="text-foreground">영상 생성</strong>: 1회당 일정 크레딧 소모</li>
-                  <li><strong className="text-foreground">이미지 생성</strong>: 1회당 일정 크레딧 소모</li>
+                  <li><strong className="text-foreground">영상 생성</strong>: 1회당 80 크레딧 소모</li>
+                  <li><strong className="text-foreground">이미지 생성</strong>: 1회당 20 크레딧 소모</li>
                 </ul>
-                <p className="mt-2">정확한 크레딧 소모량은 크레딧 충전 페이지에서 확인하실 수 있습니다.</p>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="credit-5">
-              <AccordionTrigger className="text-left">
-                Q. 크레딧의 유효기간이 있나요?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">
-                네, 크레딧의 유효기간은 <strong className="text-foreground">충전일로부터 6개월</strong>입니다.
-                유효기간이 지난 크레딧은 자동으로 소멸되니, 기간 내에 사용해 주세요.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="credit-6">
               <AccordionTrigger className="text-left">
                 Q. 크레딧을 다른 사람에게 양도할 수 있나요?
               </AccordionTrigger>
@@ -202,16 +191,6 @@ export default function FAQPage() {
                   <li>크레딧을 1회 이상 사용한 경우 (디지털 콘텐츠 제공이 개시된 것으로 간주)</li>
                   <li>잔여 크레딧에 대한 부분 환불</li>
                 </ul>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="credit-8">
-              <AccordionTrigger className="text-left">
-                Q. 결제 영수증은 어디서 확인하나요?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">
-                결제 완료 후 등록된 이메일로 영수증이 발송됩니다.
-                또한 마이 페이지 &gt; 결제 내역에서 확인 및 재발급이 가능합니다.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -259,7 +238,7 @@ export default function FAQPage() {
                 Q. 광고 문구는 어떻게 선택하나요?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
-                AI가 여러 개의 광고 문구를 생성하면, 그 중에서 <strong className="text-foreground">가장 마음에 드는 문구 하나를 선택</strong>하시면 됩니다.
+                AI가 여러 개의 광고 문구를 생성하면, 그 중에서 <strong className="text-foreground">가장 마음에 드는 문구 하나를 선택</strong>하거나 직접입력하시면 됩니다.
                 선택한 문구가 영상에 적용됩니다.
               </AccordionContent>
             </AccordionItem>
@@ -269,7 +248,7 @@ export default function FAQPage() {
                 Q. 생성된 영상의 길이는 얼마나 되나요?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
-                생성되는 영상의 길이는 약 <strong className="text-foreground">10~15초</strong>입니다.
+                생성되는 영상의 길이는 약 <strong className="text-foreground">12초</strong>입니다.
                 짧고 임팩트 있는 광고 영상에 최적화되어 있습니다.
               </AccordionContent>
             </AccordionItem>
@@ -320,7 +299,7 @@ export default function FAQPage() {
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
                 생성되는 이미지는 다양한 플랫폼에 적합한 크기로 제공됩니다.
-                정사각형(1:1), 세로형(9:16) 등 다양한 비율을 지원합니다.
+                정사각형(1:1) 비율을 지원합니다.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -473,25 +452,6 @@ export default function FAQPage() {
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">기타</h2>
           <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="etc-1">
-              <AccordionTrigger className="text-left">
-                Q. 고객센터 연락처는 어디인가요?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">
-                <ul className="list-disc ml-4 space-y-1">
-                  <li><strong className="text-foreground">이메일</strong>: sappable@gmail.com</li>
-                  <li><strong className="text-foreground">전화번호</strong>: 010-7266-0807</li>
-                  <li><strong className="text-foreground">운영시간</strong>: 평일 09:00 ~ 18:00 (주말/공휴일 휴무)</li>
-                </ul>
-                <p className="mt-3">문의 시 다음 정보를 함께 알려주시면 빠른 처리가 가능합니다:</p>
-                <ul className="list-disc ml-4 mt-1 space-y-1">
-                  <li>가입 이메일</li>
-                  <li>문의 내용</li>
-                  <li>오류 발생 시 스크린샷</li>
-                </ul>
-              </AccordionContent>
-            </AccordionItem>
-
             <AccordionItem value="etc-2">
               <AccordionTrigger className="text-left">
                 Q. 서비스 이용에 제한이 있나요?
@@ -543,9 +503,6 @@ export default function FAQPage() {
           <h2 className="text-lg font-semibold mb-2">추가 문의</h2>
           <p className="text-muted-foreground">
             FAQ에서 답변을 찾지 못하셨나요? 고객센터로 문의해 주시면 친절하게 안내해 드리겠습니다.
-          </p>
-          <p className="text-muted-foreground mt-2">
-            <strong className="text-foreground">이메일</strong>: sappable@gmail.com
           </p>
         </Card>
       </div>
