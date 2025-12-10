@@ -51,6 +51,7 @@ export function DashboardContent({
     initialPagination.currentPage < initialPagination.totalPages
   );
   const [videoTotalCount, setVideoTotalCount] = useState(initialPagination.totalCount);
+  const [videosLoaded, setVideosLoaded] = useState(true); // SSR에서 이미 로드됨
 
   // Image state
   const [images, setImages] = useState<ImageWithProductName[]>([]);
@@ -145,6 +146,7 @@ export function DashboardContent({
       setVideos(result.videos);
       setVideoHasMore(1 < result.pagination.totalPages);
       setVideoTotalCount(result.pagination.totalCount);
+      setVideosLoaded(true);
     } else {
       setError(result.error || "영상 목록을 불러올 수 없습니다.");
     }
@@ -263,6 +265,7 @@ export function DashboardContent({
         setVideos([]);
         setVideoPage(1);
         setVideoHasMore(true);
+        setVideosLoaded(false); // 필터 변경 시 다시 로드 트리거
       } else {
         setImages([]);
         setImagePage(1);
@@ -281,14 +284,13 @@ export function DashboardContent({
     [updateUrlParams]
   );
 
-  // Refetch when filter changes
+  // Refetch when filter changes (only when videosLoaded is reset to false)
   useEffect(() => {
-    if (activeTab === "videos" && videos.length === 0 && !isLoading) {
+    if (activeTab === "videos" && !videosLoaded && !isLoading) {
       resetAndFetchVideos();
-    } else if (activeTab === "images" && images.length === 0 && imagesLoaded === false) {
-      // Will be handled by the images tab effect
     }
-  }, [filter, activeTab, videos.length, images.length, isLoading, imagesLoaded, resetAndFetchVideos]);
+    // Images are handled by the images tab effect
+  }, [activeTab, videosLoaded, isLoading, resetAndFetchVideos]);
 
   // Handle video deleted
   const handleVideoDeleted = useCallback(() => {
