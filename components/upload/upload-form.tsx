@@ -50,6 +50,9 @@ export function UploadForm() {
 
   // Step 1: 이미지 업로드 후 다음 단계로
   const handleImageNext = async () => {
+    console.log("[Upload] handleImageNext called");
+    console.log("[Upload] selectedImage:", selectedImage?.file.name, selectedImage?.file.size, selectedImage?.file.type);
+
     if (!selectedImage) {
       setError("이미지를 선택해주세요.");
       return;
@@ -61,20 +64,24 @@ export function UploadForm() {
     try {
       const formData = new FormData();
       formData.append("image", selectedImage.file);
+      console.log("[Upload] FormData created, calling uploadImage...");
 
       const uploadResult = await uploadImage(formData);
+      console.log("[Upload] uploadResult:", uploadResult);
 
       if (!uploadResult.success || !uploadResult.imageId) {
+        console.error("[Upload] Upload failed:", uploadResult.error);
         setError(uploadResult.error || "이미지 업로드에 실패했습니다.");
         setIsSubmitting(false);
         return;
       }
 
+      console.log("[Upload] Upload success, imageId:", uploadResult.imageId);
       setUploadedImageId(uploadResult.imageId);
       setImagePreviewUrl(selectedImage.preview);
       setCurrentStep("product");
     } catch (err) {
-      console.error("Upload error:", err);
+      console.error("[Upload] Upload error:", err);
       setError("이미지 업로드 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
