@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClerkSupabaseClient } from "@/lib/supabase/server";
+import { getServiceRoleClient } from "@/lib/supabase/service-role";
 import { validateImageFile } from "@/lib/validation";
 import type { UploadImageResult } from "@/types/upload";
 
@@ -40,8 +40,8 @@ export async function uploadImage(
       };
     }
 
-    // Create Supabase client
-    const supabase = createClerkSupabaseClient();
+    // Create Supabase client with service role for storage operations
+    const supabase = getServiceRoleClient();
 
     // Generate unique filename
     const fileExt = file.name.split(".").pop();
