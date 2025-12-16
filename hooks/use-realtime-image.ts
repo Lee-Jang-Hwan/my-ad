@@ -14,8 +14,9 @@ interface UseRealtimeImageOptions {
 // Timeout duration: 5 minutes (image generation is faster than video)
 const GENERATION_TIMEOUT_MS = 5 * 60 * 1000;
 
-// Polling interval: Check database every 3 seconds as backup
-const POLLING_INTERVAL_MS = 3000;
+// Polling interval: Check database every 15 seconds as backup
+// Increased from 3s to reduce database load - Realtime handles most updates
+const POLLING_INTERVAL_MS = 15000;
 
 // Maximum time to wait before falling back to polling (if no realtime events)
 const REALTIME_FALLBACK_MS = 10000;

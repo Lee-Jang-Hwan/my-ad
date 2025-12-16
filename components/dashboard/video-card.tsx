@@ -138,7 +138,7 @@ export function VideoCard({ video, onDelete, onPublicToggle }: VideoCardProps) {
           <video
             src={`${video.video_url}#t=0.1`}
             className="w-full h-full object-cover"
-            preload="auto"
+            preload="none"
             muted
             playsInline
           >

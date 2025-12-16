@@ -174,7 +174,7 @@ export function VideoPlayer({
         src={`${videoUrl}#t=0.1`}
         poster={thumbnailUrl || undefined}
         className="w-full h-full object-contain"
-        preload="auto"
+        preload="metadata"
         playsInline
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
