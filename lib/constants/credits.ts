@@ -12,6 +12,128 @@ export const VIDEO_GENERATION_COST = 80;
  */
 export const IMAGE_GENERATION_COST = 20;
 
+// =====================================================
+// Storyboard Credit Costs
+// =====================================================
+
+/**
+ * Cost for AI to generate storyboard draft (scenes structure)
+ */
+export const STORYBOARD_AI_DRAFT_COST = 10;
+
+/**
+ * Cost per scene for image generation
+ */
+export const SCENE_IMAGE_GENERATION_COST = 5;
+
+/**
+ * Cost per scene for clip generation (image to video)
+ */
+export const SCENE_CLIP_GENERATION_COST = 15;
+
+/**
+ * Cost for final video merge
+ */
+export const STORYBOARD_FINAL_MERGE_COST = 20;
+
+/**
+ * Calculate total storyboard generation cost
+ */
+export function calculateStoryboardCost(
+  sceneCount: number,
+  options: {
+    includeAIDraft?: boolean;
+    generateImages?: boolean;
+    generateClips?: boolean;
+    includeFinalMerge?: boolean;
+  } = {}
+): number {
+  const {
+    includeAIDraft = false,
+    generateImages = true,
+    generateClips = true,
+    includeFinalMerge = true,
+  } = options;
+
+  let totalCost = 0;
+
+  if (includeAIDraft) {
+    totalCost += STORYBOARD_AI_DRAFT_COST;
+  }
+
+  if (generateImages) {
+    totalCost += sceneCount * SCENE_IMAGE_GENERATION_COST;
+  }
+
+  if (generateClips) {
+    totalCost += sceneCount * SCENE_CLIP_GENERATION_COST;
+  }
+
+  if (includeFinalMerge) {
+    totalCost += STORYBOARD_FINAL_MERGE_COST;
+  }
+
+  return totalCost;
+}
+
+/**
+ * Get storyboard cost breakdown
+ */
+export function getStoryboardCostBreakdown(
+  sceneCount: number,
+  options: {
+    includeAIDraft?: boolean;
+    generateImages?: boolean;
+    generateClips?: boolean;
+    includeFinalMerge?: boolean;
+  } = {}
+): Array<{ label: string; cost: number; count?: number }> {
+  const {
+    includeAIDraft = false,
+    generateImages = true,
+    generateClips = true,
+    includeFinalMerge = true,
+  } = options;
+
+  const breakdown: Array<{ label: string; cost: number; count?: number }> = [];
+
+  if (includeAIDraft) {
+    breakdown.push({
+      label: "AI 스토리보드 초안 생성",
+      cost: STORYBOARD_AI_DRAFT_COST,
+    });
+  }
+
+  if (generateImages) {
+    breakdown.push({
+      label: "씬 이미지 생성",
+      cost: sceneCount * SCENE_IMAGE_GENERATION_COST,
+      count: sceneCount,
+    });
+  }
+
+  if (generateClips) {
+    breakdown.push({
+      label: "씬 클립 생성",
+      cost: sceneCount * SCENE_CLIP_GENERATION_COST,
+      count: sceneCount,
+    });
+  }
+
+  if (includeFinalMerge) {
+    breakdown.push({
+      label: "최종 영상 병합",
+      cost: STORYBOARD_FINAL_MERGE_COST,
+    });
+  }
+
+  return breakdown;
+}
+
+// =====================================================
+// Minimum Requirements
+// =====================================================
+
 /**
  * Minimum credit balance required to generate a video
  */

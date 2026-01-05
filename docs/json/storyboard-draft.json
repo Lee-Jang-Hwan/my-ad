@@ -1,0 +1,214 @@
+{
+  "name": "스토리보드 AI 초안 생성",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "storyboard-draft",
+        "authentication": "basicAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "storyboard-draft"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text: `당신은 전문 스토리보드 작가입니다. 주어진 상품/콘텐츠 정보를 바탕으로 영상 스토리보드를 생성합니다.\\n\\n출력 형식 (JSON):\\n{\\n  \\\"scenes\\\": [\\n    {\\n      \\\"scene_order\\\": 1,\\n      \\\"scene_name\\\": \\\"씬 이름\\\",\\n      \\\"scene_description\\\": \\\"씬 설명 (시각적 요소)\\\",\\n      \\\"dialogue\\\": \\\"나레이션/대사\\\",\\n      \\\"dialogue_type\\\": \\\"narration|character|caption\\\",\\n      \\\"visual_prompt\\\": \\\"이미지 생성용 상세 프롬프트 (영문)\\\",\\n      \\\"camera_angle\\\": \\\"eye_level|high_angle|low_angle|bird_eye|dutch_angle|pov|close_up|wide_shot|medium_shot\\\",\\n      \\\"camera_movement\\\": \\\"static|pan_left|pan_right|tilt_up|tilt_down|zoom_in|zoom_out|dolly_in|dolly_out|tracking\\\",\\n      \\\"duration_seconds\\\": 3,\\n      \\\"transition_type\\\": \\\"cut|fade|dissolve|wipe_left|wipe_right|zoom|slide|blur\\\"\\n    }\\n  ]\\n}\\n\\n상품명: ${$json.body.product_name}\\n설명: ${$json.body.product_description || '없음'}\\n목표 길이: ${$json.body.target_duration}초\\n화면 비율: ${$json.body.aspect_ratio}\\n스타일: ${$json.body.style_preference || '일반 광고'}\\n\\n위 정보를 바탕으로 ${Math.ceil($json.body.target_duration / 5)}개의 씬으로 구성된 스토리보드를 JSON 형식으로 생성해주세요.`\n    }]\n  }],\n  generationConfig: {\n    responseMimeType: 'application/json',\n    temperature: 0.7\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "gemini-generate",
+      "name": "Gemini 3 Pro 스토리보드 생성",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "google-ai-credentials",
+          "name": "Google AI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Gemini 3 Pro 응답 파싱\nconst response = JSON.parse($input.first().json.candidates[0].content.parts[0].text);\nconst webhookData = $('Webhook').first().json.body;\n\nreturn {\n  success: true,\n  storyboard_id: webhookData.storyboard_id,\n  scenes: response.scenes\n};"
+      },
+      "id": "parse-response",
+      "name": "응답 파싱",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "storyboards",
+        "filters": {
+          "filterFields": [
+            {
+              "fieldName": "id",
+              "filterValue": "={{ $('Webhook').first().json.body.storyboard_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "fieldMap": {
+            "progress_stage": "user_editing",
+            "status": "draft",
+            "ai_generated": true
+          }
+        }
+      },
+      "id": "update-storyboard",
+      "name": "Supabase 스토리보드 상태 업데이트",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1000, 200],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 씬 배열을 개별 아이템으로 분리\nconst scenes = $input.first().json.scenes;\nreturn scenes.map(scene => ({ json: scene }));"
+      },
+      "id": "split-scenes",
+      "name": "씬 분리",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 450]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "storyboard_scenes",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "storyboard_id": "={{ $('Webhook').first().json.body.storyboard_id }}",
+            "scene_order": "={{ $json.scene_order }}",
+            "scene_name": "={{ $json.scene_name }}",
+            "scene_description": "={{ $json.scene_description }}",
+            "dialogue": "={{ $json.dialogue }}",
+            "dialogue_type": "={{ $json.dialogue_type }}",
+            "visual_prompt": "={{ $json.visual_prompt }}",
+            "camera_angle": "={{ $json.camera_angle }}",
+            "camera_movement": "={{ $json.camera_movement }}",
+            "duration_seconds": "={{ $json.duration_seconds }}",
+            "transition_type": "={{ $json.transition_type }}",
+            "generation_status": "pending"
+          }
+        }
+      },
+      "id": "insert-scenes",
+      "name": "Supabase 씬 삽입",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1000, 450],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('응답 파싱').first().json) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Webhook 응답",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Gemini 3 Pro 스토리보드 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 3 Pro 스토리보드 생성": {
+      "main": [
+        [
+          {
+            "node": "응답 파싱",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "응답 파싱": {
+      "main": [
+        [
+          {
+            "node": "Supabase 스토리보드 상태 업데이트",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "씬 분리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "씬 분리": {
+      "main": [
+        [
+          {
+            "node": "Supabase 씬 삽입",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase 스토리보드 상태 업데이트": {
+      "main": [
+        [
+          {
+            "node": "Webhook 응답",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

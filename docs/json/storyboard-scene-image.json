@@ -1,0 +1,245 @@
+{
+  "name": "스토리보드 씬 이미지 생성",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "storyboard-scene-image",
+        "authentication": "basicAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "storyboard-scene-image"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "storyboard_scenes",
+        "filters": {
+          "filterFields": [
+            {
+              "fieldName": "id",
+              "filterValue": "={{ $json.body.scene_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "fieldMap": {
+            "generation_status": "generating_image"
+          }
+        }
+      },
+      "id": "update-status-start",
+      "name": "상태: 이미지 생성 중",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text: $('Webhook').first().json.body.visual_prompt\n    }]\n  }],\n  generationConfig: {\n    responseModalities: ['IMAGE'],\n    imageDimension: {\n      aspectRatio: $('Webhook').first().json.body.aspect_ratio === '16:9' ? '16:9' :\n                   ($('Webhook').first().json.body.aspect_ratio === '9:16' ? '9:16' : '1:1')\n    }\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "nanobanana-generate",
+      "name": "Nano Banana Pro 이미지 생성",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [750, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "google-ai-credentials",
+          "name": "Google AI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Nano Banana Pro 응답에서 base64 이미지 추출\nconst response = $input.first().json;\nconst imageData = response.candidates[0].content.parts[0].inlineData;\nconst base64Image = imageData.data;\nconst mimeType = imageData.mimeType || 'image/png';\n\n// base64를 Buffer로 변환\nconst buffer = Buffer.from(base64Image, 'base64');\n\n// binary 데이터로 반환\nreturn {\n  json: {\n    mimeType: mimeType,\n    fileExtension: mimeType === 'image/png' ? 'png' : 'jpg'\n  },\n  binary: {\n    data: {\n      data: base64Image,\n      mimeType: mimeType,\n      fileName: 'generated_image.' + (mimeType === 'image/png' ? 'png' : 'jpg')\n    }\n  }\n};"
+      },
+      "id": "process-image",
+      "name": "이미지 처리",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "storyboards",
+        "fileName": "={{ $('Webhook').first().json.body.user_id }}/storyboards/{{ $('Webhook').first().json.body.storyboard_id }}/images/{{ $('Webhook').first().json.body.scene_id }}.png",
+        "binaryPropertyName": "data"
+      },
+      "id": "upload-storage",
+      "name": "Supabase Storage 업로드",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Storage URL 생성\nconst webhookData = $('Webhook').first().json.body;\nconst supabaseUrl = process.env.SUPABASE_URL || 'https://dcbvrbljeanjzsbrqays.supabase.co';\nconst storagePath = `${webhookData.user_id}/storyboards/${webhookData.storyboard_id}/images/${webhookData.scene_id}.png`;\nconst imageUrl = `${supabaseUrl}/storage/v1/object/public/storyboards/${storagePath}`;\n\nreturn {\n  scene_id: webhookData.scene_id,\n  image_url: imageUrl\n};"
+      },
+      "id": "generate-url",
+      "name": "URL 생성",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "storyboard_scenes",
+        "filters": {
+          "filterFields": [
+            {
+              "fieldName": "id",
+              "filterValue": "={{ $json.scene_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "fieldMap": {
+            "generated_image_url": "={{ $json.image_url }}",
+            "generation_status": "completed"
+          }
+        }
+      },
+      "id": "update-scene-complete",
+      "name": "씬 이미지 URL 저장",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1750, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, scene_id: $('Webhook').first().json.body.scene_id, image_url: $json.generated_image_url }) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Webhook 응답",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2000, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "상태: 이미지 생성 중",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "상태: 이미지 생성 중": {
+      "main": [
+        [
+          {
+            "node": "Nano Banana Pro 이미지 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nano Banana Pro 이미지 생성": {
+      "main": [
+        [
+          {
+            "node": "이미지 처리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "이미지 처리": {
+      "main": [
+        [
+          {
+            "node": "Supabase Storage 업로드",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Storage 업로드": {
+      "main": [
+        [
+          {
+            "node": "URL 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL 생성": {
+      "main": [
+        [
+          {
+            "node": "씬 이미지 URL 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "씬 이미지 URL 저장": {
+      "main": [
+        [
+          {
+            "node": "Webhook 응답",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

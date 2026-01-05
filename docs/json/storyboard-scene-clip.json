@@ -1,0 +1,383 @@
+{
+  "name": "스토리보드 씬 클립 생성",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "storyboard-scene-clip",
+        "authentication": "basicAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "storyboard-scene-clip"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "storyboard_scenes",
+        "filters": {
+          "filterFields": [
+            {
+              "fieldName": "id",
+              "filterValue": "={{ $json.body.scene_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "fieldMap": {
+            "generation_status": "generating_clip"
+          }
+        }
+      },
+      "id": "update-status-start",
+      "name": "상태: 클립 생성 중",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/videos",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'sora-2-pro',\n  prompt: `${$('Webhook').first().json.body.camera_movement || 'static'}. ${$('Webhook').first().json.body.visual_prompt || 'Cinematic quality video.'}`,\n  input_image: $('Webhook').first().json.body.source_image_url,\n  size: $('Webhook').first().json.body.aspect_ratio === '16:9' ? '1792x1024' : ($('Webhook').first().json.body.aspect_ratio === '9:16' ? '1024x1792' : '1280x720'),\n  seconds: Math.min(12, Math.max(4, $('Webhook').first().json.body.duration_seconds || 4))\n}) }}",
+        "options": {}
+      },
+      "id": "sora-generate",
+      "name": "Sora 2 Pro 클립 생성 요청",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [750, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-credentials",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "id": "wait-generation",
+      "name": "생성 대기",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.openai.com/v1/videos/{{ $('Sora 2 Pro 클립 생성 요청').first().json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "options": {}
+      },
+      "id": "check-status",
+      "name": "생성 상태 확인",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-credentials",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-complete",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-complete",
+      "name": "완료 확인",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1500, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.openai.com/v1/videos/{{ $('Sora 2 Pro 클립 생성 요청').first().json.id }}/content",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-clip",
+      "name": "클립 다운로드",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1750, 200],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-credentials",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "storyboards",
+        "fileName": "={{ $('Webhook').first().json.body.user_id }}/storyboards/{{ $('Webhook').first().json.body.storyboard_id }}/clips/{{ $('Webhook').first().json.body.scene_id }}.mp4",
+        "binaryPropertyName": "data"
+      },
+      "id": "upload-storage",
+      "name": "Supabase Storage 업로드",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2000, 200],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Storage URL 생성\nconst webhookData = $('Webhook').first().json.body;\nconst supabaseUrl = process.env.SUPABASE_URL || 'https://dcbvrbljeanjzsbrqays.supabase.co';\nconst storagePath = `${webhookData.user_id}/storyboards/${webhookData.storyboard_id}/clips/${webhookData.scene_id}.mp4`;\nconst clipUrl = `${supabaseUrl}/storage/v1/object/public/storyboards/${storagePath}`;\n\nreturn {\n  scene_id: webhookData.scene_id,\n  clip_url: clipUrl\n};"
+      },
+      "id": "generate-url",
+      "name": "URL 생성",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2250, 200]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "storyboard_scenes",
+        "filters": {
+          "filterFields": [
+            {
+              "fieldName": "id",
+              "filterValue": "={{ $json.scene_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "fieldMap": {
+            "generated_clip_url": "={{ $json.clip_url }}",
+            "generation_status": "completed"
+          }
+        }
+      },
+      "id": "update-scene-complete",
+      "name": "씬 클립 URL 저장",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2500, 200],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, scene_id: $('Webhook').first().json.body.scene_id, clip_url: $json.generated_clip_url }) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Webhook 응답",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2750, 200]
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "id": "retry-wait",
+      "name": "재시도 대기",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1500, 450]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "상태: 클립 생성 중",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "상태: 클립 생성 중": {
+      "main": [
+        [
+          {
+            "node": "Sora 2 Pro 클립 생성 요청",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sora 2 Pro 클립 생성 요청": {
+      "main": [
+        [
+          {
+            "node": "생성 대기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "생성 대기": {
+      "main": [
+        [
+          {
+            "node": "생성 상태 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "생성 상태 확인": {
+      "main": [
+        [
+          {
+            "node": "완료 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "완료 확인": {
+      "main": [
+        [
+          {
+            "node": "클립 다운로드",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "재시도 대기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "재시도 대기": {
+      "main": [
+        [
+          {
+            "node": "생성 상태 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "클립 다운로드": {
+      "main": [
+        [
+          {
+            "node": "Supabase Storage 업로드",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Storage 업로드": {
+      "main": [
+        [
+          {
+            "node": "URL 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL 생성": {
+      "main": [
+        [
+          {
+            "node": "씬 클립 URL 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "씬 클립 URL 저장": {
+      "main": [
+        [
+          {
+            "node": "Webhook 응답",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

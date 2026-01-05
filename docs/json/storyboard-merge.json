@@ -1,0 +1,268 @@
+{
+  "name": "스토리보드 최종 병합",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "storyboard-merge",
+        "authentication": "basicAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "storyboard-merge"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "storyboards",
+        "filters": {
+          "filterFields": [
+            {
+              "fieldName": "id",
+              "filterValue": "={{ $json.body.storyboard_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "fieldMap": {
+            "status": "generating",
+            "progress_stage": "final_merge"
+          }
+        }
+      },
+      "id": "update-status-start",
+      "name": "상태: 병합 중",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// FFmpeg 명령어 생성을 위한 데이터 준비\nconst webhookData = $('Webhook').first().json.body;\nconst scenes = webhookData.scenes;\n\nreturn {\n  storyboard_id: webhookData.storyboard_id,\n  user_id: webhookData.user_id,\n  scenes: scenes,\n  global_bgm_url: webhookData.global_bgm_url,\n  output_settings: webhookData.output_settings\n};"
+      },
+      "id": "prepare-ffmpeg",
+      "name": "FFmpeg 준비",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "command": "={{ (() => {\n  const data = $json;\n  const outputPath = `/tmp/${data.storyboard_id}_final.mp4`;\n  \n  let cmd = 'ffmpeg -y ';\n  \n  // 입력 파일들\n  data.scenes.forEach((scene, i) => {\n    cmd += `-i \"${scene.clip_url}\" `;\n  });\n  \n  // BGM 추가\n  if (data.global_bgm_url) {\n    cmd += `-i \"${data.global_bgm_url}\" `;\n  }\n  \n  const sceneCount = data.scenes.length;\n  cmd += `-filter_complex \"`;\n  \n  // 비디오 concat\n  for (let i = 0; i < sceneCount; i++) {\n    cmd += `[${i}:v]`;\n  }\n  cmd += `concat=n=${sceneCount}:v=1:a=0[outv]`;\n  \n  cmd += `\" `;\n  cmd += `-map \"[outv]\" `;\n  \n  if (data.global_bgm_url) {\n    cmd += `-map ${sceneCount}:a `;\n  }\n  \n  cmd += `-c:v libx264 -preset fast -crf 23 `;\n  cmd += `-c:a aac -b:a 128k `;\n  cmd += `\"${outputPath}\"`;\n  \n  return cmd;\n})() }}"
+      },
+      "id": "ffmpeg-merge",
+      "name": "FFmpeg 병합",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "filePath": "=/tmp/{{ $('prepare-ffmpeg').first().json.storyboard_id }}_final.mp4"
+      },
+      "id": "read-output",
+      "name": "출력 파일 읽기",
+      "type": "n8n-nodes-base.readBinaryFiles",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "storyboards",
+        "fileName": "={{ $('prepare-ffmpeg').first().json.user_id }}/storyboards/{{ $('prepare-ffmpeg').first().json.storyboard_id }}/final/{{ $('prepare-ffmpeg').first().json.storyboard_id }}.mp4",
+        "binaryPropertyName": "data"
+      },
+      "id": "upload-final",
+      "name": "Supabase Storage 업로드",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1500, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 최종 URL 생성\nconst prepData = $('prepare-ffmpeg').first().json;\nconst supabaseUrl = process.env.SUPABASE_URL || 'https://dcbvrbljeanjzsbrqays.supabase.co';\nconst storagePath = `${prepData.user_id}/storyboards/${prepData.storyboard_id}/final/${prepData.storyboard_id}.mp4`;\nconst finalUrl = `${supabaseUrl}/storage/v1/object/public/storyboards/${storagePath}`;\n\nreturn {\n  storyboard_id: prepData.storyboard_id,\n  final_video_url: finalUrl\n};"
+      },
+      "id": "generate-final-url",
+      "name": "최종 URL 생성",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1750, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "storyboards",
+        "filters": {
+          "filterFields": [
+            {
+              "fieldName": "id",
+              "filterValue": "={{ $json.storyboard_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "fieldMap": {
+            "final_video_url": "={{ $json.final_video_url }}",
+            "status": "completed",
+            "progress_stage": "completed",
+            "completed_at": "={{ new Date().toISOString() }}"
+          }
+        }
+      },
+      "id": "update-complete",
+      "name": "스토리보드 완료 업데이트",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2000, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "rm -f /tmp/{{ $('prepare-ffmpeg').first().json.storyboard_id }}_final.mp4"
+      },
+      "id": "cleanup",
+      "name": "임시 파일 정리",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [2250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, storyboard_id: $('generate-final-url').first().json.storyboard_id, final_video_url: $('generate-final-url').first().json.final_video_url }) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Webhook 응답",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2500, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "상태: 병합 중",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "상태: 병합 중": {
+      "main": [
+        [
+          {
+            "node": "FFmpeg 준비",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FFmpeg 준비": {
+      "main": [
+        [
+          {
+            "node": "FFmpeg 병합",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FFmpeg 병합": {
+      "main": [
+        [
+          {
+            "node": "출력 파일 읽기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "출력 파일 읽기": {
+      "main": [
+        [
+          {
+            "node": "Supabase Storage 업로드",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Storage 업로드": {
+      "main": [
+        [
+          {
+            "node": "최종 URL 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "최종 URL 생성": {
+      "main": [
+        [
+          {
+            "node": "스토리보드 완료 업데이트",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "스토리보드 완료 업데이트": {
+      "main": [
+        [
+          {
+            "node": "임시 파일 정리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "임시 파일 정리": {
+      "main": [
+        [
+          {
+            "node": "Webhook 응답",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
