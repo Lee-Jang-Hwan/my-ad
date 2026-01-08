@@ -4,7 +4,11 @@
       "Bash(claude mcp add supabase -s local -e SUPABASE_ACCESS_TOKEN=sbp_5725e6e1450a83c6439f9b59b3d6177d41777fe6 -- npx -y @supabase/mcp-server-supabase@latest)",
       "Bash(claude mcp add context7 -s local -- npx -y @upnext/context7)",
       "Bash(claude mcp add:*)",
-      "Bash(claude mcp list:*)"
+      "Bash(claude mcp list:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:glama.ai)",
+      "Bash(N8N_HOST=https://n8n.sappstudio.kr N8N_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODBkOGFlMi1mNWFhLTRhZTktYmEyYi02NTA2NTEwNzRkMjUiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY3ODgxMzg2fQ.8CuPVRbZ08lQxaqcvDm-Dn13DBJ9YLXRZsE5c02m7Ag timeout 10 npx:*)"
     ],
     "deny": [],
     "ask": []
