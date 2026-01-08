@@ -29,7 +29,7 @@ export default async function GenerationPage({
     notFound();
   }
 
-  const { storyboard, scenes } = result.data;
+  const { scenes, ...storyboard } = result.data;
 
   // If already completed, redirect to editor
   if (storyboard.status === "completed") {

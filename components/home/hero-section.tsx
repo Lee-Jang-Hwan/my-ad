@@ -1,15 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Video, ImageIcon } from "lucide-react";
+import { Video, ImageIcon } from "lucide-react";
 
 interface HeroSectionProps {
-  isSignedIn?: boolean;
-  onCTAClick?: () => void;
   howItWorks?: React.ReactNode;
   sampleVideos?: React.ReactNode;
   sampleImages?: React.ReactNode;
 }
 
-export function HeroSection({ isSignedIn, onCTAClick, howItWorks, sampleVideos, sampleImages }: HeroSectionProps) {
+export function HeroSection({ howItWorks, sampleVideos, sampleImages }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden">
 

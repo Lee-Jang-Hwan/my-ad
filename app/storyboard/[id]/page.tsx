@@ -37,7 +37,7 @@ export default async function StoryboardEditorPage({
     notFound();
   }
 
-  const { storyboard, scenes } = result.data;
+  const { scenes, ...storyboard } = result.data;
 
   // Check if we need to generate AI draft
   const shouldGenerateDraft =

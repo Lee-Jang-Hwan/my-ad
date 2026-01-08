@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { HeroSection } from "@/components/home/hero-section";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
@@ -10,7 +9,6 @@ import { IntroScreen } from "@/components/intro/intro-screen";
 import { PromoPopup } from "@/components/home/promo-popup";
 
 function HomeContent() {
-  const router = useRouter();
   const { isSignedIn, isLoaded } = useAuth();
 
   // Show loading while checking auth status
@@ -22,16 +20,6 @@ function HomeContent() {
     );
   }
 
-  const handleCTAClick = () => {
-    if (isSignedIn) {
-      // Redirect to upload page if logged in
-      router.push("/upload");
-    } else {
-      // Redirect to sign-up page if not logged in
-      router.push("/sign-up");
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-background lg:-mt-16">
       {/* 프로모션 팝업 */}
@@ -39,8 +27,6 @@ function HomeContent() {
 
       {/* Hero Section with Sample Videos and Images - ALWAYS SHOW */}
       <HeroSection
-        isSignedIn={isSignedIn}
-        onCTAClick={handleCTAClick}
         howItWorks={!isSignedIn ? <HowItWorksSection /> : undefined}
         sampleVideos={<SampleVideosSection />}
         sampleImages={<SampleImagesSection />}

@@ -36,7 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Video,
-  Image,
+  Image as ImageIcon,
   CheckCircle,
   XCircle,
   Clock,
@@ -170,7 +170,7 @@ export function LogsClient({
     }
     return (
       <Badge variant="outline" className="gap-1">
-        <Image className="h-3 w-3" />
+        <ImageIcon className="h-3 w-3" />
         이미지
       </Badge>
     );
@@ -239,7 +239,7 @@ export function LogsClient({
             <CardHeader className="pb-2">
               <CardDescription>이미지 생성</CardDescription>
               <CardTitle className="text-2xl flex items-center gap-2">
-                <Image className="h-5 w-5 text-green-500" />
+                <ImageIcon className="h-5 w-5 text-green-500" />
                 {stats.imageLogs.toLocaleString()}
               </CardTitle>
             </CardHeader>

@@ -2,13 +2,11 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { useForm } from "react-hook-form";
 import {
   ImageIcon,
   Video,
   Camera,
   Palette,
-  Type,
   Clock,
   Sparkles,
 } from "lucide-react";
