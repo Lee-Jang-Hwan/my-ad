@@ -1,3 +1,5 @@
+# [삽가능 스튜디오] 광고 영상 및 이미지 제작 서비스
+
 <div align="center">
   <br />
 
@@ -10,285 +12,495 @@
     <img src="https://img.shields.io/badge/-Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="supabase" />
   </div>
 
-  <h1 align="center">SaaS 템플릿</h1>
-  <h3 align="center">Next.js 15 + Clerk + Supabase</h3>
+  <!-- 대표 이미지 추가 위치 -->
+  <!-- ![Frame 1](./public/images/hero-banner.png) -->
+
+  <h3 align="center">삽가능 스튜디오</h3>
 
   <p align="center">
-    프로덕션 레디 SaaS 애플리케이션을 위한 풀스택 보일러플레이트
+    <strong>상품명</strong>과 <strong>상품사진</strong>만 있다면 쉽게 <strong>삽가능!</strong>
+  </p>
+
+  <p align="center">
+    AI 기반 광고 영상 및 이미지 자동 생성 플랫폼
+  </p>
+
+  <p align="center">
+    https://www.sappstudio.kr/
   </p>
 </div>
 
-## 📋 목차
+---
 
-1. [소개](#소개)
-2. [기술 스택](#기술-스택)
-3. [주요 기능](#주요-기능)
-4. [시작하기](#시작하기)
-5. [추가 설정 및 팁](#추가-설정-및-팁)
-6. [프로젝트 구조](#프로젝트-구조)
+## 🛠️ 페이지 별 주요 기능
 
-## 소개
+### 💙 홈
 
-Next.js 15, Clerk, Supabase를 활용한 모던 SaaS 애플리케이션 템플릿입니다.
+- 히어로 섹션 (서비스 소개 및 CTA 버튼)
+- 서비스 이용 방법 안내 (How It Works)
+- 샘플 영상 갤러리 (인기순 Top 10)
+- 샘플 이미지 갤러리 (최신순)
+- 프로모션 팝업
 
-**핵심 특징:**
-- ✨ Next.js 15 + React 19 최신 기능 활용
-- 🔐 Clerk와 Supabase 네이티브 통합 (2025년 권장 방식)
-- 🎨 Tailwind CSS v4 + shadcn/ui
-- 📱 완전한 반응형 디자인
-- 🌐 한국어 지원 (Clerk 한국어 로컬라이제이션)
+<!-- ![홈 화면](./docs/screenshots/home.png) -->
 
-## 기술 스택
+### 💙 비디오 생성
 
-### 프레임워크 & 라이브러리
+- 상품 이미지 드래그 앤 드롭 업로드
+- 상품명 입력
+- AI가 6개의 광고 문구 자동 생성
+- 원하는 광고 문구 선택
+- n8n 워크플로우를 통한 영상 자동 생성
+- 실시간 생성 진행률 표시 (Supabase Realtime)
 
-- **[Next.js 15](https://nextjs.org/)** - React 프레임워크 (App Router, Server Components)
-- **[React 19](https://react.dev/)** - UI 라이브러리
-- **[TypeScript](https://www.typescriptlang.org/)** - 타입 안정성
+<!-- ![비디오 생성](./docs/screenshots/video-generation.png) -->
 
-### 인증 & 데이터베이스
+### 💙 이미지 생성
 
-- **[Clerk](https://clerk.com/)** - 사용자 인증 및 관리
-  - Google, 이메일 등 다양한 로그인 방식 지원
-  - 한국어 UI 지원
-  - Supabase와 네이티브 통합
-- **[Supabase](https://supabase.com/)** - PostgreSQL 데이터베이스
-  - 실시간 데이터 동기화
-  - Row Level Security (RLS)
-  - 파일 스토리지
+- 상품 이미지 업로드
+- AI 광고 문구 생성 및 선택
+- 광고 이미지 자동 생성
+- 비디오 대비 빠른 생성 속도 (20 크레딧)
 
-### UI & 스타일링
+<!-- ![이미지 생성](./docs/screenshots/image-generation.png) -->
 
-- **[Tailwind CSS v4](https://tailwindcss.com/)** - 유틸리티 우선 CSS 프레임워크
-- **[shadcn/ui](https://ui.shadcn.com/)** - 재사용 가능한 컴포넌트 라이브러리
-- **[Radix UI](https://www.radix-ui.com/)** - 접근성 높은 헤드리스 컴포넌트
-- **[lucide-react](https://lucide.dev/)** - 아이콘 라이브러리
+### 💙 스토리보드
 
-### 폼 & 검증
+- AI가 자동으로 씬 구조 생성
+- 씬별 상세 설정:
+  - 씬 설명 및 대사/나레이션
+  - 카메라 각도 (9종) 및 움직임 (10종)
+  - 전환 효과 (8종) 및 전환 시간
+  - BGM 및 효과음 선택
+  - 자막 스타일 (위치, 폰트, 색상)
+  - 참조 이미지 업로드
+- 씬별 이미지 생성 → 클립 생성 → 최종 병합
+- 실시간 생성 진행 상황 표시
 
-- **[React Hook Form](https://react-hook-form.com/)** - 폼 상태 관리
-- **[Zod](https://zod.dev/)** - 스키마 검증
+<!-- ![스토리보드](./docs/screenshots/storyboard.png) -->
 
-## 주요 기능
+### 💙 대시보드
 
-### 🔐 인증 시스템
-- Clerk를 통한 안전한 사용자 인증
-- 소셜 로그인 지원 (Google 등)
-- Clerk 사용자 자동으로 Supabase DB에 동기화
-- 한국어 UI 지원
+- 내가 생성한 영상/이미지 목록
+- 필터링 (전체, 완료, 진행 중, 실패)
+- 정렬 (최신순, 오래된 순)
+- 페이지네이션
+- 영상/이미지 공개/비공개 설정
+- 다운로드 및 삭제
 
-### 🗄️ 데이터베이스 통합
-- Clerk 토큰 기반 Supabase 인증 (JWT 템플릿 불필요)
-- 환경별 Supabase 클라이언트 분리:
-  - Client Component용 (`useClerkSupabaseClient`)
-  - Server Component용 (`createClerkSupabaseClient`)
-  - 관리자 권한용 (`createServiceRoleClient`)
-- SQL 마이그레이션 시스템
+<!-- ![대시보드](./docs/screenshots/dashboard.png) -->
 
-### 🎨 UI/UX
-- shadcn/ui 기반 모던 컴포넌트
-- 완전한 반응형 디자인
-- 다크/라이트 모드 지원 가능
-- 접근성 준수 (WCAG)
+### 💙 결제 (크레딧 충전)
 
-### 🏗️ 아키텍처
-- Server Actions 우선 사용
-- 타입 안전성 보장
-- 모듈화된 코드 구조
-- Next.js 15 최신 패턴 적용
+- 3가지 크레딧 패키지 제공
+  - 싱글 (100 크레딧): ₩17,900
+  - 비즈니스 5 (500 크레딧): ₩75,500
+  - 비즈니스 10 (1,000 크레딧): ₩153,000
+- 토스페이먼츠 연동 (신용카드, 계좌이체 등)
+- 결제 성공/실패 콜백 처리
+- 크레딧 잔액 실시간 표시
 
-## 시작하기
+<!-- ![결제](./docs/screenshots/pricing.png) -->
 
-### 필수 요구사항
+### 💙 관리자 대시보드
 
-시스템에 다음이 설치되어 있어야 합니다:
+- 전체 사용자 목록 및 크레딧 관리
+- 크레딧 지급/차감 기능
+- 결제 내역 조회
+- 사용량 분석 (영상, 이미지, 스토리보드)
+- 생성 로그 확인 및 에러 추적
 
-- [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en) (v18 이상)
-- [pnpm](https://pnpm.io/) (권장 패키지 매니저)
+<!-- ![관리자](./docs/screenshots/admin.png) -->
 
-```bash
-# pnpm 설치
-npm install -g pnpm
+### 💙 마이페이지
+
+- Clerk를 통한 프로필 관리
+- 크레딧 잔액 확인
+- 크레딧 거래 내역
+- 회원 탈퇴 (모든 데이터 삭제)
+
+<!-- ![마이페이지](./docs/screenshots/mypage.png) -->
+
+---
+
+## 🌐 서비스 아키텍처
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Client (Next.js 15)                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
+│  │   홈     │  │  영상    │  │  이미지  │  │   스토리보드     │ │
+│  │  페이지  │  │  생성    │  │  생성    │  │      편집       │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Vercel (Edge Network)                       │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              Next.js Server (App Router)                  │   │
+│  │  ┌────────────────┐  ┌────────────────┐                  │   │
+│  │  │ Server Actions │  │  API Routes    │                  │   │
+│  │  │   (56개)       │  │  (sync-user,   │                  │   │
+│  │  │                │  │   instagram)   │                  │   │
+│  │  └────────────────┘  └────────────────┘                  │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+          │                    │                    │
+          ▼                    ▼                    ▼
+┌──────────────┐    ┌──────────────────┐    ┌──────────────┐
+│    Clerk     │    │    Supabase      │    │     n8n      │
+│  (인증/JWT)  │    │  ┌────────────┐  │    │  (워크플로우) │
+│              │    │  │ PostgreSQL │  │    │              │
+│  - 회원가입  │    │  │ (27 tables)│  │    │  - 영상 생성 │
+│  - 로그인    │◄──►│  └────────────┘  │◄──►│  - 이미지    │
+│  - OAuth     │    │  ┌────────────┐  │    │  - 병합      │
+│              │    │  │  Storage   │  │    │              │
+└──────────────┘    │  │  (uploads) │  │    └──────────────┘
+                    │  └────────────┘  │
+                    │  ┌────────────┐  │
+                    │  │  Realtime  │  │
+                    │  │  (진행률)  │  │
+                    │  └────────────┘  │
+                    └──────────────────┘
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │   Toss Payments  │
+                    │   (KRW 결제)     │
+                    └──────────────────┘
 ```
 
-### 프로젝트 초기화
+<!-- ![Architecture](./docs/architecture.png) -->
 
-다음 단계를 순서대로 진행하세요:
+---
 
-#### 1. Supabase 프로젝트 생성
+## 🔧 기술적 의사결정
 
-1. [Supabase Dashboard](https://supabase.com/dashboard)에 접속하여 로그인
-2. **"New Project"** 클릭
-3. Organization 선택 (없으면 새로 생성)
-4. 프로젝트 정보 입력:
-   - **Name**: 원하는 프로젝트 이름
-   - **Database Password**: 안전한 비밀번호 생성 (기억할 필요 없음, Supabase가 관리)
-   - **Region**: `Northeast Asia (Seoul)` 선택 (한국 서비스용)
-   - **Pricing Plan**: Free 또는 Pro 선택
-5. **"Create new project"** 클릭하고 프로젝트가 준비될 때까지 대기 (~2분)
+| **공통 기술** | |
+| --- | --- |
+| Next.js 15 (App Router) | React 19의 Server Components와 Server Actions를 활용하여 성능 최적화. API Routes 대신 Server Actions 우선 사용으로 코드 간결화 및 타입 안전성 확보. Turbopack을 통한 빠른 개발 환경 제공. |
+| Supabase Realtime | 영상/이미지 생성 진행률을 실시간으로 표시하기 위해 선택. WebSocket 기반으로 폴링 대비 서버 부하 감소. 연결 실패 시 15초 폴링 폴백 구현. |
+| Clerk + Supabase 통합 | 2025년 네이티브 통합 방식 사용. JWT 템플릿 없이 Clerk JWT를 Supabase에서 직접 검증. RLS 정책에서 `auth.jwt()->>'sub'`로 사용자 확인. |
+| **프론트엔드** | |
+| React 19 | 최신 React 기능 활용 (use hook, Server Components). Concurrent Features로 더 나은 UX 제공. |
+| Tailwind CSS v4 | 설정 파일 없이 `globals.css`에서 직접 설정. CSS 변수 기반 다크/라이트 모드 지원. |
+| shadcn/ui | Radix UI 기반의 접근성 높은 컴포넌트. 프로젝트에 직접 복사되어 커스터마이징 용이. |
+| react-hook-form + Zod | 폼 상태 관리와 런타임 타입 검증을 결합. 타입스크립트와의 완벽한 통합으로 개발 생산성 향상. |
+| lucide-react | 일관된 아이콘 디자인. 트리 쉐이킹 지원으로 번들 크기 최적화. |
+| framer-motion | 부드러운 애니메이션 효과로 UX 향상. 생성 진행률 표시 등에 활용. |
+| **백엔드** | |
+| Supabase PostgreSQL | 관계형 데이터베이스로 복잡한 쿼리 지원. Row Level Security로 데이터 보안 강화. 27개 마이그레이션으로 스키마 버전 관리. |
+| Supabase Storage | 사용자 업로드 이미지 저장. RLS 정책으로 사용자별 폴더 격리. CDN을 통한 빠른 이미지 제공. |
+| n8n Workflow | 영상/이미지 생성 파이프라인 자동화. 외부 AI 서비스 연동. 웹훅을 통한 비동기 처리. |
+| Toss Payments | 한국 결제 환경에 최적화. 다양한 결제 수단 지원 (카드, 계좌이체, 가상계좌). SDK로 간편한 연동. |
+| Vercel | Next.js 최적화 호스팅. Edge Network로 글로벌 성능. 자동 배포 및 프리뷰 환경. |
 
-#### 2. Clerk 프로젝트 생성
+---
 
-1. [Clerk Dashboard](https://dashboard.clerk.com/)에 접속하여 로그인
-2. **"Create application"** 클릭
-3. 애플리케이션 정보 입력:
-   - **Application name**: 원하는 이름 (예: `SaaS Template`)
-   - **Sign-in options**: Email, Google 등 원하는 인증 방식 선택
-4. **"Create application"** 클릭
-5. Quick Start 화면에서 **"Continue in Dashboard"** 클릭
+## 💣 트러블슈팅
 
-#### 3. Clerk + Supabase 통합
+### FE (프론트엔드)
 
-> **중요**: 2025년 4월부터 Clerk의 네이티브 Supabase 통합을 사용합니다. JWT Template은 더 이상 필요하지 않습니다.
+#### Supabase Realtime 연결 끊김
 
-**3-1. Clerk Frontend API URL 확인**
+❗ **문제상황**
 
-1. Clerk Dashboard → **API Keys** 메뉴
-2. **"Frontend API"** URL 복사 (예: `https://your-app-12.clerk.accounts.dev`)
-   - 이 URL을 메모해두세요 (다음 단계에서 사용)
+- 영상 생성 중 Realtime 연결이 간헐적으로 끊어져 진행률 업데이트가 멈추는 현상 발생
+- 특히 JWT 토큰 만료 시점에서 재연결 실패
 
-**3-2. Supabase에서 Clerk 인증 제공자 설정**
+❗ **이전 코드의 문제점**
 
-1. Supabase Dashboard로 돌아가기
-2. 프로젝트 선택 → **Settings** → **Authentication** → **Providers**
-3. 페이지 하단으로 스크롤하여 **"Third-Party Auth"** 섹션 찾기
-4. **"Enable Custom Access Token"** 또는 **"Add Provider"** 클릭
-5. 다음 정보 입력:
+- 단순히 Supabase Realtime 채널을 구독하고 상태 변경만 감지
+- 토큰 만료나 네트워크 불안정에 대한 처리 없음
 
-   - **Provider Name**: `Clerk` (또는 원하는 이름)
-   - **JWT Issuer (Issuer URL)**:
-     ```
-     https://your-app-12.clerk.accounts.dev
-     ```
-     (`your-app-12` 부분을 실제 Clerk Frontend API URL로 교체)
+✅ **문제 해결**
 
-   - **JWKS Endpoint (JWKS URI)**:
-     ```
-     https://your-app-12.clerk.accounts.dev/.well-known/jwks.json
-     ```
-     (동일하게 실제 URL로 교체)
+- `useRealtimeVideo` 훅에서 다중 복구 전략 구현:
+  1. **토큰 자동 갱신**: `getToken({ skipCache: true })`로 항상 새 토큰 사용
+  2. **폴링 폴백**: Realtime 실패 시 15초 간격 폴링으로 전환
+  3. **지수 백오프 재연결**: 최대 5회까지 재시도, 간격 점진적 증가
+  4. **하트비트 체크**: 15초마다 연결 상태 확인
+  5. **10분 타임아웃**: 장기간 응답 없을 시 에러 상태로 전환
 
-6. **"Save"** 또는 **"Add Provider"** 클릭
+```typescript
+// 이전 코드
+const channel = supabase
+  .channel('video-updates')
+  .on('postgres_changes', { ... }, handleChange)
+  .subscribe();
 
-**3-3. 통합 확인**
-
-[Clerk 공식 통합 가이드](https://clerk.com/docs/guides/development/integrations/databases/supabase)에서 추가 정보를 확인할 수 있습니다.
-
-#### 4. Supabase Storage 생성 및 설정
-
-1. Supabase Dashboard → **Storage** 메뉴
-2. **"New bucket"** 클릭
-3. 버킷 정보 입력:
-   - **Name**: `uploads` (`.env.example`과 동일하게)
-   - **Public bucket**: 필요에 따라 선택
-     - Public: 누구나 URL로 파일 접근 가능
-     - Private: 인증된 사용자만 접근 (RLS 정책 필요)
-4. **"Create bucket"** 클릭
-
-#### 5. 데이터베이스 스키마 적용
-
-1. Supabase Dashboard → **SQL Editor** 메뉴
-2. **"New query"** 클릭
-3. `supabase/migrations/schema.sql` 파일 내용을 복사하여 붙여넣기
-4. **"Run"** 클릭하여 실행
-5. 성공 메시지 확인 (`Success. No rows returned`)
-
-**생성되는 테이블:**
-- `users`: Clerk 사용자와 동기화되는 사용자 정보 테이블
-
-#### 6. 환경 변수 설정
-
-**6-1. 저장소 클론 및 의존성 설치**
-
-```bash
-git clone <your-repository-url>
-cd saas-template
-pnpm install
-```
-
-**6-2. .env 파일 생성**
-
-```bash
-cp .env.example .env
-```
-
-**6-3. Supabase 환경 변수 설정**
-
-1. Supabase Dashboard → **Settings** → **API**
-2. 다음 값들을 복사하여 `.env` 파일에 입력:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL="<Project URL>"
-   NEXT_PUBLIC_SUPABASE_ANON_KEY="<anon public key>"
-   SUPABASE_SERVICE_ROLE_KEY="<service_role secret key>"
-   NEXT_PUBLIC_STORAGE_BUCKET="uploads"
-   ```
-
-> **⚠️ 주의**: `service_role` 키는 모든 RLS를 우회하는 관리자 권한이므로 절대 공개하지 마세요!
-
-**6-4. Clerk 환경 변수 설정**
-
-1. Clerk Dashboard → **API Keys**
-2. 다음 값들을 복사하여 `.env` 파일에 입력:
-   ```env
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="<Publishable Key>"
-   CLERK_SECRET_KEY="<Secret Key>"
-   NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
-   NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL="/"
-   NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL="/"
-   ```
-
-#### 7. Cursor MCP 설정 (선택사항)
-
-> Cursor AI를 사용하는 경우, Supabase MCP 서버를 설정하면 AI가 데이터베이스를 직접 조회하고 관리할 수 있습니다.
-
-**7-1. Supabase Access Token 생성**
-
-1. Supabase Dashboard → 우측 상단 프로필 아이콘 클릭
-2. **Account Settings** → **Access Tokens**
-3. **"Generate new token"** 클릭
-4. Token name 입력 (예: `cursor-mcp`)
-5. 생성된 토큰 복사 (다시 볼 수 없으므로 안전한 곳에 보관)
-
-**7-2. .cursor/mcp.json 설정**
-
-`.cursor/mcp.json` 파일을 열고 `your_supabase_access_token` 부분을 실제 토큰으로 교체:
-
-```json
-{
-  "mcpServers": {
-    "supabase": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@supabase/mcp-server-supabase@latest",
-        "--access-token",
-        "sbp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-      ]
-    }
-  }
+// 수정 코드 (486줄의 완성된 훅)
+export function useRealtimeVideo(videoId: string) {
+  // 토큰 갱신, 폴링 폴백, 재연결 로직 포함
+  // 타임아웃 감지, 하트비트 체크 구현
+  // onComplete, onError 콜백 지원
 }
 ```
 
-**7-3. Cursor 재시작**
+---
 
-Cursor를 완전히 종료하고 다시 실행하여 MCP 서버 설정을 적용합니다.
+#### 무한 스크롤 상태 관리
 
-#### 8. 개발 서버 실행
+❗ **문제상황**
 
-```bash
-pnpm dev
+- 대시보드에서 스크롤 시 동일 데이터가 중복 로드되거나 누락되는 현상
+
+❗ **원인 분석**
+
+- 페이지네이션 커서와 로딩 상태 관리가 비동기 특성을 고려하지 않음
+
+✅ **문제 해결**
+
+- `useInfiniteScroll` 커스텀 훅 구현
+- `IntersectionObserver`로 스크롤 위치 감지
+- 로딩 중 추가 요청 방지를 위한 상태 플래그 사용
+- 커서 기반 페이지네이션으로 일관된 데이터 로드
+
+---
+
+#### 이미지 드롭존 미리보기
+
+❗ **문제상황**
+
+- 대용량 이미지 업로드 시 브라우저가 멈추는 현상
+
+✅ **문제 해결**
+
+- 클라이언트에서 이미지 리사이징 후 미리보기 표시
+- 실제 업로드는 원본 또는 최적화된 크기로 진행
+- `FileReader`와 `canvas`를 활용한 썸네일 생성
+
+---
+
+### BE (백엔드/인프라)
+
+#### Clerk JWT + Supabase RLS 통합
+
+❗ **문제상황**
+
+- Clerk 사용자 ID(`user_xxx`)와 Supabase의 `auth.uid()` 불일치로 RLS 정책 실패
+
+❗ **원인 분석**
+
+- Supabase 기본 RLS는 자체 인증 시스템의 `auth.uid()`를 기대
+- Clerk JWT는 `sub` 클레임에 사용자 ID 저장
+
+✅ **문제 해결**
+
+- RLS 정책에서 `auth.jwt()->>'sub'`으로 Clerk user ID 직접 추출
+- 데이터베이스 `user_id` 컬럼에 Clerk ID (`clerk_id`) 저장
+- 네이티브 통합 방식으로 JWT 템플릿 불필요
+
+```sql
+-- RLS 정책 예시
+CREATE POLICY "Users can view own videos"
+ON ad_videos FOR SELECT
+USING (user_id = auth.jwt()->>'sub');
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 확인합니다.
+---
 
-**테스트 페이지:**
-- `/auth-test`: Clerk + Supabase 인증 통합 테스트
-- `/storage-test`: Supabase Storage 업로드 테스트
+#### 토큰 만료로 인한 Storage 업로드 실패
 
-### 개발 명령어
+❗ **문제상황**
+
+- 장시간 페이지 유지 후 파일 업로드 시 401 Unauthorized 에러
+
+❗ **원인 분석**
+
+- Supabase 클라이언트 생성 시 토큰이 캐시되어 만료된 토큰 사용
+
+✅ **문제 해결**
+
+- `useClerkSupabaseClient` 훅에서 `accessToken` 옵션에 함수 전달
+- 매 요청마다 `getToken({ skipCache: true })`로 새 토큰 획득
+- Realtime 채널에서도 동일 패턴 적용
+
+```typescript
+// clerk-client.ts
+const client = createClient(supabaseUrl, supabaseAnonKey, {
+  global: {
+    headers: {
+      Authorization: `Bearer ${await getToken({ skipCache: true })}`,
+    },
+  },
+});
+```
+
+---
+
+#### n8n 웹훅 타임아웃
+
+❗ **문제상황**
+
+- 복잡한 영상 생성 시 n8n 웹훅 응답 대기 중 타임아웃 발생
+
+✅ **문제 해결**
+
+- 웹훅 호출을 비동기로 변경 (fire-and-forget)
+- n8n이 완료 시 별도 콜백으로 상태 업데이트
+- 클라이언트는 Realtime으로 상태 변경 감지
+
+---
+
+#### 크레딧 동시성 문제
+
+❗ **문제상황**
+
+- 동시에 여러 생성 요청 시 크레딧이 음수가 되는 경우 발생
+
+✅ **문제 해결**
+
+- 트랜잭션 내에서 크레딧 확인 및 차감
+- `FOR UPDATE` 락으로 동시 접근 방지
+- 크레딧 부족 시 에러 반환 후 생성 중단
+
+---
+
+#### 스토리보드 씬 순서 동기화
+
+❗ **문제상황**
+
+- 드래그 앤 드롭으로 씬 순서 변경 시 다른 사용자 화면과 불일치
+
+✅ **문제 해결**
+
+- `scene_order` 컬럼으로 순서 관리
+- `reorder-scenes` Server Action에서 배치 업데이트
+- Realtime으로 다른 탭/기기에 순서 변경 전파
+
+---
+
+## 📊 크레딧 비용 구조
+
+| 기능 | 크레딧 |
+| --- | --- |
+| 비디오 생성 | 80 |
+| 이미지 생성 | 20 |
+| 스토리보드 AI 초안 | 10 |
+| 씬 이미지 생성 (개당) | 5 |
+| 씬 클립 생성 (개당) | 15 |
+| 최종 영상 병합 | 20 |
+
+**스토리보드 예시 (5씬 기준)**
+= 10 + (5 × 5) + (5 × 15) + 20 = **135 크레딧**
+
+---
+
+## 📁 프로젝트 구조
+
+```
+my-ad1106/
+├── app/                          # Next.js App Router (36 라우트)
+│   ├── (auth)/                   # 인증 관련 페이지
+│   │   ├── sign-in/             # 로그인
+│   │   └── sign-up/             # 회원가입
+│   ├── admin/                    # 관리자 페이지
+│   │   ├── analytics/           # 사용량 분석
+│   │   ├── logs/                # 생성 로그
+│   │   ├── payments/            # 결제 내역
+│   │   └── users/               # 사용자 관리
+│   ├── api/                      # API Routes
+│   │   ├── sync-user/           # Clerk → Supabase 동기화
+│   │   └── auth/instagram/      # Instagram OAuth
+│   ├── dashboard/                # 대시보드
+│   ├── generation/[id]/          # 비디오 생성 진행
+│   ├── image/                    # 이미지 허브
+│   ├── image-generation/[id]/    # 이미지 생성 진행
+│   ├── payment/                  # 결제 결과
+│   ├── pricing/                  # 요금제
+│   ├── storyboard/               # 스토리보드
+│   │   ├── [id]/                # 스토리보드 편집
+│   │   └── new/                 # 새 스토리보드
+│   ├── video/                    # 비디오 허브
+│   └── layout.tsx                # Root Layout
+│
+├── components/                   # React 컴포넌트 (70+)
+│   ├── admin/                    # 관리자 컴포넌트
+│   ├── chatbot/                  # AI 챗봇
+│   ├── credit/                   # 크레딧 관련
+│   ├── dashboard/                # 대시보드 컴포넌트
+│   ├── generation/               # 영상 생성 진행률
+│   ├── home/                     # 홈페이지 섹션
+│   ├── image-generation/         # 이미지 생성 진행률
+│   ├── payment/                  # 결제 컴포넌트
+│   ├── providers/                # Context Providers
+│   ├── storyboard/               # 스토리보드 컴포넌트
+│   ├── ui/                       # shadcn/ui (수정 금지)
+│   ├── upload/                   # 업로드 폼
+│   ├── upload-image/             # 이미지 업로드
+│   └── video/                    # 비디오 플레이어
+│
+├── actions/                      # Server Actions (56개)
+│   ├── admin/                    # 관리자 액션
+│   ├── credit/                   # 크레딧 관리
+│   ├── image/                    # 이미지 액션
+│   ├── payment/                  # 결제 액션
+│   ├── storyboard/               # 스토리보드 액션
+│   └── *.ts                      # 비디오 관련 액션
+│
+├── hooks/                        # Custom Hooks
+│   ├── use-credit-balance.ts     # 크레딧 잔액
+│   ├── use-realtime-video.ts     # 실시간 비디오 상태
+│   ├── use-realtime-image.ts     # 실시간 이미지 상태
+│   ├── use-realtime-storyboard.ts # 실시간 스토리보드
+│   └── use-sync-user.ts          # 사용자 동기화
+│
+├── lib/                          # 유틸리티
+│   ├── supabase/                 # Supabase 클라이언트
+│   │   ├── clerk-client.ts      # Client Component용
+│   │   ├── server.ts            # Server Component용
+│   │   └── service-role.ts      # 관리자용
+│   ├── constants/                # 상수 (크레딧 비용 등)
+│   ├── tosspayments/             # 토스페이먼츠
+│   └── utils.ts                  # 공통 유틸
+│
+├── types/                        # TypeScript 타입
+│   ├── database.ts               # DB 테이블 타입
+│   ├── generation.ts             # 생성 관련 타입
+│   ├── storyboard.ts             # 스토리보드 타입 (524줄)
+│   └── *.ts                      # 기타 타입
+│
+├── supabase/                     # 데이터베이스
+│   ├── migrations/               # 27개 마이그레이션
+│   └── config.toml               # Supabase 설정
+│
+├── middleware.ts                 # Clerk 미들웨어
+├── CLAUDE.md                     # AI 에이전트 가이드
+└── AGENTS.md                     # 프로젝트 규칙
+```
+
+---
+
+## 📦 주요 의존성
+
+```json
+{
+  "next": "15.5.9",
+  "react": "19.2.3",
+  "@clerk/nextjs": "6.20.0",
+  "@supabase/supabase-js": "2.49.8",
+  "tailwindcss": "4",
+  "react-hook-form": "7.56.4",
+  "zod": "3.25.32",
+  "lucide-react": "0.511.0",
+  "framer-motion": "12.23.25",
+  "@tosspayments/tosspayments-sdk": "2.4.1",
+  "date-fns": "4.1.0",
+  "next-themes": "0.4.6",
+  "sonner": "2.0.7"
+}
+```
+
+---
+
+## 🚀 실행 방법
 
 ```bash
+# 의존성 설치
+pnpm install
+
 # 개발 서버 실행 (Turbopack)
 pnpm dev
 
@@ -298,115 +510,54 @@ pnpm build
 # 프로덕션 서버 실행
 pnpm start
 
-# 린팅
+# 린트 검사
 pnpm lint
 ```
 
-## 추가 설정 및 팁
+---
 
-### Clerk 한국어 설정
+## 🔐 환경 변수
 
-프로젝트에 이미 Clerk 한국어 로컬라이제이션이 적용되어 있습니다. `app/layout.tsx`의 `ClerkProvider`에서 `koKR` locale이 설정되어 있습니다.
+`.env.example` 참고:
 
-### Supabase RLS (Row Level Security) 정책
+```env
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
 
-프로젝트의 `users` 테이블에는 기본 RLS 정책이 설정되어 있습니다:
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_STORAGE_BUCKET=uploads
 
-- **SELECT**: 사용자는 자신의 데이터만 조회 가능
-- **INSERT**: 새 사용자 생성 가능
-- **UPDATE**: 사용자는 자신의 데이터만 수정 가능
+# n8n Webhook
+N8N_WEBHOOK_URL=
+N8N_WEBHOOK_USER=
+N8N_WEBHOOK_PASSWORD=
 
-추가 테이블 생성 시 RLS 정책을 반드시 설정하세요:
+# Toss Payments
+NEXT_PUBLIC_TOSS_CLIENT_KEY=
+TOSS_SECRET_KEY=
 
-```sql
--- 테이블 생성
-CREATE TABLE your_table (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id TEXT NOT NULL REFERENCES users(clerk_id),
-  -- 기타 컬럼들
-);
-
--- RLS 활성화
-ALTER TABLE your_table ENABLE ROW LEVEL SECURITY;
-
--- SELECT 정책
-CREATE POLICY "Users can view their own data"
-  ON your_table FOR SELECT
-  USING (auth.jwt()->>'sub' = user_id);
-
--- INSERT 정책
-CREATE POLICY "Users can insert their own data"
-  ON your_table FOR INSERT
-  WITH CHECK (auth.jwt()->>'sub' = user_id);
+# Analytics
+NEXT_PUBLIC_GA_ID=
 ```
 
-### 추가 로그인 방식 설정
+---
 
-Clerk에서 추가 로그인 방식을 활성화하려면:
+## 👨‍👩‍👧‍👦 팀원 소개
 
-1. Clerk Dashboard → **User & Authentication** → **Social Connections**
-2. 원하는 제공자 선택 (Google, GitHub, Discord 등)
-3. OAuth 자격 증명 입력 (제공자 개발자 콘솔에서 생성)
-4. **Enable** 클릭
+<!-- 팀원 정보 추가 위치 -->
+| 역할 | 이름 | GitHub |
+| --- | --- | --- |
+| Full-stack | - | - |
 
-## 프로젝트 구조
+---
 
-```
-saas-template/
-├── app/                    # Next.js App Router
-│   ├── api/               # API Routes
-│   │   └── sync-user/    # Clerk → Supabase 사용자 동기화
-│   ├── auth-test/        # 인증 테스트 페이지
-│   ├── storage-test/     # 스토리지 테스트 페이지
-│   ├── layout.tsx        # Root Layout (Clerk Provider)
-│   ├── page.tsx          # 홈페이지
-│   └── globals.css       # 전역 스타일 (Tailwind v4 설정)
-│
-├── components/            # React 컴포넌트
-│   ├── ui/               # shadcn/ui 컴포넌트 (자동 생성)
-│   ├── providers/        # Context Providers
-│   │   └── sync-user-provider.tsx
-│   └── Navbar.tsx        # 네비게이션 바
-│
-├── lib/                   # 유틸리티 및 설정
-│   ├── supabase/         # Supabase 클라이언트들
-│   │   ├── clerk-client.ts    # Client Component용
-│   │   ├── server.ts          # Server Component용
-│   │   ├── service-role.ts    # 관리자용
-│   │   └── client.ts          # 공개 데이터용
-│   └── utils.ts          # 공통 유틸리티 (cn 함수 등)
-│
-├── hooks/                 # Custom React Hooks
-│   └── use-sync-user.ts  # 사용자 동기화 훅
-│
-├── supabase/             # Supabase 관련 파일
-│   ├── migrations/       # 데이터베이스 마이그레이션
-│   │   └── schema.sql   # 초기 스키마
-│   └── config.toml       # Supabase 프로젝트 설정
-│
-├── .cursor/              # Cursor AI 규칙
-│   └── rules/           # 개발 컨벤션 및 가이드
-│
-├── middleware.ts         # Next.js 미들웨어 (Clerk)
-├── .env.example         # 환경 변수 예시
-└── CLAUDE.md            # AI 에이전트용 프로젝트 가이드
-```
+## 📄 라이선스
 
-### 주요 파일 설명
-
-- **`middleware.ts`**: Clerk 인증 미들웨어 설정
-- **`app/layout.tsx`**: ClerkProvider와 SyncUserProvider 설정
-- **`lib/supabase/`**: 환경별 Supabase 클라이언트 (매우 중요!)
-- **`hooks/use-sync-user.ts`**: Clerk 사용자를 Supabase에 자동 동기화
-- **`components/providers/sync-user-provider.tsx`**: 앱 전역에서 사용자 동기화 실행
-- **`CLAUDE.md`**: Claude Code를 위한 프로젝트 가이드
-
-## 추가 리소스
-
-- [Next.js 15 문서](https://nextjs.org/docs)
-- [Clerk 문서](https://clerk.com/docs)
-- [Supabase 문서](https://supabase.com/docs)
-- [shadcn/ui 문서](https://ui.shadcn.com/)
-- [Tailwind CSS v4 문서](https://tailwindcss.com/docs)
-#   m y - a d  
- 
+Private - All Rights Reserved
