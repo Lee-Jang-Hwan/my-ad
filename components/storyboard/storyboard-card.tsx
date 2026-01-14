@@ -129,13 +129,6 @@ export function StoryboardCard({ storyboard, onDeleted }: StoryboardCardProps) {
                 <Film className="w-10 h-10 text-muted-foreground/30" />
               </div>
             )}
-            {/* Status badge overlay */}
-            <div className="absolute top-2 left-2">
-              <Badge variant={status.variant} className="gap-1">
-                {status.icon}
-                {status.label}
-              </Badge>
-            </div>
             {/* Scene count */}
             <div className="absolute bottom-2 right-2">
               <Badge variant="secondary" className="bg-black/60 text-white">
@@ -181,9 +174,15 @@ export function StoryboardCard({ storyboard, onDeleted }: StoryboardCardProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-            <Clock className="w-3 h-3" />
-            {timeAgo}
+          <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              {timeAgo}
+            </div>
+            <Badge variant={status.variant} className="gap-1">
+              {status.icon}
+              {status.label}
+            </Badge>
           </div>
           {storyboard.description && (
             <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
