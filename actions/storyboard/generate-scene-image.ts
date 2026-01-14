@@ -42,7 +42,7 @@ export async function generateSceneImage(
     // Verify scene ownership
     const { data: scene, error: sceneError } = await supabase
       .from("storyboard_scenes")
-      .select("id, storyboard_id, storyboards!inner(user_id, aspect_ratio, color_grade)")
+      .select("id, storyboard_id, storyboards!inner(user_id, aspect_ratio, color_grade, product_reference_image_url)")
       .eq("id", input.sceneId)
       .single();
 
@@ -54,6 +54,7 @@ export async function generateSceneImage(
       user_id: string;
       aspect_ratio: string;
       color_grade: string;
+      product_reference_image_url: string | null;
     };
 
     if (storyboardData.user_id !== clerkId) {
@@ -84,6 +85,7 @@ export async function generateSceneImage(
       user_id: clerkId,
       visual_prompt: input.visualPrompt,
       reference_image_url: input.referenceImageUrl,
+      product_reference_image_url: storyboardData.product_reference_image_url || undefined,
       aspect_ratio: storyboardData.aspect_ratio,
       style_settings: {
         color_grade: storyboardData.color_grade,

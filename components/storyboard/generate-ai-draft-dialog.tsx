@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, AlertCircle, ImageIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,13 +23,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { STORYBOARD_AI_DRAFT_COST } from "@/lib/constants/credits";
+import { generateAIDraft, fetchStoryboardScenes } from "@/actions/storyboard";
+import { ReferenceImageUpload } from "@/components/storyboard/reference-image-upload";
 import type { Storyboard, StoryboardScene } from "@/types/storyboard";
 
 interface DraftParams {
   productName: string;
   productDescription: string;
   stylePreference: string;
+  sceneCount: string;
+  referenceImageUrl?: string;
 }
 
 interface GenerateAIDraftDialogProps {
@@ -43,6 +49,7 @@ interface FormValues {
   productName: string;
   productDescription: string;
   stylePreference: string;
+  sceneCount: string;
 }
 
 const STYLE_OPTIONS = [
@@ -54,6 +61,28 @@ const STYLE_OPTIONS = [
   { value: "playful", label: "재미있는" },
 ];
 
+// 씬 조회 재시도 로직
+async function fetchScenesWithRetry(
+  storyboardId: string,
+  maxRetries: number = 5,
+  delayMs: number = 2000
+): Promise<StoryboardScene[] | null> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const result = await fetchStoryboardScenes(storyboardId);
+
+    if (result.success && result.data && result.data.length > 0) {
+      return result.data;
+    }
+
+    // 마지막 시도가 아니면 대기 후 재시도
+    if (attempt < maxRetries - 1) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  return null;
+}
+
 export function GenerateAIDraftDialog({
   open,
   onOpenChange,
@@ -63,80 +92,90 @@ export function GenerateAIDraftDialog({
 }: GenerateAIDraftDialogProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [statusMessage, setStatusMessage] = useState<string>("");
+  const [referenceImageUrl, setReferenceImageUrl] = useState<string | undefined>(
+    initialParams?.referenceImageUrl
+  );
+  const [referenceImageStoragePath, setReferenceImageStoragePath] = useState<string | undefined>();
+
+  const handleImageChange = (imageUrl: string | undefined, storagePath: string | undefined) => {
+    setReferenceImageUrl(imageUrl);
+    setReferenceImageStoragePath(storagePath);
+  };
 
   const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
     defaultValues: {
       productName: initialParams?.productName || storyboard.title,
       productDescription: initialParams?.productDescription || storyboard.description || "",
-      stylePreference: initialParams?.stylePreference || "cinematic",
+      stylePreference: initialParams?.stylePreference || "commercial",
+      sceneCount: initialParams?.sceneCount || "5",
     },
   });
 
   const stylePreference = watch("stylePreference");
+  const sceneCount = watch("sceneCount");
 
-  const estimatedScenes = Math.ceil(storyboard.target_duration / 5);
+  const estimatedScenes = parseInt(sceneCount || "5", 10);
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = useCallback(async (data: FormValues) => {
     setIsGenerating(true);
     setError(null);
+    setProgress(0);
+    setStatusMessage("AI 초안 생성 준비 중...");
 
     try {
-      // TODO: Call n8n webhook to generate AI draft
-      // For now, we'll simulate with a mock response
+      // 1단계: n8n webhook 호출하여 AI 초안 생성
+      setProgress(10);
+      setStatusMessage("AI가 스토리보드를 분석하고 있습니다...");
 
-      // Mock API call delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const result = await generateAIDraft({
+        storyboardId: storyboard.id,
+        productName: data.productName,
+        productDescription: data.productDescription,
+        stylePreference: data.stylePreference,
+        sceneCount: parseInt(data.sceneCount, 10),
+        referenceImageUrl: referenceImageUrl,
+      });
 
-      // Mock generated scenes
-      const mockScenes: StoryboardScene[] = Array.from(
-        { length: estimatedScenes },
-        (_, i) => ({
-          id: `mock-${i + 1}`,
-          storyboard_id: storyboard.id,
-          scene_order: i + 1,
-          scene_name: `씬 ${i + 1}`,
-          scene_description: `${data.productName}의 ${i + 1}번째 장면입니다.`,
-          dialogue: i === 0 ? `${data.productName}를 소개합니다.` : null,
-          dialogue_type: "narration" as const,
-          visual_prompt: `A ${data.stylePreference} shot of ${data.productName}`,
-          reference_image_url: null,
-          camera_angle: "eye_level" as const,
-          camera_movement: i % 2 === 0 ? "static" as const : "zoom_in" as const,
-          duration_seconds: 3,
-          transition_type: "fade" as const,
-          transition_duration: 0.5,
-          bgm_id: null,
-          bgm_volume: 0.8,
-          sfx_id: null,
-          subtitle_style: {
-            position: "bottom" as const,
-            fontSize: "medium" as const,
-            fontColor: "#FFFFFF",
-            bgColor: "#00000080",
-          },
-          generated_image_url: null,
-          generated_clip_url: null,
-          generation_status: "pending" as const,
-          generation_error: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-      );
+      if (!result.success) {
+        setError(result.error || "AI 초안 생성에 실패했습니다.");
+        setIsGenerating(false);
+        setProgress(0);
+        return;
+      }
 
-      // In real implementation, scenes would be saved to DB by n8n webhook
-      // and we'd fetch them after generation completes
+      // 2단계: 생성된 씬 조회 (재시도 로직 포함)
+      setProgress(70);
+      setStatusMessage("생성된 씬을 불러오는 중...");
 
-      onComplete(mockScenes);
+      const scenes = await fetchScenesWithRetry(storyboard.id, 5, 2000);
+
+      if (!scenes || scenes.length === 0) {
+        setError("생성된 씬을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
+        setIsGenerating(false);
+        setProgress(0);
+        return;
+      }
+
+      // 3단계: 완료
+      setProgress(100);
+      setStatusMessage(`${scenes.length}개의 씬이 생성되었습니다!`);
+
+      // 잠시 대기 후 완료 콜백 호출
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      onComplete(scenes);
     } catch (err) {
       console.error("Generate AI draft error:", err);
-      setError("AI 초안 생성 중 오류가 발생했습니다.");
+      setError("AI 초안 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [storyboard.id, onComplete, referenceImageUrl]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={isGenerating ? undefined : onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -145,7 +184,7 @@ export function GenerateAIDraftDialog({
           </DialogTitle>
           <DialogDescription>
             상품 정보를 입력하면 AI가 스토리보드 초안을 생성합니다.
-            약 {estimatedScenes}개의 씬이 생성됩니다.
+            약 {estimatedScenes}개의 씬이 생성됩니다. (목표: {storyboard.target_duration}초)
           </DialogDescription>
         </DialogHeader>
 
@@ -155,6 +194,7 @@ export function GenerateAIDraftDialog({
             <Input
               id="productName"
               placeholder="예: 프리미엄 무선 이어폰"
+              disabled={isGenerating}
               {...register("productName", { required: true })}
             />
           </div>
@@ -165,6 +205,7 @@ export function GenerateAIDraftDialog({
               id="productDescription"
               placeholder="상품의 특징, 장점, 타겟 고객 등을 설명해주세요."
               rows={4}
+              disabled={isGenerating}
               {...register("productDescription")}
             />
           </div>
@@ -174,6 +215,7 @@ export function GenerateAIDraftDialog({
             <Select
               value={stylePreference}
               onValueChange={(v) => setValue("stylePreference", v)}
+              disabled={isGenerating}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -188,8 +230,63 @@ export function GenerateAIDraftDialog({
             </Select>
           </div>
 
+          {/* 참조 이미지 */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-muted-foreground" />
+              <Label>참조 이미지 (선택)</Label>
+            </div>
+            {referenceImageUrl ? (
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
+                <Image
+                  src={referenceImageUrl}
+                  alt="참조 이미지"
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 500px) 100vw, 500px"
+                />
+                {!isGenerating && (
+                  <button
+                    type="button"
+                    onClick={() => handleImageChange(undefined, undefined)}
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                  >
+                    <span className="sr-only">이미지 제거</span>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <ReferenceImageUpload
+                value={referenceImageUrl}
+                storagePath={referenceImageStoragePath}
+                onChange={handleImageChange}
+                disabled={isGenerating}
+              />
+            )}
+            <p className="text-xs text-muted-foreground">
+              상품 이미지를 업로드하면 AI가 더 정확한 스토리보드를 생성합니다.
+            </p>
+          </div>
+
+          {/* 진행 상황 표시 */}
+          {isGenerating && (
+            <div className="space-y-2">
+              <Progress value={progress} className="h-2" />
+              <p className="text-sm text-muted-foreground text-center">
+                {statusMessage}
+              </p>
+            </div>
+          )}
+
+          {/* 에러 메시지 */}
           {error && (
-            <div className="text-sm text-destructive">{error}</div>
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
           )}
 
           <div className="bg-muted p-3 rounded-lg text-sm">

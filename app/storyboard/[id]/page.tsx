@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { fetchStoryboardWithScenes } from "@/actions/storyboard";
-import { StoryboardEditor } from "@/components/storyboard/storyboard-editor";
+import { StoryboardEditorWrapper } from "@/components/storyboard/storyboard-editor-wrapper";
 
 interface StoryboardEditorPageProps {
   params: Promise<{ id: string }>;
@@ -9,7 +9,9 @@ interface StoryboardEditorPageProps {
     productName?: string;
     productDescription?: string;
     stylePreference?: string;
+    sceneCount?: string;
     generateDraft?: string;
+    referenceImageUrl?: string;
   }>;
 }
 
@@ -51,11 +53,13 @@ export default async function StoryboardEditorPage({
         productName: search.productName || storyboard.title,
         productDescription: search.productDescription || storyboard.description || "",
         stylePreference: search.stylePreference || "",
+        sceneCount: search.sceneCount || "5",
+        referenceImageUrl: search.referenceImageUrl,
       }
     : null;
 
   return (
-    <StoryboardEditor
+    <StoryboardEditorWrapper
       storyboard={storyboard}
       initialScenes={scenes}
       draftParams={draftParams}

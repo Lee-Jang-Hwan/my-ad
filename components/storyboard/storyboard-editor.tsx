@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Save,
@@ -11,8 +12,19 @@ import {
   Sparkles,
   Plus,
   Loader2,
+  Film,
+  CheckCircle,
+  X,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SceneList } from "./scene-list";
 import { SceneDetailPanel } from "./scene-detail-panel";
@@ -26,6 +38,8 @@ import {
   deleteScene,
   duplicateScene,
   reorderScenes,
+  fetchStoryboardScenes,
+  triggerFinalMerge,
 } from "@/actions/storyboard";
 import type {
   Storyboard,
@@ -38,6 +52,8 @@ interface DraftParams {
   productName: string;
   productDescription: string;
   stylePreference: string;
+  sceneCount: string;
+  referenceImageUrl?: string;
 }
 
 interface StoryboardEditorProps {
@@ -59,11 +75,22 @@ export function StoryboardEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [showAIDraftDialog, setShowAIDraftDialog] = useState(!!draftParams);
   const [activeTab, setActiveTab] = useState<"scenes" | "timeline" | "settings">("scenes");
+  const [isMerging, setIsMerging] = useState(false);
+  const [mergeError, setMergeError] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // Check if merge is already complete (from database)
+  const hasFinalVideo = !!storyboard.final_video_url;
 
   const selectedScene = scenes.find((s) => s.id === selectedSceneId) || null;
 
   // Calculate total duration
   const totalDuration = scenes.reduce((sum, s) => sum + s.duration_seconds, 0);
+
+  // Check if all scenes have clips (ready for final merge)
+  const allScenesHaveClips = scenes.length > 0 && scenes.every((s) => s.generated_clip_url);
+  const scenesWithClips = scenes.filter((s) => s.generated_clip_url).length;
 
   // Handle scene selection
   const handleSceneSelect = useCallback((sceneId: string) => {
@@ -141,6 +168,14 @@ export function StoryboardEditor({
     }
   }, [router]);
 
+  // Handle scene refresh (fetch latest scene data from server)
+  const handleSceneRefresh = useCallback(async () => {
+    const result = await fetchStoryboardScenes(storyboard.id);
+    if (result.success && result.data) {
+      setScenes(result.data);
+    }
+  }, [storyboard.id]);
+
   // Handle scene reorder
   const handleSceneReorder = useCallback(
     async (reorderedScenes: StoryboardScene[]) => {
@@ -184,8 +219,102 @@ export function StoryboardEditor({
     [storyboard.id]
   );
 
+  // Handle save button click - sync all data
+  const handleSave = useCallback(async () => {
+    if (isSaving) return; // Prevent double click
+
+    setIsSaving(true);
+
+    try {
+      // Add minimum delay for visual feedback
+      const [result] = await Promise.all([
+        fetchStoryboardScenes(storyboard.id),
+        new Promise(resolve => setTimeout(resolve, 500)) // Minimum 500ms for UX
+      ]);
+
+      if (result.success && result.data) {
+        setScenes(result.data);
+        toast.success("저장되었습니다.", {
+          duration: 2000,
+        });
+      } else {
+        toast.error("저장에 실패했습니다.", {
+          duration: 3000,
+        });
+      }
+      // Refresh page data
+      router.refresh();
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("저장 중 오류가 발생했습니다.", {
+        duration: 3000,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [storyboard.id, router, isSaving]);
+
+  // Handle video download
+  const handleDownload = useCallback(async () => {
+    if (!storyboard.final_video_url || isDownloading) return;
+
+    setIsDownloading(true);
+    try {
+      const response = await fetch(storyboard.final_video_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${storyboard.title || "storyboard"}_final.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("다운로드가 시작되었습니다.");
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("다운로드에 실패했습니다.");
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [storyboard.final_video_url, storyboard.title, isDownloading]);
+
+  // Handle final video merge
+  const handleFinalMerge = useCallback(async () => {
+    if (!allScenesHaveClips) {
+      setMergeError("모든 씬의 클립을 먼저 생성해주세요.");
+      return;
+    }
+
+    setIsMerging(true);
+    setMergeError(null);
+
+    try {
+      const result = await triggerFinalMerge({
+        storyboardId: storyboard.id,
+      });
+
+      if (result.success) {
+        toast.success("최종 영상 병합이 완료되었습니다!");
+        // Refresh to get the updated storyboard with final_video_url
+        router.refresh();
+      } else {
+        const errorMsg = result.error || "최종 영상 병합에 실패했습니다.";
+        setMergeError(errorMsg);
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error("Final merge error:", error);
+      const errorMsg = "최종 영상 병합 중 오류가 발생했습니다.";
+      setMergeError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setIsMerging(false);
+    }
+  }, [allScenesHaveClips, storyboard.id, router]);
+
   return (
-    <div className="h-screen flex flex-col">
+    <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
       <header className="border-b bg-background px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
@@ -212,11 +341,46 @@ export function StoryboardEditor({
               AI 초안 생성
             </Button>
           )}
-          <Button variant="outline" disabled>
+
+          {/* Final merge button */}
+          {scenes.length > 0 && (
+            <Button
+              variant={hasFinalVideo ? "outline" : "default"}
+              disabled={isMerging || !allScenesHaveClips}
+              onClick={handleFinalMerge}
+              title={
+                hasFinalVideo
+                  ? "이미 병합된 영상이 있습니다. 다시 병합하면 기존 영상을 대체합니다."
+                  : !allScenesHaveClips
+                    ? `${scenesWithClips}/${scenes.length}개 씬에 클립이 생성되었습니다. 모든 씬의 클립을 먼저 생성해주세요.`
+                    : "모든 씬 클립을 하나의 영상으로 병합합니다."
+              }
+            >
+              {isMerging ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : hasFinalVideo ? (
+                <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+              ) : (
+                <Film className="w-4 h-4 mr-2" />
+              )}
+              {isMerging
+                ? "병합 중..."
+                : hasFinalVideo
+                  ? "병합 완료!"
+                  : `최종 영상 병합 (${scenesWithClips}/${scenes.length})`}
+            </Button>
+          )}
+
+          <Button
+            variant="outline"
+            disabled={!hasFinalVideo}
+            onClick={() => setShowPreview(true)}
+            title={hasFinalVideo ? "최종 영상 미리보기" : "먼저 영상을 병합해주세요"}
+          >
             <Play className="w-4 h-4 mr-2" />
             미리보기
           </Button>
-          <Button disabled={isSaving}>
+          <Button disabled={isSaving} onClick={handleSave}>
             {isSaving ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
@@ -227,10 +391,23 @@ export function StoryboardEditor({
         </div>
       </header>
 
+      {/* Merge error message */}
+      {mergeError && (
+        <div className="bg-destructive/10 text-destructive px-4 py-2 text-sm flex items-center justify-between">
+          <span>{mergeError}</span>
+          <button
+            onClick={() => setMergeError(null)}
+            className="text-destructive hover:text-destructive/80"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left panel - Scene list / Timeline / Settings */}
-        <div className="w-80 border-r flex flex-col">
+        <aside className="shrink-0 border-r flex flex-col" style={{ width: '320px', minWidth: '320px', maxWidth: '320px' }}>
           <Tabs
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as typeof activeTab)}
@@ -284,14 +461,16 @@ export function StoryboardEditor({
               />
             </TabsContent>
           </Tabs>
-        </div>
+        </aside>
 
         {/* Right panel - Scene detail */}
-        <div className="flex-1 overflow-auto">
+        <main className="flex-1 h-full overflow-hidden">
           {selectedScene ? (
             <SceneDetailPanel
               scene={selectedScene}
+              storyboardId={storyboard.id}
               onUpdate={(updates) => handleSceneUpdate(selectedScene.id, updates)}
+              onSceneRefresh={handleSceneRefresh}
             />
           ) : (
             <div className="h-full flex items-center justify-center text-muted-foreground">
@@ -307,7 +486,7 @@ export function StoryboardEditor({
               )}
             </div>
           )}
-        </div>
+        </main>
       </div>
 
       {/* AI Draft Dialog */}
@@ -318,6 +497,59 @@ export function StoryboardEditor({
         initialParams={draftParams}
         onComplete={handleAIDraftComplete}
       />
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>최종 영상 미리보기</span>
+              <div className="flex items-center gap-2">
+                {storyboard.final_video_url && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(storyboard.final_video_url!, "_blank")}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      새 탭
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownload}
+                      disabled={isDownloading}
+                    >
+                      {isDownloading ? (
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-1" />
+                      )}
+                      {isDownloading ? "다운로드 중..." : "다운로드"}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {storyboard.final_video_url ? (
+              <video
+                src={storyboard.final_video_url}
+                controls
+                autoPlay
+                className="w-full rounded-lg"
+                style={{ maxHeight: "70vh" }}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-64 bg-muted rounded-lg">
+                <p className="text-muted-foreground">영상이 없습니다.</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

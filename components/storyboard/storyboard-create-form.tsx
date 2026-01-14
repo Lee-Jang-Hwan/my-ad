@@ -11,8 +11,9 @@ import {
   Film,
   Clock,
   Ratio,
-  Palette,
+  Layers,
   Info,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,11 +42,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CreditDisplay } from "@/components/credit/credit-display";
+import { ReferenceImageUpload } from "@/components/storyboard/reference-image-upload";
 import { createStoryboard } from "@/actions/storyboard";
-import {
-  ASPECT_RATIO_LABELS,
-  type AspectRatio,
-} from "@/types/storyboard";
+import { type AspectRatio } from "@/types/storyboard";
 import {
   STORYBOARD_AI_DRAFT_COST,
   calculateStoryboardCost,
@@ -69,30 +68,41 @@ const createStoryboardSchema = z.object({
     .string()
     .max(1000, "상품 설명은 1000자 이내로 입력해주세요.")
     .optional(),
-  aspectRatio: z.enum(["16:9", "9:16", "1:1", "4:3"]),
-  targetDuration: z.coerce.number().min(5).max(120),
+  aspectRatio: z.enum(["16:9", "9:16"]),
+  sceneDuration: z.enum(["4", "8", "12"]),
   colorGrade: z.string().optional(),
-  stylePreference: z.string().optional(),
+  sceneCount: z.enum(["3", "4", "5", "6", "7"]),
 });
 
 type CreateStoryboardFormValues = z.infer<typeof createStoryboardSchema>;
 
+const SCENE_COUNT_OPTIONS = [
+  { value: "3", label: "3개" },
+  { value: "4", label: "4개" },
+  { value: "5", label: "5개" },
+  { value: "6", label: "6개" },
+  { value: "7", label: "7개" },
+];
+
 const STYLE_OPTIONS = [
-  { value: "cinematic", label: "시네마틱" },
   { value: "commercial", label: "상업 광고" },
+  { value: "cinematic", label: "시네마틱" },
   { value: "minimal", label: "미니멀" },
   { value: "vibrant", label: "생동감 있는" },
   { value: "luxury", label: "럭셔리" },
   { value: "playful", label: "재미있는" },
+  { value: "animation", label: "애니메이션" },
 ];
 
-const COLOR_GRADE_OPTIONS = [
-  { value: "natural", label: "자연스러운" },
-  { value: "warm", label: "따뜻한" },
-  { value: "cool", label: "차가운" },
-  { value: "vintage", label: "빈티지" },
-  { value: "high-contrast", label: "고대비" },
-  { value: "soft", label: "부드러운" },
+const SCENE_DURATION_OPTIONS = [
+  { value: "4", label: "4초" },
+  { value: "8", label: "8초" },
+  { value: "12", label: "12초" },
+];
+
+const ASPECT_RATIO_OPTIONS = [
+  { value: "16:9", label: "가로형 (16:9)" },
+  { value: "9:16", label: "세로형 (9:16)" },
 ];
 
 export function StoryboardCreateForm() {
@@ -100,6 +110,13 @@ export function StoryboardCreateForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [useAIDraft, setUseAIDraft] = useState(true);
+  const [referenceImageUrl, setReferenceImageUrl] = useState<string | undefined>();
+  const [referenceImageStoragePath, setReferenceImageStoragePath] = useState<string | undefined>();
+
+  const handleImageChange = (imageUrl: string | undefined, storagePath: string | undefined) => {
+    setReferenceImageUrl(imageUrl);
+    setReferenceImageStoragePath(storagePath);
+  };
 
   const form = useForm<CreateStoryboardFormValues>({
     resolver: zodResolver(createStoryboardSchema),
@@ -108,15 +125,17 @@ export function StoryboardCreateForm() {
       description: "",
       productName: "",
       productDescription: "",
-      aspectRatio: "16:9",
-      targetDuration: 30,
-      colorGrade: "natural",
-      stylePreference: "cinematic",
+      aspectRatio: "9:16",
+      sceneDuration: "8",
+      colorGrade: "commercial",
+      sceneCount: "5",
     },
   });
 
-  const watchedDuration = form.watch("targetDuration");
-  const estimatedScenes = Math.ceil(watchedDuration / 5);
+  const watchedSceneDuration = form.watch("sceneDuration");
+  const watchedSceneCount = form.watch("sceneCount");
+  const sceneDurationSeconds = parseInt(watchedSceneDuration || "8", 10);
+  const estimatedScenes = parseInt(watchedSceneCount || "5", 10);
 
   // Calculate costs
   const costBreakdown = getStoryboardCostBreakdown(estimatedScenes, {
@@ -138,13 +157,20 @@ export function StoryboardCreateForm() {
     setError(null);
 
     try {
+      // sceneDuration을 기반으로 target_duration 계산 (씬 개수 * 씬 시간)
+      const sceneDurationNum = parseInt(values.sceneDuration, 10) as 4 | 8 | 12;
+      const sceneCountNum = parseInt(values.sceneCount, 10);
+      const targetDuration = sceneCountNum * sceneDurationNum;
+
       // Create storyboard
       const result = await createStoryboard({
         title: values.title,
         description: values.description,
         aspect_ratio: values.aspectRatio as AspectRatio,
-        target_duration: values.targetDuration,
+        target_duration: targetDuration,
+        default_scene_duration: sceneDurationNum,
         color_grade: values.colorGrade,
+        product_reference_image_url: referenceImageUrl,
       });
 
       if (!result.success || !result.data) {
@@ -158,14 +184,16 @@ export function StoryboardCreateForm() {
       // If using AI draft, redirect to AI draft generation page
       // Otherwise, redirect to editor
       if (useAIDraft) {
-        // TODO: Implement AI draft generation with n8n webhook
-        // For now, redirect to editor with product info in URL
         const params = new URLSearchParams({
           productName: values.productName,
           productDescription: values.productDescription || "",
-          stylePreference: values.stylePreference || "",
+          sceneCount: values.sceneCount,
           generateDraft: "true",
         });
+        // 참조 이미지 URL이 있으면 추가
+        if (referenceImageUrl) {
+          params.set("referenceImageUrl", referenceImageUrl);
+        }
         router.push(`/storyboard/${storyboardId}?${params.toString()}`);
       } else {
         router.push(`/storyboard/${storyboardId}`);
@@ -282,6 +310,33 @@ export function StoryboardCreateForm() {
                     </FormItem>
                   )}
                 />
+
+                {/* 참조 이미지 업로드 */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">참조 이미지 (선택)</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>상품 이미지나 원하는 스타일의 참조 이미지를 업로드하면 AI가 더 정확한 스토리보드를 생성합니다.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <ReferenceImageUpload
+                    value={referenceImageUrl}
+                    storagePath={referenceImageStoragePath}
+                    onChange={handleImageChange}
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    상품 이미지나 원하는 스타일의 이미지를 업로드하세요.
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
@@ -313,8 +368,6 @@ export function StoryboardCreateForm() {
                               <TooltipContent>
                                 <p>16:9: YouTube, TV</p>
                                 <p>9:16: 인스타 릴스, 틱톡</p>
-                                <p>1:1: 인스타 피드</p>
-                                <p>4:3: 클래식</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -329,13 +382,11 @@ export function StoryboardCreateForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(ASPECT_RATIO_LABELS).map(
-                              ([value, label]) => (
-                                <SelectItem key={value} value={value}>
-                                  {label}
-                                </SelectItem>
-                              )
-                            )}
+                            {ASPECT_RATIO_OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -345,40 +396,10 @@ export function StoryboardCreateForm() {
 
                   <FormField
                     control={form.control}
-                    name="targetDuration"
+                    name="colorGrade"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          목표 길이 (초)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={5}
-                            max={120}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          약 {estimatedScenes}개 씬 생성 예상
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="stylePreference"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-1">
-                          <Palette className="w-4 h-4" />
-                          스타일
-                        </FormLabel>
+                        <FormLabel>스타일</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -400,30 +421,69 @@ export function StoryboardCreateForm() {
                       </FormItem>
                     )}
                   />
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="colorGrade"
+                    name="sceneCount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>색감</FormLabel>
+                        <FormLabel className="flex items-center gap-1">
+                          <Layers className="w-4 h-4" />
+                          씬 갯수
+                        </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="색감 선택" />
+                              <SelectValue placeholder="씬 갯수 선택" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {COLOR_GRADE_OPTIONS.map((option) => (
+                            {SCENE_COUNT_OPTIONS.map((option) => (
                               <SelectItem key={option.value} value={option.value}>
                                 {option.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="sceneDuration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          씬 당 시간
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="씬 시간 선택" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {SCENE_DURATION_OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          각 씬의 재생 시간 (Sora 지원)
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

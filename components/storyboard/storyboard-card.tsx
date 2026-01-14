@@ -18,7 +18,6 @@ import {
 import {
   Card,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,20 +99,34 @@ export function StoryboardCard({ storyboard, onDeleted }: StoryboardCardProps) {
 
   return (
     <>
-      <Card className="group overflow-hidden transition-shadow hover:shadow-lg">
+      <Card className="group overflow-hidden transition-shadow hover:shadow-lg w-full">
+        {/* 썸네일 영역 */}
         <Link href={editUrl}>
-          <div className="relative aspect-video bg-muted">
+          <div className="relative aspect-video bg-muted overflow-hidden">
             {storyboard.final_thumbnail_url ? (
               <Image
                 src={storyboard.final_thumbnail_url}
                 alt={storyboard.title}
                 fill
                 className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            ) : storyboard.final_video_url ? (
+              <video
+                src={storyboard.final_video_url}
+                className="absolute inset-0 w-full h-full object-cover"
+                muted
+                playsInline
+                preload="metadata"
+                onLoadedMetadata={(e) => {
+                  // Seek to first frame for thumbnail
+                  const video = e.currentTarget;
+                  video.currentTime = 0.1;
+                }}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
-                <Film className="w-12 h-12 text-muted-foreground/30" />
+                <Film className="w-10 h-10 text-muted-foreground/30" />
               </div>
             )}
             {/* Status badge overlay */}
@@ -132,52 +145,52 @@ export function StoryboardCard({ storyboard, onDeleted }: StoryboardCardProps) {
           </div>
         </Link>
 
-        <CardContent className="p-4">
-          <Link href={editUrl}>
-            <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-              {storyboard.title}
-            </h3>
-          </Link>
+        {/* 콘텐츠 영역 */}
+        <CardContent className="px-4 py-0">
+          <div className="flex items-center justify-between gap-2">
+            <Link href={editUrl} className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                {storyboard.title}
+              </h3>
+            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 flex-shrink-0"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                  <span className="sr-only">더보기</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href={editUrl}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    편집하기
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  삭제하기
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+            <Clock className="w-3 h-3" />
+            {timeAgo}
+          </div>
           {storyboard.description && (
             <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
               {storyboard.description}
             </p>
           )}
         </CardContent>
-
-        <CardFooter className="p-4 pt-0 flex items-center justify-between">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" />
-            {timeAgo}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-                <span className="sr-only">더보기</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={editUrl}>
-                  <Pencil className="w-4 h-4 mr-2" />
-                  편집하기
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                삭제하기
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </CardFooter>
       </Card>
 
       {/* Delete confirmation dialog */}

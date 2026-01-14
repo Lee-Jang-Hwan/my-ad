@@ -66,7 +66,9 @@ export async function selectImageAdCopyAndGenerate(
       };
     }
 
-    if (image.progress_stage !== "ad_copy_selection") {
+    // 광고문구 선택 단계 또는 이전 실패 후 재시도 허용
+    const allowedStages = ["ad_copy_selection", "failed"];
+    if (!allowedStages.includes(image.progress_stage)) {
       return {
         success: false,
         error: "현재 단계에서는 광고문구를 선택할 수 없습니다.",
@@ -217,13 +219,13 @@ export async function selectImageAdCopyAndGenerate(
     } catch (fetchError) {
       console.error("adpicture webhook error:", fetchError);
 
-      // Update ad_images status to failed
+      // Update ad_images status to failed, but keep progress_stage as ad_copy_selection for retry
       await supabase
         .from("ad_images")
         .update({
           status: "failed",
-          progress_stage: "failed",
-          error_message: "이미지 생성 요청에 실패했습니다.",
+          progress_stage: "ad_copy_selection", // 재시도 가능하도록 유지
+          error_message: "이미지 생성 요청에 실패했습니다. 다시 시도해주세요.",
         })
         .eq("id", adImageId);
 

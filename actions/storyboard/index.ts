@@ -17,3 +17,9 @@ export { generateAIDraft } from "./generate-ai-draft";
 export { generateSceneImage, generateAllSceneImages } from "./generate-scene-image";
 export { generateSceneClip, generateAllSceneClips } from "./generate-scene-clip";
 export { triggerFinalMerge } from "./trigger-final-merge";
+
+// Media Management
+export { clearSceneMedia, clearSceneImage, clearSceneClip, clearSceneAllMedia } from "./clear-scene-media";
+
+// Image Upload
+export { uploadReferenceImage, deleteReferenceImage } from "./upload-reference-image";

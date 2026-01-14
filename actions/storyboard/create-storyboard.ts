@@ -41,9 +41,11 @@ export async function createStoryboard(
         user_id: clerkId,
         title: input.title.trim(),
         description: input.description?.trim() || null,
-        aspect_ratio: input.aspect_ratio || "16:9",
-        target_duration: input.target_duration || 30,
+        aspect_ratio: input.aspect_ratio || "9:16",
+        target_duration: input.target_duration || 40,
+        default_scene_duration: input.default_scene_duration || 8,
         color_grade: input.color_grade || "default",
+        product_reference_image_url: input.product_reference_image_url || null,
         status: "draft",
         progress_stage: "init",
       })

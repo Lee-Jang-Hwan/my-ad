@@ -44,9 +44,10 @@ export async function generateSceneClip(
         id,
         storyboard_id,
         generated_image_url,
+        visual_prompt,
         camera_movement,
         duration_seconds,
-        storyboards!inner(user_id, aspect_ratio)
+        storyboards!inner(user_id, aspect_ratio, product_reference_image_url)
       `)
       .eq("id", input.sceneId)
       .single();
@@ -58,6 +59,7 @@ export async function generateSceneClip(
     const storyboardData = scene.storyboards as unknown as {
       user_id: string;
       aspect_ratio: string;
+      product_reference_image_url: string | null;
     };
 
     if (storyboardData.user_id !== clerkId) {
@@ -91,6 +93,8 @@ export async function generateSceneClip(
       scene_id: input.sceneId,
       user_id: clerkId,
       source_image_url: scene.generated_image_url,
+      visual_prompt: scene.visual_prompt || undefined,
+      product_reference_image_url: storyboardData.product_reference_image_url || undefined,
       camera_movement: scene.camera_movement,
       duration_seconds: scene.duration_seconds,
       aspect_ratio: storyboardData.aspect_ratio,
@@ -124,11 +128,12 @@ export async function generateSceneClip(
 
       const responseData = await response.json();
 
-      if (!responseData.success || !responseData.clip_url) {
-        throw new Error("클립 생성 응답이 올바르지 않습니다.");
+      // 비동기 방식: accepted: true이면 백그라운드 처리 시작됨
+      if (!responseData.success) {
+        throw new Error(responseData.error || "클립 생성 요청에 실패했습니다.");
       }
 
-      // Deduct credits
+      // 크레딧 차감 (요청 시점에 차감)
       await supabase.rpc("deduct_credits", {
         p_clerk_id: clerkId,
         p_amount: SCENE_CLIP_GENERATION_COST,
@@ -149,10 +154,12 @@ export async function generateSceneClip(
 
       revalidatePath(`/storyboard/${input.storyboardId}`);
 
+      // 비동기 응답: clip_url은 나중에 DB에서 가져옴
       return {
         success: true,
         sceneId: input.sceneId,
-        clipUrl: responseData.clip_url,
+        accepted: true,
+        message: responseData.message || "클립 생성이 시작되었습니다. 백그라운드에서 처리 중입니다.",
       };
     } catch (fetchError) {
       console.error("scene-clip webhook error:", fetchError);

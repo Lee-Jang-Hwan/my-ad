@@ -46,11 +46,12 @@ export async function triggerFinalMerge(
     // Verify storyboard ownership
     const { data: storyboard, error: fetchError } = await supabase
       .from("storyboards")
-      .select("id, user_id, default_bgm_id, storyboard_bgm(audio_url)")
+      .select("id, user_id, default_bgm_id")
       .eq("id", input.storyboardId)
       .single();
 
     if (fetchError || !storyboard) {
+      console.error("Storyboard fetch error:", fetchError);
       return { success: false, error: "스토리보드를 찾을 수 없습니다." };
     }
 
@@ -105,12 +106,8 @@ export async function triggerFinalMerge(
       })
       .eq("id", input.storyboardId);
 
-    // Determine BGM URL
-    let globalBgmUrl = input.globalBgmUrl;
-    if (!globalBgmUrl && storyboard.storyboard_bgm) {
-      const bgmData = storyboard.storyboard_bgm as unknown as { audio_url: string };
-      globalBgmUrl = bgmData.audio_url;
-    }
+    // Determine BGM URL (BGM 테이블이 없으므로 input에서만 받음)
+    const globalBgmUrl = input.globalBgmUrl;
 
     // Prepare webhook payload
     const payload: FinalMergeWebhookPayload = {

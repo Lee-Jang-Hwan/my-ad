@@ -92,7 +92,7 @@ function SortableSceneItem({
       <div className="w-16 h-10 rounded bg-muted flex-shrink-0 relative overflow-hidden">
         {scene.generated_image_url ? (
           <Image
-            src={scene.generated_image_url}
+            src={`${scene.generated_image_url}?t=${new Date(scene.updated_at).getTime()}`}
             alt={scene.scene_name || `씬 ${scene.scene_order}`}
             fill
             className="object-cover"

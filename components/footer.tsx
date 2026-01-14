@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -17,13 +17,19 @@ import Link from "next/link";
 import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [mounted, setMounted] = useState(false);
   const { isSignedIn, isLoaded } = useAuth();
   const [isCustomerServiceOpen, setIsCustomerServiceOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  // Hydration 에러 방지
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // 로그인 상태가 로드되었고 로그인된 경우에만 회원탈퇴 버튼 표시
   const showDeleteAccount = isLoaded && isSignedIn;
+  const currentYear = mounted ? new Date().getFullYear() : 2025;
 
   return (
     <footer className="border-t bg-muted/50">
@@ -45,53 +51,61 @@ export function Footer() {
             <h4 className="font-bold mb-4">도움의 손길</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Dialog open={isCustomerServiceOpen} onOpenChange={setIsCustomerServiceOpen}>
-                  <DialogTrigger asChild>
-                    <button
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      고객센터
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>고객센터</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <Clock className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">상담가능시간</p>
-                          <p className="font-medium">09:00 ~ 18:00</p>
+                {mounted ? (
+                  <Dialog open={isCustomerServiceOpen} onOpenChange={setIsCustomerServiceOpen}>
+                    <DialogTrigger asChild>
+                      <button
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        고객센터
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>고객센터</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <Clock className="h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">상담가능시간</p>
+                            <p className="font-medium">09:00 ~ 18:00</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Phone className="h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">전화번호</p>
+                            <a
+                              href="tel:010-7266-0807"
+                              className="font-medium hover:underline"
+                            >
+                              010-7266-0807
+                            </a>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Mail className="h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">이메일</p>
+                            <a
+                              href="mailto:sappable@gmail.com"
+                              className="font-medium hover:underline"
+                            >
+                              sappable@gmail.com
+                            </a>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">전화번호</p>
-                          <a
-                            href="tel:010-7266-0807"
-                            className="font-medium hover:underline"
-                          >
-                            010-7266-0807
-                          </a>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Mail className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">이메일</p>
-                          <a
-                            href="mailto:sappable@gmail.com"
-                            className="font-medium hover:underline"
-                          >
-                            sappable@gmail.com
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <button
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    고객센터
+                  </button>
+                )}
               </li>
               <li>
                 <Link

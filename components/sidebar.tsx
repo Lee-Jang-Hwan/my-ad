@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogIn,
   Coins,
+  Film,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -45,6 +46,12 @@ const menuItems: MenuItem[] = [
     title: "영상 만들기",
     href: "/video",
     icon: Clapperboard,
+    requireAuth: true,
+  },
+  {
+    title: "스토리보드",
+    href: "/storyboard",
+    icon: Film,
     requireAuth: true,
   },
   {

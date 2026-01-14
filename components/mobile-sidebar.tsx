@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ import {
   Menu,
   LogIn,
   Coins,
+  Film,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -52,6 +53,12 @@ const menuItems: MenuItem[] = [
     requireAuth: true,
   },
   {
+    title: "스토리보드",
+    href: "/storyboard",
+    icon: Film,
+    requireAuth: true,
+  },
+  {
     title: "마이 페이지",
     href: "/dashboard",
     icon: LayoutDashboard,
@@ -67,9 +74,15 @@ const menuItems: MenuItem[] = [
 
 export function MobileSidebar() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { isSignedIn } = useAuth();
+
+  // Hydration 에러 방지: 클라이언트에서만 Sheet 렌더링
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleMenuClick = (item: MenuItem) => {
     setOpen(false);
@@ -77,6 +90,18 @@ export function MobileSidebar() {
       router.push("/sign-in");
     }
   };
+
+  // 마운트 전에는 버튼만 표시 (SSR에서 동일하게 렌더링)
+  if (!mounted) {
+    return (
+      <div className="lg:hidden">
+        <Button variant="ghost" size="icon" className="lg:hidden">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">메뉴 열기</span>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="lg:hidden">

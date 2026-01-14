@@ -59,7 +59,7 @@ export default async function StoryboardPage({
   // Handle errors
   if (!result.success) {
     return (
-      <div className="container max-w-7xl mx-auto py-8 px-4">
+      <div className="w-full min-w-fit py-8 px-6 lg:px-12">
         <h1 className="text-3xl font-bold mb-8">스토리보드</h1>
         <div className="rounded-lg bg-destructive/10 p-8 text-center">
           <p className="text-destructive font-semibold mb-2">
@@ -83,7 +83,7 @@ export default async function StoryboardPage({
   }
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4">
+    <div className="w-full min-w-fit py-8 px-6 lg:px-12">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">스토리보드</h1>

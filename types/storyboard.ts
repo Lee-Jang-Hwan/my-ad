@@ -16,7 +16,9 @@ export type StoryboardProgressStage =
   | "completed"
   | "failed";
 
-export type AspectRatio = "16:9" | "9:16" | "1:1" | "4:3";
+export type AspectRatio = "16:9" | "9:16";
+
+export type SceneDuration = 4 | 8 | 12;
 
 export type CameraAngle =
   | "eye_level"
@@ -110,10 +112,12 @@ export interface Storyboard {
   description: string | null;
   aspect_ratio: AspectRatio;
   target_duration: number;
+  default_scene_duration: SceneDuration;
   color_grade: string;
   default_bgm_id: string | null;
   default_voice_style: string;
   brand_guidelines: BrandGuidelines | null;
+  product_reference_image_url: string | null;
   status: StoryboardStatus;
   progress_stage: StoryboardProgressStage;
   error_message: string | null;
@@ -213,7 +217,9 @@ export interface CreateStoryboardInput {
   description?: string;
   aspect_ratio?: AspectRatio;
   target_duration?: number;
+  default_scene_duration?: SceneDuration;
   color_grade?: string;
+  product_reference_image_url?: string;
 }
 
 export interface UpdateStoryboardInput {
@@ -288,6 +294,8 @@ export interface GenerateSceneClipResult {
   success: boolean;
   sceneId?: string;
   clipUrl?: string;
+  accepted?: boolean;  // 비동기 처리 시작됨
+  message?: string;    // 사용자에게 보여줄 메시지
   error?: string;
 }
 
@@ -309,6 +317,8 @@ export interface StoryboardDraftWebhookPayload {
   product_description?: string;
   reference_image_url?: string;
   target_duration: number;
+  scene_duration: number;
+  scene_count: number;
   aspect_ratio: string;
   style_preference?: string;
 }
@@ -319,6 +329,7 @@ export interface SceneImageWebhookPayload {
   user_id: string;
   visual_prompt: string;
   reference_image_url?: string;
+  product_reference_image_url?: string;
   aspect_ratio: string;
   style_settings?: {
     color_grade: string;
@@ -331,6 +342,8 @@ export interface SceneClipWebhookPayload {
   scene_id: string;
   user_id: string;
   source_image_url: string;
+  visual_prompt?: string;
+  product_reference_image_url?: string;
   camera_movement: string;
   duration_seconds: number;
   aspect_ratio: string;
@@ -421,6 +434,7 @@ export type StoryboardListItem = Pick<
   | "progress_stage"
   | "total_scenes"
   | "final_thumbnail_url"
+  | "final_video_url"
   | "created_at"
   | "updated_at"
 >;
@@ -479,8 +493,12 @@ export const TRANSITION_TYPE_LABELS: Record<TransitionType, string> = {
 export const ASPECT_RATIO_LABELS: Record<AspectRatio, string> = {
   "16:9": "가로형 (16:9)",
   "9:16": "세로형 (9:16)",
-  "1:1": "정사각형 (1:1)",
-  "4:3": "클래식 (4:3)",
+};
+
+export const SCENE_DURATION_LABELS: Record<SceneDuration, string> = {
+  4: "4초",
+  8: "8초",
+  12: "12초",
 };
 
 export const DIALOGUE_TYPE_LABELS: Record<DialogueType, string> = {

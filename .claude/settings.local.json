@@ -8,7 +8,7 @@
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:glama.ai)",
-      "Bash(N8N_HOST=https://n8n.sappstudio.kr N8N_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODBkOGFlMi1mNWFhLTRhZTktYmEyYi02NTA2NTEwNzRkMjUiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY3ODgxMzg2fQ.8CuPVRbZ08lQxaqcvDm-Dn13DBJ9YLXRZsE5c02m7Ag timeout 10 npx:*)"
+      "Bash(N8N_HOST=https://n8n.sappstudio.kr N8N_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODBkOGFlMi1mNWFhLTRhZTktYmEyYi02NTA2NTEwNzRkMjUiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY4MzI3MDkzfQ.1BeG5f5EgN3_5uU6qkpu9z_1wmcQFCU9m5CnvnNbncM timeout 10 npx:*)"
     ],
     "deny": [],
     "ask": []

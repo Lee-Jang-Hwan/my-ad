@@ -47,7 +47,7 @@ export async function fetchUserStoryboards(
     let query = supabase
       .from("storyboards")
       .select(
-        "id, title, description, status, progress_stage, total_scenes, final_thumbnail_url, created_at, updated_at",
+        "id, title, description, status, progress_stage, total_scenes, final_thumbnail_url, final_video_url, created_at, updated_at",
         { count: "exact" }
       )
       .eq("user_id", clerkId);
